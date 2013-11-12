@@ -1,0 +1,1 @@
+../../installArchLinux.bash
