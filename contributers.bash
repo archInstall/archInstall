@@ -9,7 +9,7 @@
 developers=(thaibault zvynar)
 
 for developer in ${developers[*]}; do
-    git remote add "$developer" "git@github.com:$developer/installArchLinux.git"
+    git remote add "$developer" "git@github.com:$developer/archInstall.git"
     git fetch "$developer"
 done
 
@@ -18,5 +18,5 @@ done
 # ...
 # [remote "origin"]
 #     ...
-#     url = git@github.com:YOUR_NICKNAME/installArchLinux
+#     url = git@github.com:YOUR_NICKNAME/archInstall
 # ...
