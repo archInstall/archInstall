@@ -169,15 +169,15 @@ function installArchLinux() {
 
     # Prints a description about how to use this program.
     function installArchLinuxPrintUsageMessage() {
-        cat << EOF
-    $__NAME__ installs a linux from scratch by the arch way. You will end up in
-    ligtweigth linux with pacman as packetmanager.
-    You can directly install into a given blockdevice, partition or
-    any directory (see command line option "--output-system").
-    Note that every needed information which isn't given via command line
-    will be asked interactivly on start. This script is as unnatted it could
-    be, which means you can relax after providing all needed informations in
-    the beginning till your new system is ready to boot.
+    cat << EOF
+$__NAME__ installs a linux from scratch by the arch way. You will end up in
+ligtweigth linux with pacman as packetmanager.
+You can directly install into a given blockdevice, partition or
+any directory (see command line option "--output-system").
+Note that every needed information which isn't given via command line
+will be asked interactivly on start. This script is as unnatted it could
+be, which means you can relax after providing all needed informations in
+the beginning till your new system is ready to boot.
 EOF
     }
 
