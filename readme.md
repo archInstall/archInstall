@@ -27,7 +27,7 @@ Inhalt
 Einstieg
 --------
 
-Um die neuste Version zu erhalten sollte man das Bash-Script runterladen: [installArchLinux](https://raw.github.com/thaibault/installArchLinux/master/installArchLinux.bash)
+Um die neuste Version zu erhalten sollte man das Bash-Script runterladen: [installArchLinux](https://raw.github.com/archInstall/archInstall/master/installArchLinux.bash)
 
 ```bash
 >>> wget \
