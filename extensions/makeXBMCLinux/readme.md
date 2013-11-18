@@ -5,8 +5,7 @@ vim: foldmethod=marker foldmarker=region,endregion:
 
 endregion -->
 
-MakeXBMCLinux
--------------
+### MakeXBMCLinux
 
 makeXBMCLinux ist ein Wrapper-Skript für installArchlinux, welches das gleiche Interface unterstützt. Neben dem Grundsystem wird dabei eine XBMC-Umgebung installiert, welche beim booten automatisch startet.
 

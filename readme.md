@@ -19,13 +19,13 @@ endregion -->
 Create your own linux distribution based on the rolling released ArchLinux.
 
 Inhalt
-======
+------
 
 <!--Place for automatic generated table of contents.-->
 [TOC]
 
 Einstieg
-========
+--------
 
 Um die neuste Version zu erhalten sollte man das Bash-Script runterladen: [installArchLinux](https://raw.github.com/thaibault/installArchLinux/master/installArchLinux.bash)
 
@@ -76,7 +76,7 @@ Will man lieber eine unbeaufsichtigte Installation:
 ```
 
 Installation auf ein Block Device
-=================================
+---------------------------------
 
 Im typischen Fall will man von einer Life-CD booten um das System auf
 einer Festplatte zu installieren. Hierbei müssen folgende Aufgaben erfüllt
@@ -151,7 +151,7 @@ individualisieren einfach folgende Optionen nutzen:
 ```
 
 Installation auf eine Partition
-===============================
+-------------------------------
 
 Um z.B. aus einem Produktivsystem heraus eine alternative Linux Distribution
 auf eine weitere Partition zu installieren kann einfach folgender Befehl
@@ -169,7 +169,7 @@ nur wenn "os-prober" installiert ist. Sonst muss man hier von Hand nachbessern.
 Um die alternative Linux Version auch booten zu können.
 
 Installation in einen Ordner
-============================
+----------------------------
 
 Um installArchLinux für komplexere Szenarien zu verwenden oder nachträgliche
 Manipulationen vorzunehmen ist es sinnvoll zunächst in einen Ordner zu
@@ -185,7 +185,7 @@ Dieser Befehl installiert ein vollständiges System in den eigenen Home-Ordner
 ```
 
 Automatische Konfiguration
-==========================
+--------------------------
 
 InstallArchLinux konfiguriert das neu eingerichtete System vollautomatisch.
 Folgende Taske wurden automatisiert:
@@ -227,7 +227,7 @@ auf:
 zu werfen.
 
 InstallArchLinux im Decorator Pattern
-=====================================
+-------------------------------------
 
 Um eigene Betriebssystem Module zu entwerfen bietet installArchLinux eine
 Vielzahl von Schnittstellen um seine internen Mechanismen separate nach Außen
@@ -280,7 +280,7 @@ einfach in der shell folgendes eintippen:
 Siehe hierzu auch "installArchLinux API".
 
 InstallArchLinux API
-====================
+--------------------
 
 Folgende Umgebungsvariablen können mit:
 
@@ -512,7 +512,7 @@ installArchLinuxPrepareInstallation()
 ```
 
 InstallArchLinux Options
-========================
+------------------------
 
 InstallArchLinux stellt ein Alphabet voller Optionen zur Verfügung.
 Während bisher zum einfachen Verständnis immer sog. Long-Options verwendet
@@ -604,7 +604,7 @@ Selbst wenn der Wert von "--output-system" über die CLI gesetzt wurde ist sie
 im Wrapper wieder überschrieben werden.
 
 Offline Installieren
-====================
+--------------------
 
 installArchLinux erstellt bei jeder Installation automatisch einen Paket-Cache
 um weitere Installationen zu beschleunigen. Ist dieser einmal erstellt oder
@@ -620,7 +620,7 @@ installArchLinux versuchen diese nach zu laden und im Offline-Fall einen Fehler
 zurückgeben.
 
 Installieren ohne root Rechte
-=============================
+-----------------------------
 
 Prinzipiell ist es sogar möglich auch ohne root Rechte ein System aufzusetzen.
 Hierbei werden jedoch folgende Einschnitte gemacht:
@@ -637,7 +637,7 @@ Hierbei werden jedoch folgende Einschnitte gemacht:
   oder fehlerfrei gebootet werden kann.
 
 Nützliches, Tipps, Debugging
-============================
+----------------------------
 
 Während der Entwicklung haben sich eine Reihe von Optionen bewährt um Fehler
 bei der Entwicklung von Wrappern zu finden.
@@ -704,7 +704,7 @@ selber setzten will, eignet sich folgender Pattern:
     # ...
 
 Abhängigkeiten
-==============
+--------------
 
 * bash (or any bash like shell)
 * test - Check file types and compare values.

@@ -5,14 +5,13 @@ vim: foldmethod=marker foldmarker=region,endregion:
 
 endregion -->
 
-makeUnityLinux
---------------
+### makeUnityLinux
 
 Installiert ein Arch Linux mit lightdm als Display-Manager und Unity als
 Window-Manager/Arbeitsumgebung. Es werde auch andere Ubuntu-Typische Pakete,
 wie Libre-Office oder Thunderbird installiert.
 
-### Interface
+#### Interface
 
 Das Interface ist mit dem von installArchLiunx.bash identisch, zusätzlich kann
 mit der Option

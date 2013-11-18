@@ -5,8 +5,7 @@ vim: foldmethod=marker foldmarker=region,endregion:
 
 endregion -->
 
-MakeSquashLinux
----------------
+### MakeSquashLinux
 
 MakeSquashLinux generiert ein ArchLinux-System (oder ein beliebiges auf
 ArchLinux basierendes System, welches mit einem Script generiert werden kann,
@@ -21,7 +20,7 @@ generieren des Grundsystems weitere Anpassungen vornehmen möchten.
 [!] Da der Download der squash-Datei ein paar Sekunden in Anspruch nimmt, wird
 beim booten per 'plymouth' ein splash-screen angezeigt.
 
-### Interface
+#### Interface
 
     Usage: ./makeSquashLinux.bash <squashfsFilePath> <kernelFilePath> <initramfsFilePath> [options]
 
@@ -43,7 +42,7 @@ mit dem Ort des Kernels oder tftp-Servers nicht verbundenen Netz zu laden).
 
 [!] scp-Pfade haben die Form "user@ssh-server:/pfad/zu/datei"
 
-### Initramfs Parameter
+#### Initramfs Parameter
 
 Um über das Netzwerk booten zu können müssen dem initramfs auf der Kernel-Kommandozeile einige Informationen mitgegeben werden:
 * Art der Netzwerkverbindung: `ip=<client-ip>::<gw-ip>:<netmask>:<hostname>:<device>:<autoconf>`
