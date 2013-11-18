@@ -19,7 +19,10 @@ endregion -->
 Use case<!--deDE:Einsatz--><!--frFR:Utilisier-->
 ------------------------------------------------
 
-Create your own linux distribution based on the rolling released ArchLinux.
+This script provides a full unnatted way to install ArchLinux from any live
+environment. You can create your own linux distribution based on the rolling
+released ArchLinux. A rock solid decorator pattern allows to automate a fully
+unattended individual installation process.
 
 Inhalt
 ------
