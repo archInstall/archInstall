@@ -16,6 +16,9 @@ License
 
 endregion -->
 
+Use case<!--deDE:Einsatz--><!--frFR:Utilisier-->
+------------------------------------------------
+
 Create your own linux distribution based on the rolling released ArchLinux.
 
 Inhalt
