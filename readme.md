@@ -703,9 +703,9 @@ selber setzten will, eignet sich folgender Pattern:
         sed '/^ *-[a-z] --output-system .*$/,/^$/d')
     EOF
 
-    myTarget=$(mktemp)
+    myTarget="$(mktemp)"
 
-    installArchLinux "$@" --output-system $myTarget
+    installArchLinux "$@" --output-system "$myTarget"
 
     # ...
 
