@@ -24,16 +24,19 @@ environment. You can create your own linux distribution based on the rolling
 released ArchLinux. A rock solid decorator pattern allows to automate a fully
 unattended individual installation process.
 
-Inhalt
-------
+Content<!--deDE:Inhalt-->
+-------------------------
 
 <!--Place for automatic generated table of contents.-->
 [TOC]
 
-Einstieg
---------
+Quick-Start<!--deDE:Einstieg-->
+-------------------------------
 
-Um die neuste Version zu erhalten sollte man das Bash-Script runterladen: [installArchLinux](https://raw.github.com/archInstall/archInstall/master/installArchLinux.bash)
+Simply load the newest version from:
+<!--deDE:Um die neuste Version zu erhalten sollte man das Bash-Script
+runterladen:-->
+[installArchLinux](https://raw.github.com/archInstall/archInstall/master/installArchLinux.bash)
 
 ```bash
 >>> wget \
