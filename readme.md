@@ -16,8 +16,8 @@ License
 
 endregion -->
 
-Use case<!--deDE:Einsatz--><!--frFR:Utilisier-->
-------------------------------------------------
+Use case<!--deDE:Einsatz-->
+---------------------------
 
 This script provides a full unnatted way to install ArchLinux from any live
 environment. You can create your own linux distribution based on the rolling
@@ -34,8 +34,9 @@ Quick-Start<!--deDE:Einstieg-->
 -------------------------------
 
 Simply load the newest version from:
-<!--deDE:Um die neuste Version zu erhalten sollte man das Bash-Script
-runterladen:-->
+<!--deDE:
+    Um die neuste Version zu erhalten sollte man das Bash-Script runterladen:
+-->
 [installArchLinux](https://raw.github.com/archInstall/archInstall/master/installArchLinux.bash)
 
 ```bash
