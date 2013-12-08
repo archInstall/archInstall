@@ -77,10 +77,10 @@ __NAME__='installArchLinux'
 
 # endregion
 
-# Provides the main module scope.
 function installArchLinux() {
+    # Provides the main module scope.
 
-# region configuration 
+# region configuration
 
     # region private properties
 
@@ -167,8 +167,8 @@ function installArchLinux() {
 
     # region command line interface
 
-    # Prints a description about how to use this program.
     function installArchLinuxPrintUsageMessage() {
+        # Prints a description about how to use this program.
     cat << EOF
 $__NAME__ installs a linux from scratch by the arch way. You will end up in
 ligtweigth linux with pacman as packetmanager.
@@ -180,9 +180,8 @@ be, which means you can relax after providing all needed informations in
 the beginning till your new system is ready to boot.
 EOF
     }
-
-    # Prints a description about how to use this program by providing examples.
     function installArchLinuxPrintUsageExamples() {
+        # Prints a description about how to use this program by providing examples.
         cat << EOF
     # Start install progress command on first found blockdevice:
     >>> $0 --output-system /dev/sda
@@ -194,9 +193,8 @@ EOF
     >>> $0 --output-system /dev/sda1 --verbose -f vim net-tools
 EOF
     }
-
-    # Prints descriptions about each available command line option.
     function installArchLinuxPrintCommandLineOptionDescriptions() {
+        # Prints descriptions about each available command line option.
         # NOTE; All letters are used for short options.
         # NOTE: "-k" and "--key-map-configuration" isn't needed in the future.
         cat << EOF
@@ -293,9 +291,8 @@ EOF
         packages (default: "$_PACKAGE_CACHE_PATH").
 EOF
     }
-
-    # Provides a help message for this module.
     function installArchLinuxPrintHelpMessage() {
+        # Provides a help message for this module.
         echo -e "\nUsage: $0 [options]\n"
         installArchLinuxPrintUsageMessage "$@"
         echo -e '\nExamples:\n'
@@ -304,9 +301,8 @@ EOF
         installArchLinuxPrintCommandLineOptionDescriptions "$@"
         echo
     }
-
-    # Provides the command line interface and interactive questions.
     function installArchLinuxCommandLineInterface() {
+        # Provides the command line interface and interactive questions.
         while true; do
             case "$1" in
                 -h|--help)
@@ -481,10 +477,9 @@ EOF
             fi
         fi
     }
-
-    # Handles logging messages. Returns non zero and exit on log level error to
-    # support chaining the message into toolchain.
     function installArchLinuxLog() {
+        # Handles logging messages. Returns non zero and exit on log level
+        # error to support chaining the message into toolchain.
         local loggingType='info'
         local message="$1"
         if [ "$2" ]; then
@@ -507,8 +502,8 @@ EOF
 
     # region install arch linux steps.
 
-    # Installs arch linux via pacstrap.
     function installArchLinuxWithPacstrap() {
+        # Installs arch linux via pacstrap.
         installArchLinuxLoadCache
         installArchLinuxLog \
             'Patch pacstrap to handle offline installations.' && \
@@ -537,10 +532,9 @@ EOF
             'Caching current downloaded packages and generated database failed.')
         return $returnCode
     }
-
-    # This functions performs creating an arch linux system from any linux
-    # system base.
     function installArchLinuxGenericLinuxSteps() {
+        # This functions performs creating an arch linux system from any linux
+        # system base.
         installArchLinuxLog 'Create a list with urls for needed packages.'
         (installArchLinuxDownloadAndExtractPacman \
             $(installArchLinuxCreatePackageUrlList)) && \
@@ -586,14 +580,13 @@ EOF
 
         # region change root functions
 
-    # This function performs a changeroot to currently set mountpoint path.
     function installArchLinuxChangeRootToMountPoint() {
+        # This function performs a changeroot to currently set mountpoint path.
         installArchLinuxChangeRoot "$_MOUNTPOINT_PATH" "$@"
         return $?
     }
-
-    # This function emulates the arch linux native "arch-chroot" function.
     function installArchLinuxChangeRoot() {
+        # This function emulates the arch linux native "arch-chroot" function.
         if [[ "$1" == '/' ]]; then
             shift
             "$@" 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
@@ -611,10 +604,9 @@ EOF
         installArchLinuxPerformChangeRoot "$@"
         return $?
     }
-
-    # Performs a change root by mounting needed host locations in change root
-    # environment.
     function installArchLinuxChangeRootViaMount() {
+        # Performs a change root by mounting needed host locations in change
+        # root environment.
         local returnCode=0
         local mountpointPath
         for mountpointPath in ${_NEEDED_MOUNTPOINTS[*]}; do
@@ -707,9 +699,8 @@ EOF
         done
         return $returnCode
     }
-
-    # Perform the available change root program wich needs at least rights.
     function installArchLinuxPerformChangeRoot() {
+        # Perform the available change root program wich needs at least rights.
         if [[ "$UID" == '0' ]]; then
             chroot "$@" 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
         else
@@ -720,10 +711,10 @@ EOF
 
         # endregion
 
-    # Provides generic linux configuration mechanism. If an argument is given
-    # new systemd like programs are used (they could have problems in change
-    # root environment without and exclusive dbus connection.
     function installArchLinuxConfigure() {
+        # Provides generic linux configuration mechanism. If an argument is
+        # given new systemd like programs are used (they could have problems in
+        # change root environment without and exclusive dbus connection.
         installArchLinuxLog "Make keyboard layout permanent to \"${_KEYBOARD_LAYOUT}\"."
         if [[ "$1" == true ]]; then
             installArchLinuxChangeRootToMountPoint localectl set-keymap \
@@ -787,9 +778,8 @@ EOF
         done
         return $?
     }
-
-    # Enable all needed services.
     function installArchLinuxEnableServices() {
+        # Enable all needed services.
         local serviceName
         for serviceName in ${_NEEDED_SERVICES[*]}; do
             installArchLinuxLog "Enable \"$serviceName\" service."
@@ -800,9 +790,8 @@ EOF
             fi
         done
     }
-
-    # Deletes some unneeded locations in new installs operating system.
     function installArchLinuxTidyUpSystem() {
+        # Deletes some unneeded locations in new installs operating system.
         local returnCode=0
         installArchLinuxLog 'Tidy up new build system.'
         local filePath
@@ -816,10 +805,9 @@ EOF
             fi
         done
     }
-
-    # Appends temporary used mirrors to download missing packages during
-    # installation.
     function installArchLinuxAppendTemporaryInstallMirrors() {
+        # Appends temporary used mirrors to download missing packages during
+        # installation.
         local url
         for url in ${_PACKAGE_SOURCE_URLS[*]}; do
             echo "Server = $url/\$repo/os/$_CPU_ARCHITECTURE" \
@@ -830,10 +818,9 @@ EOF
             fi
         done
     }
-
-    # Packs the resulting system to provide files owned by root without root
-    # permissions.
     function installArchLinuxPackResult() {
+        # Packs the resulting system to provide files owned by root without
+        # root permissions.
         if [[ "$UID" != '0' ]]; then
             installArchLinuxLog "System will be packed into \"$_MOUNTPOINT_PATH.tar\" to provide root owned files. You have to extract this archiv as root."
             tar cvf "$_MOUNTPOINT_PATH".tar "$_MOUNTPOINT_PATH" --owner root 1>"$_STANDARD_OUTPUT" \
@@ -843,9 +830,8 @@ EOF
             return $?
         fi
     }
-
-    # Generates all web urls for needed packages.
     function installArchLinuxCreatePackageUrlList() {
+        # Generates all web urls for needed packages.
         local returnCode=0
         local listBufferFile=$(mktemp)
         local firstPackageSourceUrl=$(echo "$_PACKAGE_SOURCE_URLS" | \
@@ -868,9 +854,8 @@ EOF
         echo "$listBufferFile"
         return $returnCode
     }
-
-    # Reads pacmans database and determine pacman's dependencies.
     function installArchLinuxDeterminePacmansNeededPackages() {
+        # Reads pacmans database and determine pacman's dependencies.
         local coreDatabaseUrl=$(grep "core\.db" "$listBufferFile" | \
             head --lines 1)
         wget "$coreDatabaseUrl" --timestamping --directory-prefix \
@@ -887,10 +872,9 @@ EOF
                 "No database file (\"$_PACKAGE_CACHE_PATH/core.db\") available."
         fi
     }
-
-    # Determines all package dependencies. Returns a list of needed
-    # packages for given package determined by given database.
     function installArchLinuxDeterminePackageDependencies() {
+        # Determines all package dependencies. Returns a list of needed
+        # packages for given package determined by given database.
         _NEEDED_PACKAGES+=" $1"
         local packageDirectoryPath=$(installArchLinuxDeterminePackageDirectoryName "$@")
         if [ "$packageDirectoryPath" ]; then
@@ -913,10 +897,9 @@ EOF
             return 1
         fi
     }
-
-    # Determines the package directory name from given package name in given
-    # database.
     function installArchLinuxDeterminePackageDirectoryName() {
+        # Determines the package directory name from given package name in
+        # given database.
         local packageDirectoryPath=$(grep "%PROVIDES%\n(.+\n)*$1\n(.+\n)*\n" \
             --perl-regexp --null-data "$2" --recursive --files-with-matches | \
             grep --extended-regexp '/depends$' | sed 's/depends$//' | head \
@@ -942,9 +925,8 @@ EOF
         echo "$packageDirectoryPath"
         return $?
     }
-
-    # Downloads all packages from arch linux needed to run pacman.
     function installArchLinuxDownloadAndExtractPacman() {
+        # Downloads all packages from arch linux needed to run pacman.
         local listBufferFile="$1"
         if installArchLinuxDeterminePacmansNeededPackages "$listBufferFile"; then
             installArchLinuxLog \
@@ -980,9 +962,8 @@ EOF
         fi
         return $?
     }
-
-    # Performs the auto partitioning.
     function installArchLinuxMakePartitions() {
+        # Performs the auto partitioning.
         if [[ $(echo "$_AUTO_PARTITIONING" | tr '[A-Z]' '[a-z]') == 'yes' ]]
         then
             installArchLinuxLog 'Check for suitable device divisions.'
@@ -1027,7 +1008,7 @@ EOF
             fi
         else
             installArchLinuxLog \
- l rt              "You have to create at least one partition. The first one will be used as boot partition labeled to \"${_BOOT_PARTITION_LABEL}\" and second one will be used as swap partition and labeled to \"${_SWAP_PARTITION_LABEL}\". The third will be used as data partition labeled to \"$_DATA_PARTITION_LABEL\" Press Enter to continue." && \
+                "You have to create at least one partition. The first one will be used as boot partition labeled to \"${_BOOT_PARTITION_LABEL}\" and second one will be used as swap partition and labeled to \"${_SWAP_PARTITION_LABEL}\". The third will be used as data partition labeled to \"$_DATA_PARTITION_LABEL\" Press Enter to continue." && \
             read && \
             installArchLinuxLog \
                 'Show blockdevices. Press Enter to continue.' && \
@@ -1038,9 +1019,8 @@ EOF
         fi
         return $?
     }
-
-    # Writes the fstab configuration file.
     function installArchLinuxGenerateFstabConfigurationFile() {
+        # Writes the fstab configuration file.
         installArchLinuxLog 'Generate fstab config.'
         if hash genfstab 1>"$_STANDARD_OUTPUT" 2>/dev/null; then
             # NOTE: Mountpoint shouldn't have a path separator at the end.
@@ -1052,9 +1032,8 @@ EOF
         fi
         return $?
     }
-
-    # Reconfigures or installs a boot loader.
     function installArchLinuxHandleBootLoader() {
+        # Reconfigures or installs a boot loader.
         if echo "$_OUTPUT_SYSTEM" | grep --quiet --extended-regexp \
             '[0-9]$'
         then
@@ -1070,18 +1049,16 @@ EOF
         fi
         return $?
     }
-
-    # Unmount previous installed system.
     function installArchLinuxUnmountInstalledSystem() {
+        # Unmount previous installed system.
         installArchLinuxLog 'Unmount installed system.'
         sync 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
         cd / 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
         umount "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
         return $?
     }
-
-    # Reboots into fresh installed system if previous defined.
     function installArchLinuxPrepareNextBoot() {
+        # Reboots into fresh installed system if previous defined.
         if [ -b "$_OUTPUT_SYSTEM" ]; then
             installArchLinuxGenerateFstabConfigurationFile && \
             installArchLinuxHandleBootLoader && \
@@ -1098,9 +1075,8 @@ EOF
             return $returnCode
         fi
     }
-
-    # Disables signature checking for incoming packages.
     function installArchLinuxConfigurePacman() {
+        # Disables signature checking for incoming packages.
         installArchLinuxLog "Enable mirrors in \"$_COUNTRY_WITH_MIRRORS\"."
         local bufferFile=$(mktemp)
         local inArea=false
@@ -1126,9 +1102,8 @@ EOF
             2>"$_ERROR_OUTPUT"
         return $?
     }
-
-    # Determine weather we should perform our auto partitioning mechanism.
     function installArchLinuxDetermineAutoPartitioning() {
+        # Determine weather we should perform our auto partitioning mechanism.
         if [ ! "$_AUTO_PARTITIONING" ]; then
             while true; do
                 echo -n 'Do you want auto partioning? [yes|NO]: '
@@ -1144,18 +1119,16 @@ EOF
             done
         fi
     }
-
-    # Provides the file content for the "/etc/hosts".
     function installArchLinuxGetHostsContent() {
+        # Provides the file content for the "/etc/hosts".
         cat << EOF
 #<IP-Adresse>  <Rechnername.Arbeitsgruppe>      <Rechnername>
 127.0.0.1      localhost.localdomain            localhost $1
 ::1            ipv6-localhost                   ipv6-localhost ipv6-$1
 EOF
     }
-
-    # Prepares given block devices to make it ready for fresh installation.
     function installArchLinuxPrepareBlockdevices() {
+        # Prepares given block devices to make it ready for fresh installation.
         installArchLinuxLog \
             "Unmount needed devices and devices pointing to our temporary system mount point \"$_MOUNTPOINT_PATH\"."
         umount -f "${_OUTPUT_SYSTEM}"* 1>"$_STANDARD_OUTPUT" 2>/dev/null
@@ -1168,9 +1141,8 @@ EOF
         installArchLinuxFormatPartitions
         return $?
     }
-
-    # Prepares the boot partition.
     function installArchLinuxPrepareBootPartition() {
+        # Prepares the boot partition.
         installArchLinuxLog 'Make boot partition.'
         local outputDevice="$_OUTPUT_SYSTEM"
         if [ -b "${_OUTPUT_SYSTEM}1" ]; then
@@ -1183,9 +1155,8 @@ EOF
             2>"$_ERROR_OUTPUT"
         return $?
     }
-
-    # Prepares the swap partition.
     function installArchLinuxPrepareSwapPartition() {
+        # Prepares the swap partition.
         if [ -b "${_OUTPUT_SYSTEM}2" ]; then
             installArchLinuxLog \
                 "Make swap partition at \"${_OUTPUT_SYSTEM}2\"."
@@ -1194,9 +1165,8 @@ EOF
             return $?
         fi
     }
-
-    # Prepares the data partition.
     function installArchLinuxPrepareDataPartition() {
+        # Prepares the data partition.
         if [ -b "${_OUTPUT_SYSTEM}3" ]; then
             installArchLinuxLog \
                 "Make data partition at \"${_OUTPUT_SYSTEM}3\"."
@@ -1205,17 +1175,15 @@ EOF
             return $?
         fi
     }
-
-    # Performs formating part.
     function installArchLinuxFormatPartitions() {
+        # Performs formating part.
         installArchLinuxPrepareBootPartition && \
         installArchLinuxPrepareSwapPartition && \
         installArchLinuxPrepareDataPartition
         return $?
     }
-
-    # Installs "grub2" as bootloader.
     function installArchLinuxIntegrateBootLoader() {
+        # Installs "grub2" as bootloader.
         installArchLinuxLog 'Install boot manager.'
         installArchLinuxChangeRootToMountPoint grub-install \
             --target=i386-pc --recheck "$_OUTPUT_SYSTEM" \
@@ -1226,9 +1194,8 @@ EOF
             2>"$_ERROR_OUTPUT"
         return $?
     }
-
-    # Load previous downloaded packages and database.
     function installArchLinuxLoadCache() {
+        # Load previous downloaded packages and database.
         installArchLinuxLog 'Load cached databases.' && \
         mkdir --parents \
             "$_MOUNTPOINT_PATH"var/lib/pacman/sync \
@@ -1244,9 +1211,8 @@ EOF
             2>"$_ERROR_OUTPUT"
         return $?
     }
-
-    # Cache previous downloaded packages and database.
     function installArchLinuxCache() {
+        # Cache previous downloaded packages and database.
         installArchLinuxLog 'Cache loaded packages.'
         cp --force --preserve \
             "$_MOUNTPOINT_PATH"var/cache/pacman/pkg/*.pkg.tar.xz \
@@ -1258,10 +1224,9 @@ EOF
             "$_PACKAGE_CACHE_PATH"/ 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
         return $?
     }
-
-    # Deletes previous installed things in given output target. And creates a
-    # package cache directory.
     function installArchLinuxPrepareInstallation() {
+        # Deletes previous installed things in given output target. And creates
+        # a package cache directory.
         mkdir --parents "$_PACKAGE_CACHE_PATH" 1>"$_STANDARD_OUTPUT" \
             2>"$_ERROR_OUTPUT" && \
         installArchLinuxLog \
