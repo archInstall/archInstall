@@ -44,7 +44,9 @@ mit dem Ort des Kernels oder tftp-Servers nicht verbundenen Netz zu laden).
 
 #### Initramfs Parameter
 
-Um über das Netzwerk booten zu können müssen dem initramfs auf der Kernel-Kommandozeile einige Informationen mitgegeben werden:
+Um über das Netzwerk booten zu können müssen dem initramfs auf der
+Kernel-Kommandozeile einige Informationen mitgegeben werden:
+
 * Art der Netzwerkverbindung: `ip=<client-ip>::<gw-ip>:<netmask>:<hostname>:<device>:<autoconf>`
     [!] Alle Parameter sind optional.
     `<client-ip>`: Statische IP-Adresse, die angefordert werden soll.
