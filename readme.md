@@ -16,22 +16,19 @@ License
 
 endregion -->
 
-Use case<!--deDE:Einsatz-->
----------------------------
+<h2>Use case<!--deDE:Einsatz--></h2>
 
 This script provides a full unnatted way to install ArchLinux from any live
 environment. You can create your own linux distribution based on the rolling
 released ArchLinux. A rock solid decorator pattern allows to automate a fully
 unattended individual installation process.
 
-Content<!--deDE:Inhalt-->
--------------------------
+<h2>Content<!--deDE:Inhalt--></h2>
 
 <!--Place for automatic generated table of contents.-->
 [TOC]
 
-Quick-Start<!--deDE:Einstieg-->
--------------------------------
+<h2>Quick-Start<!--deDE:Einstieg--></h2>
 
 Simply load the newest version from:
 <!--deDE:
