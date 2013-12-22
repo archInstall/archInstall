@@ -5,7 +5,9 @@ vim: foldmethod=marker foldmarker=region,endregion:
 
 endregion -->
 
-<h2>Extensions<!--deDE:Erweiterungen>--></h2>
+<!--deDE:Erweiterungen>-->
+Extensions
+----------
 
 Eine Menge von Werkzeugen um diverse ArchLinux Setups für verschiedene
 Anwendungsfälle zu bauen.
