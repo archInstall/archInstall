@@ -34,7 +34,6 @@ nosetests.xml
 
 # Vim temporary file
 *.swp
-.roperproject
 
 # Running time cache files.
 *Cache
