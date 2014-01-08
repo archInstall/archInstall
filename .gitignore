@@ -2,6 +2,7 @@
 *.so
 
 ## Generic
+
 # Packages
 *.egg
 *.egg-info
@@ -16,12 +17,15 @@ develop-eggs
 .installed.cfg
 lib
 lib64
+
 # Unit test / coverage reports
 .coverage
 .tox
 nosetests.xml
+
 # Translations
 *.mo
+
 # Mr Developer
 .mr.developer.cfg
 .project
@@ -30,3 +34,13 @@ nosetests.xml
 # Vim temporary file
 *.swp
 .roperproject
+
+# PHPStorm and other IDE Files
+*.idea
+*.project
+*.pydevproject
+*.settings
+*.externalToolBuilders
+
+# Gedit autosave backups.
+*~
