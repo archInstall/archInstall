@@ -86,13 +86,13 @@ function installArchLinux() {
 
         # region command line arguments
 
-    local _SCOPE='local'
+    local _SCOPE='local' && \
     if [[ $(echo "\"$@\"" | grep --extended-regexp \
         '(^"| )(-l|--load-environment)("$| )') != '' ]]
     then
         local _SCOPE='export'
     fi
-    "$_SCOPE" _PACKAGE_CACHE_PATH="${__NAME__}PackageCache"
+    "$_SCOPE" _PACKAGE_CACHE_PATH="${__NAME__}PackageCache" && \
     # NOTE: Only initialize environment if current scope wasn't set yet.
     if [ "$_VERBOSE" == '' ]; then
         "$_SCOPE" _HOSTNAME=''
@@ -448,7 +448,7 @@ EOF
                     ;;
                 *)
                     installArchLinuxLog 'critical' \
-                        "Given argument: \"$1\" is not available." '\n'
+                        "Given argument: \"$1\" is not available." '\n' && \
                     if [[ "$_SCOPE" == 'local' ]]; then
                         installArchLinuxPrintHelpMessage "$0"
                     fi
@@ -467,7 +467,7 @@ EOF
         if [[ "$0" == *"${__NAME__}.bash" ]]; then
             if [ ! "$_HOSTNAME" ]; then
                 while true; do
-                    echo -n 'Please set hostname for new system: '
+                    echo -n 'Please set hostname for new system: ' && \
                     read _HOSTNAME
                     if [[ $(echo "$_HOSTNAME" |\
                           tr '[A-Z]' '[a-z]') != '' ]]; then
@@ -480,8 +480,8 @@ EOF
     function installArchLinuxLog() {
         # Handles logging messages. Returns non zero and exit on log level
         # error to support chaining the message into toolchain.
-        local loggingType='info'
-        local message="$1"
+        local loggingType='info' && \
+        local message="$1" && \
         if [ "$2" ]; then
             loggingType="$1"
             message="$2"
@@ -715,8 +715,8 @@ EOF
         # Provides generic linux configuration mechanism. If an argument is
         # given new systemd like programs are used (they could have problems in
         # change root environment without and exclusive dbus connection.
-        installArchLinuxLog "Make keyboard layout permanent to \"${_KEYBOARD_LAYOUT}\"."
-        if [[ "$1" == true ]]; then
+        installArchLinuxLog "Make keyboard layout permanent to \"${_KEYBOARD_LAYOUT}\"." && \
+        if [[ "$1" == 'true']]; then
             installArchLinuxChangeRootToMountPoint localectl set-keymap \
                 "$_KEYBOARD_LAYOUT" 1>"$_STANDARD_OUTPUT" \
                 2>"$_ERROR_OUTPUT" && \
@@ -726,8 +726,8 @@ EOF
             echo -e "$_KEY_MAP_CONFIGURATION_FILE_CONTENT" 1>\
                 "${_MOUNTPOINT_PATH}etc/vconsole.conf" 2>"$_ERROR_OUTPUT"
         fi
-        installArchLinuxLog "Set localtime \"$_LOCAL_TIME\"."
-        if [[ "$1" == true ]]; then
+        installArchLinuxLog "Set localtime \"$_LOCAL_TIME\"." && \
+        if [[ "$1" == 'true' ]]; then
             installArchLinuxChangeRootToMountPoint timedatectl set-timezone \
                 "$_LOCAL_TIME" 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
         else
@@ -735,8 +735,8 @@ EOF
                 "${_MOUNTPOINT_PATH}etc/localtime" 1>"$_STANDARD_OUTPUT" \
                 2>"$_ERROR_OUTPUT"
         fi
-        installArchLinuxLog "Set hostname to \"$_HOSTNAME\"."
-        if [[ "$1" == true ]]; then
+        installArchLinuxLog "Set hostname to \"$_HOSTNAME\"." && \
+        if [[ "$1" == 'true' ]]; then
             installArchLinuxChangeRootToMountPoint hostnamectl set-hostname \
                 "$_HOSTNAME" 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
         else
@@ -746,10 +746,12 @@ EOF
         installArchLinuxLog 'Set hosts.' && \
         installArchLinuxGetHostsContent "$_HOSTNAME" \
             1>"${_MOUNTPOINT_PATH}etc/hosts"  2>"$_ERROR_OUTPUT" && \
-        installArchLinuxLog 'Set root password to "root".' && \
-        installArchLinuxChangeRootToMountPoint /usr/bin/env bash -c \
-            "echo root:root | \$(which chpasswd)" 1>"$_STANDARD_OUTPUT" \
-            2>"$_ERROR_OUTPUT" && \
+        if [[ "$1" != 'true' ]]; then
+            installArchLinuxLog 'Set root password to "root".' && \
+            installArchLinuxChangeRootToMountPoint /usr/bin/env bash -c \
+                "echo root:root | \$(which chpasswd)" 1>"$_STANDARD_OUTPUT" \
+                2>"$_ERROR_OUTPUT"
+        fi
         installArchLinuxEnableServices && \
         installArchLinuxLog "Add users: \"$(echo ${_USER_NAMES[*]} | sed \
             's/ /", "/g')\"." && \
@@ -859,7 +861,8 @@ EOF
         local coreDatabaseUrl=$(grep "core\.db" "$listBufferFile" | \
             head --lines 1)
         wget "$coreDatabaseUrl" --timestamping --directory-prefix \
-            "${_PACKAGE_CACHE_PATH}/" 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
+            "${_PACKAGE_CACHE_PATH}/" 1>"$_STANDARD_OUTPUT" \
+            2>"$_ERROR_OUTPUT" && \
         if [ -f "$_PACKAGE_CACHE_PATH/core.db" ]; then
             local databaseLocation=$(mktemp --directory)
             tar --gzip --extract --file "$_PACKAGE_CACHE_PATH/core.db" \
@@ -876,7 +879,9 @@ EOF
         # Determines all package dependencies. Returns a list of needed
         # packages for given package determined by given database.
         _NEEDED_PACKAGES+=" $1"
-        local packageDirectoryPath=$(installArchLinuxDeterminePackageDirectoryName "$@")
+        local \
+            packageDirectoryPath=$(installArchLinuxDeterminePackageDirectoryName \
+            "$@") && \
         if [ "$packageDirectoryPath" ]; then
             local packageDescription
             for packageDependencyDescription in $(cat \
@@ -927,7 +932,7 @@ EOF
     }
     function installArchLinuxDownloadAndExtractPacman() {
         # Downloads all packages from arch linux needed to run pacman.
-        local listBufferFile="$1"
+        local listBufferFile="$1" && \
         if installArchLinuxDeterminePacmansNeededPackages "$listBufferFile"; then
             installArchLinuxLog \
                 "Download and extract each package into our new system located in \"$_MOUNTPOINT_PATH\"."
@@ -995,7 +1000,7 @@ EOF
             installArchLinuxLog 'Create boot partition.' && \
             parted "$_OUTPUT_SYSTEM" mkpart primary ext4 2048s \
                 ${neededBootSpaceInProcent}% --script set 1 boot on \
-                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
+                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
             if [[ ${_MINIMAL_BOOT_SPACE_IN_PROCENT} -lt 100 ]]; then
                 installArchLinuxLog 'Create swap partition.' && \
                 parted "$_OUTPUT_SYSTEM" mkpart primary linux-swap \
@@ -1021,7 +1026,7 @@ EOF
     }
     function installArchLinuxGenerateFstabConfigurationFile() {
         # Writes the fstab configuration file.
-        installArchLinuxLog 'Generate fstab config.'
+        installArchLinuxLog 'Generate fstab config.' && \
         if hash genfstab 1>"$_STANDARD_OUTPUT" 2>/dev/null; then
             # NOTE: Mountpoint shouldn't have a path separator at the end.
             genfstab -L -p "${_MOUNTPOINT_PATH%?}" \
@@ -1063,7 +1068,7 @@ EOF
             installArchLinuxGenerateFstabConfigurationFile && \
             installArchLinuxHandleBootLoader && \
             installArchLinuxUnmountInstalledSystem
-            returnCode=$?
+            local returnCode=$? && \
             if [[ $returnCode == 0 ]] && \
                [[ $(echo "$_AUTOMATIC_REBOOT" | tr '[A-Z]' '[a-z]') != 'no' ]]
             then
@@ -1083,7 +1088,7 @@ EOF
         local lineNumber=0
         local line
         while read line; do
-            lineNumber=$(($lineNumber + 1))
+            lineNumber=$(($lineNumber + 1)) && \
             if [[ "$line" == "## $_COUNTRY_WITH_MIRRORS" ]]; then
                 inArea=true
             elif [[ "$line" == '' ]]; then
@@ -1106,7 +1111,7 @@ EOF
         # Determine weather we should perform our auto partitioning mechanism.
         if [ ! "$_AUTO_PARTITIONING" ]; then
             while true; do
-                echo -n 'Do you want auto partioning? [yes|NO]: '
+                echo -n 'Do you want auto partioning? [yes|NO]: ' && \
                 read _AUTO_PARTITIONING
                 if [[ "$_AUTO_PARTITIONING" == '' ]] || \
                    [[ $(echo "$_AUTO_PARTITIONING" | \
@@ -1143,8 +1148,8 @@ EOF
     }
     function installArchLinuxPrepareBootPartition() {
         # Prepares the boot partition.
-        installArchLinuxLog 'Make boot partition.'
-        local outputDevice="$_OUTPUT_SYSTEM"
+        installArchLinuxLog 'Make boot partition.' && \
+        local outputDevice="$_OUTPUT_SYSTEM" && \
         if [ -b "${_OUTPUT_SYSTEM}1" ]; then
             outputDevice="${_OUTPUT_SYSTEM}1"
         fi
@@ -1247,7 +1252,7 @@ EOF
 
     if [[ "$0" == *"${__NAME__}.bash" ]]; then
         installArchLinuxCommandLineInterface "$@" || return $?
-        _PACKAGES="${_BASIC_PACKAGES[*]} ${_ADDITIONAL_PACKAGES[*]}"
+        _PACKAGES="${_BASIC_PACKAGES[*]} ${_ADDITIONAL_PACKAGES[*]}" && \
         if [ "$_INSTALL_COMMON_ADDITIONAL_PACKAGES" == 'yes' ]; then
             _PACKAGES+=' '${_COMMON_ADDITIONAL_PACKAGES[*]}
         fi
@@ -1256,18 +1261,18 @@ EOF
                 2>"$_ERROR_OUTPUT"
         fi
         if [ -d "$_OUTPUT_SYSTEM" ]; then
-            _MOUNTPOINT_PATH="$_OUTPUT_SYSTEM"
+            _MOUNTPOINT_PATH="$_OUTPUT_SYSTEM" && \
             if [[ ! "$_OUTPUT_SYSTEM" =~ .*/$ ]]; then
                 _MOUNTPOINT_PATH="$_OUTPUT_SYSTEM"/
             fi
         elif [ -b "$_OUTPUT_SYSTEM" ]; then
-            _PACKAGES+=' arch-install-scripts'
+            _PACKAGES+=' arch-install-scripts' && \
             if echo "$_OUTPUT_SYSTEM" | grep --quiet --extended-regexp '[0-9]$'
             then
                 installArchLinuxPrepareBootPartition || \
                 installArchLinuxLog 'error' 'Boot partition creation failed.'
             else
-                _PACKAGES+=' grub-bios'
+                _PACKAGES+=' grub-bios' && \
                 if [ installArchLinuxDetermineAutoPartitioning ]; then
                     installArchLinuxPrepareBlockdevices || \
                     installArchLinuxLog 'error' \
