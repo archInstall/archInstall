@@ -40,15 +40,15 @@ Simply load the newest version from:
 <!--deDE:
     Um die neuste Version zu erhalten sollte man das Bash-Script runterladen:
 -->
-[installArchLinux](https://raw.github.com/archInstall/archInstall/master/installArchLinux.bash)
+[archInstall](https://raw.github.com/archInstall/archInstall/master/archInstall.bash)
 
 ```bash
 >>> wget \
-    https://raw.github.com/thaibault/installArchLinux/master/installArchLinux.bash \
-    -O installArchLinux.bash && chmod +x installArchLinux.bash
+    https://raw.github.com/archInstall/archInstall/master/archInstall.bash \
+    -O archInstall.bash && chmod +x archInstall.bash
 ```
 
-InstallArchLinux ist das zentrale Module um eine Reihe von Aufgaben im Zuge der
+archInstall ist das zentrale Module um eine Reihe von Aufgaben im Zuge der
 Vorbereitung, Installation, Konfiguration oder Manipulieren eines
 "Linux from Scratch" durchzuführen.
 
@@ -56,7 +56,7 @@ Das Module kann im einfachsten Fall (z.B. von einer beliebigen Life Linux
 Umgebung) gestartet werden.
 
 ```bash
->>> ./installArchLinux.bash
+>>> ./archInstall.bash
 ```
 
 In diesem Fall werden alle benötigten Informationen zur Einrichtung
@@ -67,14 +67,14 @@ aktuellen Zustand des Installations Vorgangs.
 Mit:
 
 ```bash
->>> ./installArchLinux.bash --verbose
+>>> ./archInstall.bash --verbose
 ```
 
 bekommt man einen etwas geschwätzigeren Installations Vorgang.
 Mit:
 
 ```bash
->>> ./installArchLinux.bash --verbose --debug
+>>> ./archInstall.bash --verbose --debug
 ```
 
 werden alle Ausgaben jeglicher verwendeten Subprogramme mit ausgegeben.
@@ -85,7 +85,7 @@ So Wird im obigen Fall einfach auf das erste gefundene Block Device installiert
 Will man lieber eine unbeaufsichtigte Installation:
 
 ```bash
->>> ./installArchLinux.bash --host-name testSystem --auto-partitioning
+>>> ./archInstall.bash --host-name testSystem --auto-partitioning
 ```
 
 Installation auf ein Block Device
@@ -102,7 +102,7 @@ werden.
 * Installation und Einrichtung eines Boot-Loaders
 
 Alle Aufgaben bis auf die Einrichtung der Internet Verbindung (wird in der Regel
-von der Host Umgebung geregelt) könne mit installArchLinux automatisiert
+von der Host Umgebung geregelt) könne mit archInstall automatisiert
 durchgeführt werden. Will man z.B auf das Block Device "/dev/sdb" installieren
 und sich nicht selber um die Partitionierung kümmern und den kompletten
 verfügbaren Platz für das Haupt System verwenden (es soll also keine Swap- oder
@@ -110,7 +110,7 @@ Daten Partition erstellt werden).
 sieht das z.B. so aus:
 
 ```bash
->>> ./installArchLinux.bash --output-system /dev/sdb --auto-partitioning \
+>>> ./archInstall.bash --output-system /dev/sdb --auto-partitioning \
     --minimal-boot-space-in-procent 100
 ```
 
@@ -118,7 +118,7 @@ Möchte man eine System-, Daten- und Swap Partition haben, installiert folgender
 Befehl:
 
 ```bash
->>> ./installArchLinux.bash --output-system /dev/sdb --auto-partitioning
+>>> ./archInstall.bash --output-system /dev/sdb --auto-partitioning
 ```
 
 diese in einem "sinnvollen" Verhältnis. Es wird versucht den Swap genauso groß
@@ -130,7 +130,7 @@ ein. Der Rest wird dann für die Daten Partition eingesetzt. Will man dieses
 Verhalten individualisieren:
 
 ```bash
->>> ./installArchLinux.bash --needed-boot-space-in-byte 500000000 \
+>>> ./archInstall.bash --needed-boot-space-in-byte 500000000 \
     --minimal-boot-space-in-procent 50 --maximal-swap-space-in-procent 10 \
     --output-system /dev/sdb --auto-partitioning
 ```
@@ -146,20 +146,20 @@ Parameters "--auto-partitioning" eine ncurses basierte Oberfläche, die das
 manuelle Konfiguration des Systems erlaubt.
 
 ```bash
->>> ./installArchLinux.bash --output-system /dev/sdb
+>>> ./archInstall.bash --output-system /dev/sdb
 ```
 
-InstallArchLinux nimmt dann die erste Partition als System Partition.
+archInstall nimmt dann die erste Partition als System Partition.
 Ist noch eine weitere Vorhanden, wird diese als Swap Space verwendet. Wenn auch
-eine dritte erkannt wird, detektiert installArchLinux diese als Daten Partition.
+eine dritte erkannt wird, detektiert archInstall diese als Daten Partition.
 Alle weiteren Partitionen bleiben unberührt.
 
-An dieser Stelle sei noch erwähnt, dass installArchLinux alle erstellten
+An dieser Stelle sei noch erwähnt, dass archInstall alle erstellten
 Partition automatisch mit Labels versieht. Um dieses Verhalten zu
 individualisieren einfach folgende Optionen nutzen:
 
 ```bash
->>> ./installArchLinux.bash --boot-partition-label boot \
+>>> ./archInstall.bash --boot-partition-label boot \
     --swap-partition-label auslagerung --data-partition-label stuff
 ```
 
@@ -171,12 +171,12 @@ auf eine weitere Partition zu installieren kann einfach folgender Befehl
 verwendet werden:
 
 ```bash
->>> ./installArchLinux.bash --output-system /dev/sdb2
+>>> ./archInstall.bash --output-system /dev/sdb2
 ```
 
 Hier wird auf die zweite Partition des zweiten Block Devices installiert.
-Sofern "grub2" auf dem Hostsystem installiert ist und installArchLinux mit
-ausreichend Rechten ausgeführt wurde, integriert installArchLinux die
+Sofern "grub2" auf dem Hostsystem installiert ist und archInstall mit
+ausreichend Rechten ausgeführt wurde, integriert archInstall die
 alternative Installation in grub boot menu. Dieses Feature funktioniert jedoch
 nur wenn "os-prober" installiert ist. Sonst muss man hier von Hand nachbessern.
 Um die alternative Linux Version auch booten zu können.
@@ -184,23 +184,23 @@ Um die alternative Linux Version auch booten zu können.
 Installation in einen Ordner
 ----------------------------
 
-Um installArchLinux für komplexere Szenarien zu verwenden oder nachträgliche
+Um archInstall für komplexere Szenarien zu verwenden oder nachträgliche
 Manipulationen vorzunehmen ist es sinnvoll zunächst in einen Ordner zu
-installieren. Siehe hierzu "installArchLinux with Decorator Pattern",
+installieren. Siehe hierzu "archInstall with Decorator Pattern",
 "makeXBMCLinux", "makeRamOnlyLinux" oder "makeSquashLinux" bzw. das Projekt
-"installArchLinuxWrapperTemplate".
+"archInstallWrapperTemplate".
 
 Dieser Befehl installiert ein vollständiges System in den eigenen Home-Ordner
 "test" (siehe auch Installation ohne root Rechte).
 
 ```bash
->>> ./installArchLinux.bash --output-system ~/test
+>>> ./archInstall.bash --output-system ~/test
 ```
 
 Automatische Konfiguration
 --------------------------
 
-InstallArchLinux konfiguriert das neu eingerichtete System vollautomatisch.
+archInstall konfiguriert das neu eingerichtete System vollautomatisch.
 Folgende Taske wurden automatisiert:
 
 * Tastaturlayout einstellen
@@ -221,7 +221,7 @@ Folgende Taske wurden automatisiert:
 Will man hierauf selber Einfluss nehmen, gibt es folgende Möglichkeiten:
 
 ```bash
->>> ./installArchLinux.bash --host-name test --user-names test \
+>>> ./archInstall.bash --host-name test --user-names test \
     --cpu-architecture x86_64 --local-time /Europe/London \
     --key-map-configuration \
     KEYMAP="de-latin1\nFONT=Lat2-Terminus16\nFONT_MAP=" \
@@ -234,77 +234,77 @@ Um die einzelnen Konfigurationsparameter zu verstehen empfiehlt sich ein Blick
 auf:
 
 ```bash
->>> ./installArchLinux.bash --help
+>>> ./archInstall.bash --help
 ```
 
 zu werfen.
 
-InstallArchLinux im Decorator Pattern
--------------------------------------
+archInstall im Decorator Pattern
+--------------------------------
 
-Um eigene Betriebssystem Module zu entwerfen bietet installArchLinux eine
+Um eigene Betriebssystem Module zu entwerfen bietet archInstall eine
 Vielzahl von Schnittstellen um seine internen Mechanismen separate nach Außen
 zugänglich zu machen (siehe hierzu die Decorator Implementierung
 "installXBMCLinux", "makeRamOnlyLinux", "makeSquashLinux" oder
 "installArchLinxDecoratorTemplate") und unsere Guidelines zum Erstellen eines
 Wrappers.
 
-Im einfachsten Fall würde der Code der installArchLinux sinnvoll erweitert so
+Im einfachsten Fall würde der Code der archInstall sinnvoll erweitert so
 aussehen:
 
     #!/usr/bin/env bash
 
-    source installArchLinux.bash
+    source archInstall.bash
 
     # Do your own stuff cli logic here..
-    # All your functions and variables are separated from the installArchLinux
+    # All your functions and variables are separated from the archInstall
     # scope.
 
-    # Call the main Function of installArchLinux and overwrite or add
+    # Call the main Function of archInstall and overwrite or add
     # additional command line options.
-    installArchLinux "$@" --output-system initramfsTargetLocation
+    archInstall "$@" --output-system initramfsTargetLocation
 
     # Prepare result ...
 
-Beachte, dass trotz des sourcen von installArchLinux auf diese Weise keine
-Konflikte zwischen dem Wrapper-Scope und dem installArchLinux-Scope entstehen
-können. Die Einzige globale Variable ist "installArchLinux" selbst.
+Beachte, dass trotz des sourcen von archInstall auf diese Weise keine
+Konflikte zwischen dem Wrapper-Scope und dem archInstall-Scope entstehen
+können. Die Einzige globale Variable ist "archInstall" selbst.
 
-Will man nun von den internen Features von installArchLinux partizipieren geht
+Will man nun von den internen Features von archInstall partizipieren geht
 das so:
 
 ```bash
->>> source installArchLinux.bash --load-environment
+>>> source archInstall.bash --load-environment
 ```
 
 Jetzt haben wir den gesamten Scope auch im Decorator zur Verfügung.
-Alle Methoden sind mit dem Prefix "installArchLinux" ausgestattet, um
+Alle Methoden sind mit dem Prefix "archInstall" ausgestattet, um
 Namens Konflikte und versehentlich überschreiben von Methoden zu vermeiden.
 Will man sich also einen Überblick über alle verfügbaren Methoden machen,
 einfach in der shell folgendes eintippen:
 
 ```bash
->>> source installArchLinux.bash --load-environment
+>>> source archInstall.bash --load-environment
 
->>> installArchLinux<TAB><TAB>
+>>> archInstall<TAB><TAB>
 ...
 ```
 
-Siehe hierzu auch "installArchLinux API".
+Siehe hierzu auch "archInstall API".
 
-InstallArchLinux API
+archInstall API
 --------------------
 
 Folgende Umgebungsvariablen können mit:
 
 ```bash
->>> source installArchLinux.bash --load-environment
+>>> source archInstall.bash --load-environment
 ```
 
 geladen werden:
 
 ```bash
-# Name des Moduls installArchLinux.
+# Name des Moduls archInstall.
 __NAME__
 # "local" oder "export" je nachdem ob mit "--load-environment" geladen
 # wurde.
@@ -338,56 +338,56 @@ _STANDARD_OUTPUT, _ERROR_OUTPUT, _NEEDED_MOUNTPOINTS
 Diese Methoden können von außen geladen und verwendet werden:
 
 ```bash
-# Startet den installArchLinux Controller. Initiiert das Hauptprogramm.
-installArchLinux()
+# Startet den archInstall Controller. Initiiert das Hauptprogramm.
+archInstall()
 
 # Liefert eine Beschreibung wie das Program verwendet werden kann.
 # Wenn die Variable "__NAME__" auf den Namen des Wrappers zeigt kann diese
 # Methode im Decorator Pattern Attraktiv sein.
-installArchLinuxPrintUsageMessage()
+archInstallPrintUsageMessage()
 
 # Liefert Beispiele wie das Program ausgeführt werden soll.
 # Werden im Decorator Pattern die Variablen durch gereicht und die
 # "__NAME__" Variable gesetzt, macht das Sinn.
-installArchLinuxPrintUsageExamples()
+archInstallPrintUsageExamples()
 
 # Liefert eine Beschreibung allen verfügbaren Optionen.
-installArchLinuxPrintCommandLineOptionDescriptions()
+archInstallPrintCommandLineOptionDescriptions()
 
 # Vereinigt die Ausgabe der letzten drei Methoden.
-installArchLinuxPrintHelpMessage()
+archInstallPrintHelpMessage()
 
 # Parset Kommandozeilen-Eingaben und liefert aussagekräftige Fehler, wie
 # "No such, file or directory!" :-). Ne Spass.
-installArchLinuxCommandLineInterface()
+archInstallCommandLineInterface()
 
 # Liefert eine einfache Methode zum Loggen. Wenn zwei Argumente übergeben
 # wurde, wird der erste als Loglevel interpretiert. Loglevel wie "critical"
 # oder "error" werden auch ohne cli flag "--verbose" angezeigt.
 # "error" führt zusätzlich zum Abbruch des Programms mit Fehlercode 1.
 #
-# >>> installArchLinuxLog <LOG_NACHRICHT>
-# >>> installArchLinuxLog <LOG_LEVEL> <LOG_NACHRICHT>
-# >>> installArchLinuxLog <LOG_LEVEL> <LOG_NACHRICHT> <STRING_VOR_DER_NACHRICHT>
+# >>> archInstallLog <LOG_NACHRICHT>
+# >>> archInstallLog <LOG_LEVEL> <LOG_NACHRICHT>
+# >>> archInstallLog <LOG_LEVEL> <LOG_NACHRICHT> <STRING_VOR_DER_NACHRICHT>
 #
-installArchLinuxLog()
+archInstallLog()
 
 # Installiert das Betriebssystem dorthin wo "_MOUNPOINT_PATH" hin zeigt.
-# "_MOUNPOINT_PATH=test installArchLinuxWithPacstrap" ist also eine
+# "_MOUNPOINT_PATH=test archInstallWithPacstrap" ist also eine
 # sinnvolle Verwendung.
-installArchLinuxWithPacstrap()
+archInstallWithPacstrap()
 
 # Diese Funktion erstellt in "_MOUNTPOINT_PATH" ein basis Linux (siehe).
 # Sie benötigt außer posix konforme System Schnittstellen keinerlei
 # zusätzliche Anwendungen wie "pacman".
-installArchLinuxGenericLinuxSteps()
+archInstallGenericLinuxSteps()
 
-# Diese Methode dient als Wrapper for "installArchLinuxChangeRoot".
-# Sie ist äquivalent zu dem Aufruf "InstallArchLinux $_MOUNPOINT_PATH".
+# Diese Methode dient als Wrapper for "archInstallChangeRoot".
+# Sie ist äquivalent zu dem Aufruf "archInstall $_MOUNPOINT_PATH".
 #
-# >>> installArchLinuxChangeRootToMountPoint <ARGUMENTE>*
+# >>> archInstallChangeRootToMountPoint <ARGUMENTE>*
 #
-installArchLinuxChangeRootToMountPoint()
+archInstallChangeRootToMountPoint()
 
 # Diese Funktion unterstützt das gleiche Interface wie "chroot" nur werden
 # abhängig von verfügbaren tools wie die "arch-install-scripts" möglichst
@@ -398,175 +398,175 @@ installArchLinuxChangeRootToMountPoint()
 # "/proc", "/sys", "/dev", "/dev/pts", "/dev/shm", "/run", "/tmp",
 # "/etc/resolv.conf"
 #
-# >>> installArchLinuxChangeRoot <CHROOT_ARGUMENTE>*
+# >>> archInstallChangeRoot <CHROOT_ARGUMENTE>*
 #
-installArchLinuxChangeRoot()
+archInstallChangeRoot()
 
-# (wird von "installArchLinuxChangeRoot()" aufgerufen) Diese Funktion wird
+# (wird von "archInstallChangeRoot()" aufgerufen) Diese Funktion wird
 # verwendet, wenn "arch-chroot" nicht zur Verfügung steht oder die Flag
 # "--prevent-using-native-arch-chroot" gesetzt ist.
 #
-# >>> installArchLinuxChangeRoot <CHROOT_ARGUMENTE>*
+# >>> archInstallChangeRoot <CHROOT_ARGUMENTE>*
 #
-installArchLinuxChangeRootViaMount()
+archInstallChangeRootViaMount()
 
 # Hier wird das linux native "chroot" oder "fakechroot" Program gewrappt.
 # Sind keine root Rechte vorhanden "fakeroot" und "fakechroot" installiert.
 # wird statt "chroot $@", "fakeroot fakechroot chroot $@" aufgerufen.
 #
-# >>> installArchLinuxChangeRoot <CHROOT_ARGUMENTE>*
+# >>> archInstallChangeRoot <CHROOT_ARGUMENTE>*
 #
-installArchLinuxPerformChangeRoot()
+archInstallPerformChangeRoot()
 
 # Erledigt den meisten Linux typischen Konfigurationsaufwand wie
 # Erstellen eines Hostnamen oder des Tastaturlayouts.
-installArchLinuxConfigure()
+archInstallConfigure()
 
 # Alle benötigten Dienste (siehe "--needed-services" werden aktiviert.
-installArchLinuxEnableServices()
+archInstallEnableServices()
 
 # Nicht benötigte Orte werden aufgeräumt (siehe "_UNNEEDED_LOCATIONS").
-installArchLinuxTidyUpSystem()
+archInstallTidyUpSystem()
 
 # Erstellt eine Basisliste an verfügbaren Quellen um die ersten Pakete zu
 # beziehen (siehe "_PACKAGE_SOURCE_URLS").
-installArchLinuxAppendTemporaryInstallMirrors()
+archInstallAppendTemporaryInstallMirrors()
 
 # Verpackt ein erfolgreich erstelltes Linux in ein tar-Archiv.
-installArchLinuxPackResult()
+archInstallPackResult()
 
 # Ermittelt eine aktuelle Liste aller Pakete aus den core Repositories von
 # pacman. Sie enthält die konkrete Url zu jeder Paket bzw. deren neusten
 # Version.
-installArchLinuxCreatePackageUrlList()
+archInstallCreatePackageUrlList()
 
 # Ermittelt die aktuellen Abhängigkeiten von pacman.
-installArchLinuxDeterminePacmansNeededPackages()
+archInstallDeterminePacmansNeededPackages()
 
 # Liest die Datenbank Dateien von Pacman und ermittelt welche Abhängigkeiten
 # notwendig sind um das übergebene Programm installieren zu können.
-# In installArchLinux wird diese Funktion nur verwendet um "pacman" selbst
+# In archInstall wird diese Funktion nur verwendet um "pacman" selbst
 # lauffähig zu bekommen. Ab da übernimmt dieser das Auflösen von Abhängigkeiten.
 # Im Decorator Pattern kann diese Funktion jedoch sehr wertvoll werden, um
 # beliebige Abhängigkeiten zu ermitteln.
 #
-# >>> installArchLinuxDeterminePackageDependencies <PAKET> <DATENBANK_DATEI>
+# >>> archInstallDeterminePackageDependencies <PAKET> <DATENBANK_DATEI>
 #
-installArchLinuxDeterminePackageDependencies()
+archInstallDeterminePackageDependencies()
 
 # Ermittelt den Namen eines Paketordner in den Datenbankarchiven von
 # Pacman zu einem Program
 #
-# >>> installArchLinuxDeterminePackageDirectoryName <PROGRAMM_NAME>
+# >>> archInstallDeterminePackageDirectoryName <PROGRAMM_NAME>
 #
-installArchLinuxDeterminePackageDirectoryName()
+archInstallDeterminePackageDirectoryName()
 
 # Installiert die neuste pacman Version.
 #
-# >>> installArchLinuxDownloadAndExtractPacman <LISTE_ALLER_URLS_ZU_ALLEN_PAKETEN>
+# >>> archInstallDownloadAndExtractPacman <LISTE_ALLER_URLS_ZU_ALLEN_PAKETEN>
 #
-installArchLinuxDownloadAndExtractPacman()
+archInstallDownloadAndExtractPacman()
 
 # Partitioniert ein Block Device "_OUTPUT_SYSTEM" nach einer sinnvollen
 # Heuristik. Siehe hierzu "Installation auf ein Block Device".
-installArchLinuxMakePartitions()
+archInstallMakePartitions()
 
 # Erstellt autmatisch eine bootfähiger fstab Konfigurationsdatei in
 # "_MOUNTPOINT_PATH/etc/fstab".
-installArchLinuxGenerateFstabConfigurationFile()
+archInstallGenerateFstabConfigurationFile()
 
 # Konfiguriert Grub2, so dass alle vorhanden Betriebssysteme im Bootmenu
 # angezeigt werden.
-installArchLinuxHandleBootLoader()
+archInstallHandleBootLoader()
 
 # Unmounted "_MOUNTPOINT_PATH".
-installArchLinuxUnmountInstalledSystem()
+archInstallUnmountInstalledSystem()
 
 # Macht einen Neustart wenn die Installation erfolgreich war und die Flag
 # "--no-reboot" nicht gesetzt ist.
-installArchLinuxPrepareNextBoot()
+archInstallPrepareNextBoot()
 
 # Schreibt pacmans config so um, dass Paketsignaturüberprüfung
 # übersprungen werden. Dies ist notwendig wenn pacman ohne ein bereits
 # installiertes Pacman initial installiert werden soll.
-installArchLinuxConfigurePacman()
+archInstallConfigurePacman()
 
 # Ermittelt ob der Benutzer automatische Partitionierung wünscht.
 # So wird unbeabsichtigt Löschen von Daten verhindert.
-installArchLinuxDetermineAutoPartitioning()
+archInstallDetermineAutoPartitioning()
 
 # Generert sinnvollen Inhalt für "/etc/hosts".
 #
-# >>> installArchLinuxGetHostsContent <HOST_NAME>
+# >>> archInstallGetHostsContent <HOST_NAME>
 #
-installArchLinuxGetHostsContent()
+archInstallGetHostsContent()
 
 # Bereitet das Installations block device vor. Erstellt Partitionen und
 # vergibt Labels.
-installArchLinuxPrepareBlockdevices()
+archInstallPrepareBlockdevices()
 
-# Bereitet die boot Partition vor. Erstellt ein Dateisystem.
-installArchLinuxPrepareBootPartition()
+# Bereitet die System-Partition vor. Erstellt ein Dateisystem.
+archInstallPrepareSystemPartition()
 
-# Bereitet die swap Partition vor. Erstellt ein Dateisystem.
-installArchLinuxPrepareSwapPartition()
+# Bereitet die Boot-Partition vor. Erstellt ein Dateisystem.
+archInstallPrepareBootPartition()
 
-# Bereitet die Daten-Partition vor. Erstellt ein Dateisystem.
-installArchLinuxPrepareDataPartition()
+# Bereitet die Swap-Partition vor. Erstellt ein Dateisystem.
+archInstallPrepareSwapPartition()
 
 # Formatiert alle notwendigen Partitionen.
-installArchLinuxFormatPartitions()
+archInstallFormatPartitions()
 
 # Installiert "grub2" als Bootloader.
-installArchLinuxIntegrateBootLoader()
+archInstallIntegrateBootLoader()
 
 # Bereitet den Paket Cache vor der von pacman während der Installation
 # verwendet werden kann.
-installArchLinuxLoadCache()
+archInstallLoadCache()
 
 # Speichert alle bisher geladenen Pakete aus dem aktuell verwendeten Pacman
 # im Paket Cache (siehe "_PACKAGE_CACHE_PATH").
-installArchLinuxCache()
+archInstallCache()
 
 # Erstellt sofern nicht vorhanden den Paket Cache und bereinigt das
 # Installations Ziel.
-installArchLinuxPrepareInstallation()
+archInstallPrepareInstallation()
 ```
 
-InstallArchLinux Options
-------------------------
+archInstall Options
+-------------------
 
-InstallArchLinux stellt ein Alphabet voller Optionen zur Verfügung.
+archInstall stellt ein Alphabet voller Optionen zur Verfügung.
 Während bisher zum einfachen Verständnis immer sog. Long-Options verwendet
 wurden, gibt es für jede Option auch einen Shortcut.
 
 ```bash
->>> ./installArchLinux.bash --user-names mustermann --host-name lfs
+>>> ./archInstall.bash --user-names mustermann --host-name lfs
 ```
 
 ist äquivalent zu:
 
 ```bash
->>> ./installArchLinux.bash -u mustermann -n lfs
+>>> ./archInstall.bash -u mustermann -n lfs
 ```
 
 Alle Optionen bis auf "--host-name" und "--auto-partitioning"
 haben Standardwerte. Alle Standardwert können mit Hilfe von:
 
 ```bash
->>> ./installArchLinux.bash -h
+>>> ./archInstall.bash -h
 ```
 
 oder
 
 ```bash
->>> ./installArchLinux.bash --help
+>>> ./archInstall.bash --help
 ```
 
 oder
 
 ```bash
->>> ./installArchLinux.bash --keyboard-layout de-latin1 -h
+>>> ./archInstall.bash --keyboard-layout de-latin1 -h
 ```
 
 angesehen werden. Letzteres macht Sinn, da sich Standardwerte aufgrund schon
@@ -576,7 +576,7 @@ So wird der Standardwert von
 nach Eingabe von 
 
 ```bash
->>> ./installArchLinux.bash --keyboard-layout us
+>>> ./archInstall.bash --keyboard-layout us
 ```
 
 zu: "--key-map-configuration="KEYMAP=us\nFONT=Lat2-Terminus16\nFONT_MAP=".
@@ -588,37 +588,37 @@ Man kann Optionen die mehrere Werte annehmen auch mehrfach referenzieren.
 So hat:
 
 ```bash
->>> ./installArchLinux.bash --additional-packages ssh --additional-packages vim -f python
+>>> ./archInstall.bash --additional-packages ssh --additional-packages vim -f python
 ```
 
 den gleichen Effekt wie:
 
 ```bash
->>> ./installArchLinux.bash --additional-packages ssh vim python
+>>> ./archInstall.bash --additional-packages ssh vim python
 ```
 
 Dies ist im Decorator-Pattern nützlich. Bei einem Doppelt referenzierten Wert
 überschreiben spätere Werte zuvor Definierte. Folgendes:
 
 ```bash
->>> ./installArchLinux.bash --host-name A --host-name B
+>>> ./archInstall.bash --host-name A --host-name B
 ```
 
 entspricht:
 
 ```bash
->>> ./installArchLinux.bash --host-name B
+>>> ./archInstall.bash --host-name B
 ```
 
 Auf diese Weise kann man getrost folgendes tun:
 
     #!/usr/bin/env bash
 
-    source installArchLinux.bash
+    source archInstall.bash
 
     myTarget='/path/to/expected/result'
 
-    installArchLinux "$@" --output-system $myTarget
+    archInstall "$@" --output-system $myTarget
 
     # Working with result in "$myTarget"
 
@@ -628,9 +628,9 @@ im Wrapper wieder überschrieben werden.
 Offline Installieren
 --------------------
 
-installArchLinux erstellt bei jeder Installation automatisch einen Paket-Cache
+archInstall erstellt bei jeder Installation automatisch einen Paket-Cache
 um weitere Installationen zu beschleunigen. Ist dieser einmal erstellt oder
-wird dieser zusammen mit dem installArchLinux (z.b. auf einem usb-stick)
+wird dieser zusammen mit dem archInstall (z.b. auf einem usb-stick)
 ausgeliefert kann auch Offline installiert werden.
 
 Selbst wenn mit einem bereits vorhandenem pacstrap installiert wird, wird
@@ -638,7 +638,7 @@ dieser temporär kopiert, gepatched und anschließend offlinefähig ausgeführt!
 
 Bei Offline Installation müssen natürlich alle zusätzlich ausgewählten
 Pakete im Package Cache vorhanden sein. Ist dies nicht der Fall wird
-installArchLinux versuchen diese nach zu laden und im Offline-Fall einen Fehler
+archInstall versuchen diese nach zu laden und im Offline-Fall einen Fehler
 zurückgeben.
 
 Installieren ohne root Rechte
@@ -687,23 +687,23 @@ dem Shortcut: "--install-common-additional-packages" oder "-z".
 Will man eine beliebige Liste von Paketen integrieren:
 
 ```bash
->>> ./installArchLinux.bash --additional-packages ssh python2 vim
+>>> ./archInstall.bash --additional-packages ssh python2 vim
 ```
 
 Sollen Dienste schon beim ersten Start automatisch gestartet werden:
 
 ```bash
->>> ./installArchLinux.bash --needed-services sshd dhcpcd
+>>> ./archInstall.bash --needed-services sshd dhcpcd
 ```
 
 Um die Installation zu beschleunigen kann auf ein zentral verwalteten
 Paket Cache verwiesen werden:
 
 ```bash
->>> ./installArchLinux.bash --package-cache-path /var/cache/pacman/pkg/
+>>> ./archInstall.bash --package-cache-path /var/cache/pacman/pkg/
 ```
 
-Will man im Wrapper eine installArchLinux Option verstecken, weil man diese z.B.
+Will man im Wrapper eine archInstall Option verstecken, weil man diese z.B.
 selber setzten will, eignet sich folgender Pattern:
 
     #!/usr/bin/env bash
@@ -715,13 +715,13 @@ selber setzten will, eignet sich folgender Pattern:
 
     Option descriptions:
 
-    $(installArchLinuxPrintCommandLineOptionDescriptions "$@" | \
+    $(archInstallPrintCommandLineOptionDescriptions "$@" | \
         sed '/^ *-[a-z] --output-system .*$/,/^$/d')
     EOF
 
     myTarget="$(mktemp)"
 
-    installArchLinux "$@" --output-system "$myTarget"
+    archInstall "$@" --output-system "$myTarget"
 
     # ...
 
