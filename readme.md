@@ -462,7 +462,7 @@ installArchLinuxDownloadAndExtractPacman()
 # Heuristik. Siehe hierzu "Installation auf ein Block Device".
 installArchLinuxMakePartitions()
 
-# Erstellt autmatisch eine bootfähiger fstab Konfigurationsdatei in 
+# Erstellt autmatisch eine bootfähiger fstab Konfigurationsdatei in
 # "_MOUNTPOINT_PATH/etc/fstab".
 installArchLinuxGenerateFstabConfigurationFile()
 

@@ -92,45 +92,54 @@ function installArchLinux() {
     then
         local _SCOPE='export'
     fi
+    # NOTE: We have to reset this variable in wrapped context to set best
+    # wrapper name prefixed default.
     "$_SCOPE" _PACKAGE_CACHE_PATH="${__NAME__}PackageCache" && \
     # NOTE: Only initialize environment if current scope wasn't set yet.
     if [ "$_VERBOSE" == '' ]; then
-        "$_SCOPE" _HOSTNAME=''
+        "$_SCOPE" _VERBOSE='no'
+        "$_SCOPE" _LOAD_ENVIRONMENT='no'
+
         local userNames=()
         "$_SCOPE" _USER_NAMES="${userNames[*]}"
-        "$_SCOPE" _VERBOSE='no'
-        "$_SCOPE" _AUTO_PARTITIONING=''
-        "$_SCOPE" _INSTALL_COMMON_ADDITIONAL_PACKAGES='no'
-        "$_SCOPE" _LOAD_ENVIRONMENT='no'
+        "$_SCOPE" _HOSTNAME=''
+
         # NOTE: Possible constant values are "i686" or "x86_64".
         "$_SCOPE" _CPU_ARCHITECTURE=$(uname -m) # Possible: x86_64, i686, arm, any
-        "$_SCOPE" _AUTOMATIC_REBOOT='yes'
-        "$_SCOPE" _KEYBOARD_LAYOUT='de-latin1'
         "$_SCOPE" _OUTPUT_SYSTEM="$__NAME__"
+
+        # NOTE: This properties aren't needed in the future with supporting
+        # localectl program.
+        "$_SCOPE" _LOCAL_TIME='Europe/Berlin'
+        "$_SCOPE" _KEY_MAP_CONFIGURATION_FILE_CONTENT="KEYMAP=${_KEYBOARD_LAYOUT}\nFONT=Lat2-Terminus16\nFONT_MAP="
+        "$_SCOPE" _KEYBOARD_LAYOUT='de-latin1'
         # NOTE: Each value which is present in "/etc/pacman.d/mirrorlist" is ok.
         "$_SCOPE" _COUNTRY_WITH_MIRRORS='Germany'
-        "$_SCOPE" _BOOT_PARTITION_LABEL='system'
+
+        "$_SCOPE" _AUTOMATIC_REBOOT='yes'
+        "$_SCOPE" _PREVENT_USING_PACSTRAP='no'
+        "$_SCOPE" _PREVENT_USING_NATIVE_ARCH_CHANGE_ROOT='no'
+        "$_SCOPE" _AUTO_PARTITIONING=''
+
+        "$_SCOPE" _BOOT_PARTITION_LABEL='uefiBoot'
         "$_SCOPE" _SWAP_PARTITION_LABEL='swap'
-        "$_SCOPE" _DATA_PARTITION_LABEL='data'
+        "$_SCOPE" _SYSTEM_PARTITION_LABEL='system'
+
+        "$_SCOPE" _NEEDED_BOOT_SPACE_IN_BYTE=209715200 # 200 Megabyte
+        "$_SCOPE" _MINIMAL_BOOT_SPACE_IN_PROCENT=40
+        "$_SCOPE" _MAXIMAL_SWAP_SPACE_IN_PROCENT=20
+
+        "$_SCOPE" _INSTALL_COMMON_ADDITIONAL_PACKAGES='no'
         local additionalPackages=()
         "$_SCOPE" _ADDITIONAL_PACKAGES="${additionalPackages[*]}"
         local neededServices=()
         "$_SCOPE" _NEEDED_SERVICES="${neededServices[*]}"
-        "$_SCOPE" _NEEDED_BOOT_SPACE_IN_BYTE=524288000 # 500 MegaByte
-        "$_SCOPE" _MAXIMAL_SWAP_SPACE_IN_PROCENT=20
-        "$_SCOPE" _MINIMAL_BOOT_SPACE_IN_PROCENT=40
-        # NOTE: This property isn't needed in the future.
-        "$_SCOPE" _KEY_MAP_CONFIGURATION_FILE_CONTENT="KEYMAP=${_KEYBOARD_LAYOUT}\nFONT=Lat2-Terminus16\nFONT_MAP="
-        "$_SCOPE" _LOCAL_TIME='Europe/Berlin'
-        # Define where to mount temporary new filesystem.
-        # NOTE: Path has to be end with a system specified delimiter.
-        "$_SCOPE" _MOUNTPOINT_PATH='/mnt/'
-        "$_SCOPE" _IGNORE_UNKNOWN_ARGUMENTS='no'
-        "$_SCOPE" _PREVENT_USING_PACSTRAP='no'
-        "$_SCOPE" _PREVENT_USING_NATIVE_ARCH_CHANGE_ROOT='no'
 
         # endregion
 
+        # Define where to mount temporary new filesystem.
+        # NOTE: Path has to be end with a system specified delimiter.
+        "$_SCOPE" _MOUNTPOINT_PATH='/mnt/'
         # After determining dependencies a list like this will be stored:
         #     acl attr bzip2 curl expat glibc gpgme libarchive libassuan
         #     libgpg-error libssh2 openssl pacman xz zlib pacman-mirrorlist
@@ -251,14 +260,14 @@ EOF
         automatic.
 
 
-    -e --boot-partition-label LABEL Partition label for boot partition
+    -e --boot-partition-label LABEL Partition label for uefi boot partition
         (default: "$_BOOT_PARTITION_LABEL").
 
     -s --swap-partition-label LABEL Partition label for swap partition
         (default: "$_SWAP_PARTITION_LABEL").
 
-    -d --data-partition-label LABEL Partition label for data partition
-        (default: "$_DATA_PARTITION_LABEL").
+    -d --system-partition-label LABEL Partition label for system partition
+        (default: "$_SYSTEM_PARTITION_LABEL").
 
 
     -w --needed-boot-space-in-byte NUMBER_OF_BYTES In case if selected auto
@@ -266,8 +275,8 @@ EOF
         partition (default: "$_NEEDED_BOOT_SPACE_IN_BYTE byte").
 
     -q --minimal-boot-space-in-procent PROCENT Define how much space should
-        be at least used for your boot (system and program) partition.
-        Other space will be used for your data partition
+        be at least used for your boot (for kernel and initramfs) partition.
+        Remaining space will be used for your system and swap partition
         (default: "$_MINIMAL_BOOT_SPACE_IN_PROCENT%").
 
     -i --maximal-swap-space-in-procent PROCENT Define how much procent you
@@ -391,14 +400,14 @@ EOF
                     _BOOT_PARTITION_LABEL="$1"
                     shift
                     ;;
+                -d|--system-partition-label)
+                    shift
+                    _SYSTEM_PARTITION_LABEL="$1"
+                    shift
+                    ;;
                 -s|--swap-partition-label)
                     shift
                     _SWAP_PARTITION_LABEL="$1"
-                    shift
-                    ;;
-                -d|--data-partition-label)
-                    shift
-                    _DATA_PARTITION_LABEL="$1"
                     shift
                     ;;
 
@@ -716,7 +725,7 @@ EOF
         # given new systemd like programs are used (they could have problems in
         # change root environment without and exclusive dbus connection.
         installArchLinuxLog "Make keyboard layout permanent to \"${_KEYBOARD_LAYOUT}\"." && \
-        if [[ "$1" == 'true']]; then
+        if [[ "$1" == 'true' ]]; then
             installArchLinuxChangeRootToMountPoint localectl set-keymap \
                 "$_KEYBOARD_LAYOUT" 1>"$_STANDARD_OUTPUT" \
                 2>"$_ERROR_OUTPUT" && \
@@ -1006,14 +1015,14 @@ EOF
                 parted "$_OUTPUT_SYSTEM" mkpart primary linux-swap \
                     ${neededBootSpaceInProcent}% ${swapPlusBootSpaceInProcent}% \
                     --script 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
-                installArchLinuxLog 'Create data partition.' && \
+                installArchLinuxLog 'Create system partition.' && \
                 parted "$_OUTPUT_SYSTEM" mkpart primary ext4 \
                     ${swapPlusBootSpaceInProcent}% 100% --script \
                     1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
             fi
         else
             installArchLinuxLog \
-                "You have to create at least one partition. The first one will be used as boot partition labeled to \"${_BOOT_PARTITION_LABEL}\" and second one will be used as swap partition and labeled to \"${_SWAP_PARTITION_LABEL}\". The third will be used as data partition labeled to \"$_DATA_PARTITION_LABEL\" Press Enter to continue." && \
+                "At least you have to create two partitions. The first one will be used as boot partition labeled to \"${_BOOT_PARTITION_LABEL}\" and second one will be used as system partition and labeled to \"${_SYSTEM_PARTITION_LABEL}\". The third one will be used as swap partition labeled to \"$_SWAP_PARTITION_LABEL\" Press Enter to continue." && \
             read && \
             installArchLinuxLog \
                 'Show blockdevices. Press Enter to continue.' && \
@@ -1032,8 +1041,15 @@ EOF
             genfstab -L -p "${_MOUNTPOINT_PATH%?}" \
                 1>>"${_MOUNTPOINT_PATH}etc/fstab" 2>"$_ERROR_OUTPUT"
         else
-            echo -e "# Added during installation\nLABEL=$_BOOT_PARTITION_LABEL / ext4 rw,relatime 0 1" \
-                1>>"${_MOUNTPOINT_PATH}etc/fstab" 2>"$_ERROR_OUTPUT"
+            cat << EOF
+# Added during installation.
+# <file system>                    <mount point> <type> <options>                                                                                            <dump> <pass>
+PARTLABEL=$_BOOT_PARTITION_LABEL   /boot/        vfat   rw,relatime,fmask=0077,dmask=0077,codepage=437,iocharset=iso8859-1,shortname=mixed,errors=remount-ro 0      0
+# "compress=lzo" has lower compression ratio by better cpu performance.
+PARTLABEL=$_SYSTEM_PARTITION_LABEL /             btrfs  relatime,ssd,discard,space_cache,autodefrag,inode_cache,subvol=root,compress=zlib                    0      0
+PARTLABEL=$_SWAP_PARTITION_LABEL   TODO          swap   TODO
+EOF
+            1>>"${_MOUNTPOINT_PATH}etc/fstab" 2>"$_ERROR_OUTPUT"
         fi
         return $?
     }
@@ -1134,17 +1150,31 @@ EOF
     }
     function installArchLinuxPrepareBlockdevices() {
         # Prepares given block devices to make it ready for fresh installation.
+        # TODO prepare vfat and btrfs partition with right labels
         installArchLinuxLog \
             "Unmount needed devices and devices pointing to our temporary system mount point \"$_MOUNTPOINT_PATH\"."
         umount -f "${_OUTPUT_SYSTEM}"* 1>"$_STANDARD_OUTPUT" 2>/dev/null
         umount -f "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" 2>/dev/null
         swapoff "${_OUTPUT_SYSTEM}"* 1>"$_STANDARD_OUTPUT" 2>/dev/null
         installArchLinuxLog \
-            'Make partitions. Make a swap, data and boot partition.' && \
+            'Make partitions. Make a boot, system and swap partition.' && \
         installArchLinuxMakePartitions && \
         installArchLinuxLog 'Format partitions.' && \
         installArchLinuxFormatPartitions
         return $?
+    }
+    function installArchLinuxPrepareSystemPartition() {
+        # Prepares the system partition.
+        if [ -b "${_OUTPUT_SYSTEM}2" ]; then
+            installArchLinuxLog \
+                "Make system partition at \"${_OUTPUT_SYSTEM}3\"."
+            mkfs.btrfs "${_OUTPUT_SYSTEM}3" -L "$_SYSTEM_PARTITION_LABEL" \
+                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
+            installArchLinuxLog 'Mount system partition.' && \
+            mount "$outputDevice" "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" \
+                2>"$_ERROR_OUTPUT"
+            return $?
+        fi
     }
     function installArchLinuxPrepareBootPartition() {
         # Prepares the boot partition.
@@ -1153,16 +1183,16 @@ EOF
         if [ -b "${_OUTPUT_SYSTEM}1" ]; then
             outputDevice="${_OUTPUT_SYSTEM}1"
         fi
-        mkfs.ext4 "$outputDevice" -L "$_BOOT_PARTITION_LABEL" \
+        mkfs.vfat "$outputDevice" -L "$_BOOT_PARTITION_LABEL" \
             1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
         installArchLinuxLog 'Mount boot partition.' && \
-        mount "$outputDevice" "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" \
+        mount "$outputDevice" "${_MOUNTPOINT_PATH}boot/" 1>"$_STANDARD_OUTPUT" \
             2>"$_ERROR_OUTPUT"
-        return $?
+       return $?
     }
     function installArchLinuxPrepareSwapPartition() {
         # Prepares the swap partition.
-        if [ -b "${_OUTPUT_SYSTEM}2" ]; then
+        if [ -b "${_OUTPUT_SYSTEM}3" ]; then
             installArchLinuxLog \
                 "Make swap partition at \"${_OUTPUT_SYSTEM}2\"."
             mkswap "${_OUTPUT_SYSTEM}2" -L "$_SWAP_PARTITION_LABEL" \
@@ -1170,21 +1200,11 @@ EOF
             return $?
         fi
     }
-    function installArchLinuxPrepareDataPartition() {
-        # Prepares the data partition.
-        if [ -b "${_OUTPUT_SYSTEM}3" ]; then
-            installArchLinuxLog \
-                "Make data partition at \"${_OUTPUT_SYSTEM}3\"."
-            mkfs.ext4 "${_OUTPUT_SYSTEM}3" -L "$_DATA_PARTITION_LABEL" \
-                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
-            return $?
-        fi
-    }
     function installArchLinuxFormatPartitions() {
         # Performs formating part.
+        installArchLinuxPrepareSystemPartition && \
         installArchLinuxPrepareBootPartition && \
-        installArchLinuxPrepareSwapPartition && \
-        installArchLinuxPrepareDataPartition
+        installArchLinuxPrepareSwapPartition
         return $?
     }
     function installArchLinuxIntegrateBootLoader() {
@@ -1269,7 +1289,7 @@ EOF
             _PACKAGES+=' arch-install-scripts' && \
             if echo "$_OUTPUT_SYSTEM" | grep --quiet --extended-regexp '[0-9]$'
             then
-                installArchLinuxPrepareBootPartition || \
+                installArchLinuxPrepareSystemPartition || \
                 installArchLinuxLog 'error' 'Boot partition creation failed.'
             else
                 _PACKAGES+=' grub-bios' && \
