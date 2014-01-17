@@ -211,7 +211,7 @@ EOF
 
     -v --verbose Tells you what is going on (default: "$_VERBOSE").
 
-    -g --debug Gives you any output from all tools which are used
+    -d --debug Gives you any output from all tools which are used
         (default: "$_DEBUG").
 
     -l --load-environment Simple load the install arch linux scope without
@@ -266,7 +266,7 @@ EOF
     -s --swap-partition-label LABEL Partition label for swap partition
         (default: "$_SWAP_PARTITION_LABEL").
 
-    -d --system-partition-label LABEL Partition label for system partition
+    -g --system-partition-label LABEL Partition label for system partition
         (default: "$_SYSTEM_PARTITION_LABEL").
 
 
@@ -323,7 +323,7 @@ EOF
                     shift
                     _VERBOSE='yes'
                     ;;
-                -g|--debug)
+                -d|--debug)
                     shift
                     _STANDARD_OUTPUT=/dev/stdout
                     _ERROR_OUTPUT=/dev/stderr
@@ -400,7 +400,7 @@ EOF
                     _BOOT_PARTITION_LABEL="$1"
                     shift
                     ;;
-                -d|--system-partition-label)
+                -g|--system-partition-label)
                     shift
                     _SYSTEM_PARTITION_LABEL="$1"
                     shift
