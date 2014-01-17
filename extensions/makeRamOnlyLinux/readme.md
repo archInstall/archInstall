@@ -9,15 +9,15 @@ endregion -->
 
 makeRamOnlyLinux.bash generiert ein ArchLinux-System (oder ein beliebiges auf
 ArchLinux basierendes System, welches mit einem Script generiert werden kann,
-welches Interface und API von installArchLinux bereitstellt) und packt es in
+welches Interface und API von archInstall bereitstellt) und packt es in
 eine bootbare initramfs und stellt einen passenden Kernel dazu bereit.
 
 ### Interface
 
 Das Skript benötigt als Argument den Namen der zu erstellenden Initramfs-Datei.
 Der passende Kernel wird an gleicher Stelle nur dem Suffix 'Kernel' erstellt.
-Alle Optionen von installArchLinux werden unterstützt, es gibt keine
-zusätzlichen Optionen. Neben der obligatorischen installArchLinux.bash benötigt
+Alle Optionen von archInstall werden unterstützt, es gibt keine
+zusätzlichen Optionen. Neben der obligatorischen archInstall.bash benötigt
 dieses Skript packcpio.sh, welches im selben Ordner liegen muss.
 
 ### Beispiel

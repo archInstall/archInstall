@@ -3,7 +3,7 @@
 # and initramfs.
 
 self_path=$(dirname $(readlink --canonicalize $0))
-source "$self_path/installArchLinux.bash" --load-environment
+source "$self_path/archInstall.bash" --load-environment
 
 __NAME__="makeSquashLinux"
 
@@ -25,7 +25,7 @@ Option descriptions:
     -X --xbmc Use "../makeXBMCLinux/makeXBMCLinux.bash" as wrapper.
     -T --temp-folder <path> Store temporary files in <path>.
 
-$(installArchLinuxPrintCommandLineOptionDescriptions "$@" | \
+$(archInstallPrintCommandLineOptionDescriptions "$@" | \
   sed '/^ *-[a-z] --output-system .*$/,/^$/d')
 EOF
   }
@@ -37,15 +37,14 @@ EOF
     if [ $(echo "$@" | grep --extended-regexp '(^| )(-h|--help)($| )') ]; then
       printHelpMessageWithErrno=0
     elif [ ! "$1" ]; then
-      installArchLinuxLog 'critical' \
+      archInstallLog 'critical' \
         'You have to provide an squashfs file path.' '\n'
       printHelpMessageWithErrno=1
     elif [ ! "$2" ]; then
-      installArchLinuxLog 'critical' \
-        'You have to provide an kernel file path.'
+      archInstallLog 'critical' 'You have to provide an kernel file path.'
       printHelpMessageWithErrno=1
     elif [ ! "$3" ]; then
-      installArchLinuxLog 'critical' \
+      archInstallLog 'critical' 
         'You have to provide an initramfs file path.'
       printHelpMessageWithErrno=1
     fi
@@ -59,7 +58,7 @@ EOF
 
   function makeSquashLinuxParseCommandLine() {
   ### Parse arguments and own options while collecting the options for the
-  ### installArchlinux-wrapper function.
+  ### archInstall-wrapper function.
     makeSquashLinuxValidateCommandLine "$@"
     squashfsFilePath="$1"; shift
     kernelFilePath="$1"; shift
@@ -67,17 +66,17 @@ EOF
     while [ $1 ]; do
       case $1 in
         -W|--wrapper)
-          if [[ "$installArchLinuxWrapperFile" == "./installArchLinux.bash" ]];
+          if [[ "$archInstallWrapperFile" == "./archInstall.bash" ]];
           then
             shift
-            installArchLinuxWrapperFile="$1"
+            archInstallWrapperFile="$1"
           else
-            installArchLinuxWrapperOptions+=" $1 $2"
+            archInstallWrapperOptions+=" $1 $2"
             shift
           fi
           shift;;
         -X|--xbmc)
-          installArchLinuxWrapperFile="../makeXBMCLinux/makeXBMCLinux.bash"
+          archInstallWrapperFile="../makeXBMCLinux/makeXBMCLinux.bash"
           shift;;
         -T|--temp-folder)
           shift
@@ -85,7 +84,7 @@ EOF
           mkdir -p "$tempDirectory"
           shift;;
         *)
-          installArchLinuxWrapperOptions+=" $1"
+          archInstallWrapperOptions+=" $1"
           shift;;
       esac
     done
@@ -304,22 +303,22 @@ EndSection
   local squashfsFilePath=""
   local kernelFilePath=""
   local initramfsFilePath=""
-  local installArchLinuxWrapperFile="./installArchLinux.bash"
-  local installArchLinuxWrapperFunction=""
+  local archInstallWrapperFile="./archInstall.bash"
+  local archInstallWrapperFunction=""
   local tempDirectory=$(mktemp --directory )
   #endregion
 
   makeSquashLinuxParseCommandLine "$@"
   # NOTE: the global "__NAME__" variable has to be restored to let
-  # "installArchLinux" know that it should be executed instead of
+  # "archInstall" know that it should be executed instead of
   # beeing sourced.
   local name="$__NAME__"
-  source ${installArchLinuxWrapperFile}
+  source ${archInstallWrapperFile}
   __NAME__="$name"
 
-  installArchLinuxWrapperFunction=`basename "$installArchLinuxWrapperFile" .bash`
-  if $installArchLinuxWrapperFunction --load-environment\
-    --output-system $tempDirectory ${installArchLinuxWrapperOptions}
+  archInstallWrapperFunction=`basename "$archInstallWrapperFile" .bash`
+  if $archInstallWrapperFunction --load-environment\
+    --output-system $tempDirectory ${archInstallWrapperOptions}
   then
     # NOTE: Per default this script will stop after any error from now on.
     # Commands expected to throw an error can be put into a subshell via
@@ -328,41 +327,40 @@ EndSection
     if [ -d $tempDirectory/etc/X11 ]; then staticXorgConfiguration; fi
     cp --force /etc/resolv.conf "$tempDirectory/etc/resolv.conf"
     makeSquashLinuxConfigure
-    installArchLinuxLog 'info' \
+    archInstallLog 'info' \
       'Installing packages needed for generating kernel and initramfs.'
     # NOTE: We need a repeated call of pacman to make sure that
     # "mkinitcpio-nfs-utils" and "plymouth" are available when building kernel
     # in the next step.
-    installArchLinuxChangeRootViaMount "$tempDirectory" /usr/bin/pacman \
+    archInstallChangeRootViaMount "$tempDirectory" /usr/bin/pacman \
       --arch "$_CPU_ARCHITECTURE" --sync --noconfirm --refresh --refresh\
       --needed squashfs-tools mkinitcpio-nfs-utils base-devel yaourt
-    installArchLinuxChangeRootViaMount "$tempDirectory" /usr/bin/yaourt \
+    archInstallChangeRootViaMount "$tempDirectory" /usr/bin/yaourt \
       --arch "$_CPU_ARCHITECTURE" --sync --noconfirm --refresh plymouth
-    installArchLinuxChangeRootViaMount "$tempDirectory" /usr/bin/yaourt \
+    archInstallChangeRootViaMount "$tempDirectory" /usr/bin/yaourt \
       --arch "$_CPU_ARCHITECTURE" --sync --noconfirm --refresh linux-pf
-    installArchLinuxLog 'info' \
+    archInstallLog 'info' \
       'Copy kernel and initramfs to target-location.'
     # NOTE: Using "scp" instead of cp gives the possibility to use ssh-pathes
     # as arguments.
     scp "$tempDirectory/boot/initramfs-linux-pf.img" "$initramfsFilePath"
     scp "$tempDirectory/boot/vmlinuz-linux-pf" "$kernelFilePath"
-    installArchLinuxLog 'info' \
+    archInstallLog 'info' \
       'Removing kernel, initramfs and obsolete tools from generated system.'
-    installArchLinuxChangeRootViaMount "$tempDirectory" pacman --remove \
+    archInstallChangeRootViaMount "$tempDirectory" pacman --remove \
       --nodeps --nodeps --noconfirm linux mkinitcpio yaourt mkinitcpio-nfs-utils squashfs-tools
     rm -rf $tempDirectory/boot/{vmlinuz-linux-pf,initramfs-linux-pf.img}
     local tempSquashFsFile=`mktemp --dry-run`
-    installArchLinuxLog 'info' \
-      "Creating squashfs-file as \"$tempSquashFsFile\"."
+    archInstallLog 'info' "Creating squashfs-file as \"$tempSquashFsFile\"."
     mksquashfs "$tempDirectory" "$tempSquashFsFile" -no-progress 1> /dev/null
-    installArchLinuxLog 'info' \
+    archInstallLog 'info' \
       "Moving squashfs-file to \"$squashfsFilePath\"."
     scp "$tempSquashFsFile" "$squashfsFilePath"
     rm -i "$tempSquashFsFile"
-    installArchLinuxLog 'info' \
+    archInstallLog 'info' \
       "Deleting working directory."
     rm --recursive --force "$tempDirectory"
-    installArchLinuxLog 'info' \
+    archInstallLog 'info' \
       "Finished without errors."
   elif [[ $? == 1 ]]; then
     echo

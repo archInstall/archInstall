@@ -9,7 +9,7 @@ endregion -->
 
 MakeSquashLinux generiert ein ArchLinux-System (oder ein beliebiges auf
 ArchLinux basierendes System, welches mit einem Script generiert werden kann,
-welches Interface und API von installArchLinux bereitstellt), patched die
+welches Interface und API von archInstall bereitstellt), patched die
 Konfiguration so, dass das booten aus dem Netzwerk ermöglicht wird und packt
 dieses als squash-Dateisystem. Zusätzlich wird eine Netzwerk-Boot-fähige
 initramfs erzeugt und ein für aufs gepatchter Kernel aus den Paket-Quellen
@@ -30,11 +30,11 @@ beim booten per 'plymouth' ein splash-screen angezeigt.
         -W --wrapper <file>  Use wrapper in <file> to generate the root-Filesystem
         -X --xbmc Use "../makeXBMCLinux/makeXBMCLinux.bash" as wrapper.
 
-[!] Wrapper sind hier Skripte, welche den Standard-Setup von installArchLinux
+[!] Wrapper sind hier Skripte, welche den Standard-Setup von archInstall
 durch weitere Konfiguration oder Programme ergänzen (makeSquashLinux ist also
 selbst auch ein Wrapper).
 
-Darüberhinaus können alle Optionen von installArchLinux verwendet werden. Als
+Darüberhinaus können alle Optionen von archInstall verwendet werden. Als
 Pfade werden lokale Dateinamen und scp-kompatible Pfade akzeptiert.
 So ist es möglich die einzelnen Dateien auf verschiedenen Rechnern zu speichern
 (mit den intitramfs-Optionen ist es sogar möglich das root-squashfs aus einem

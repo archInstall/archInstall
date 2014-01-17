@@ -3,11 +3,11 @@
 # Installs a basic ArchLinux-System.
 
 self_path=$(dirname $(readlink --canonicalize $0))
-source "$self_path/installArchLinux.bash" --load-environement
+source "$self_path/archInstall.bash" --load-environement
 
 __NAME__="yourWrapperScript" 
 function yourWrapperScript() {
-### Wrapper for installArchlinux to do exactly the same.
+### Wrapper for archInstall to do exactly the same.
 
   function yourWrapperScriptPrintHelpMessage() {
   ### Prints Details about Usage and Options.
@@ -16,46 +16,46 @@ Usage: $0 [Options]
 $__NAME__ installs linux, arch linux
 
 Option descriptions:
--W --wrapper <filename> Use Wrapper in <filename> instead of ./installArchLinux.bash
-$(installArchLinuxPrintCommandLineOptionDescriptions) "$@" 
+-W --wrapper <filename> Use Wrapper in <filename> instead of ./archInstall.bash
+$(archInstallPrintCommandLineOptionDescriptions) "$@" 
 EndOfUsageMessage
   }
 
   function yourWrapperScriptParseCommandLine() {
   ### Parse arguments and own options while collecting the options for the
-  ### installArchlinux-wrapper function.
+  ### archInstall-wrapper function.
     while [ $1 ]; do
       echo hans
       case $1 in
         -W|--wrapper)
-          if [[ "$installArchLinuxWrapperFile" == "./installArchLinux.bash" ]];
+          if [[ "$archInstallWrapperFile" == "./archInstall.bash" ]];
           then
             shift
-            installArchLinuxWrapperFile="$1"
+            archInstallWrapperFile="$1"
           else
-            installArchLinuxWrapperOptions+=" $1 $2"
+            archInstallWrapperOptions+=" $1 $2"
             shift
           fi
           shift;;
         *)
-          installArchLinuxWrapperOptions+=" $1" 
+          archInstallWrapperOptions+=" $1" 
           shift;;
       esac
     done
   }
 
-  local installArchLinuxWrapperFile="./installArchLinux.bash" 
-  local installArchLinuxWrapperFunction="" 
-  local installArchLinuxWrapperOptions="" 
+  local archInstallWrapperFile="./archInstall.bash" 
+  local archInstallWrapperFunction="" 
+  local archInstallWrapperOptions="" 
 
   yourWrapperScriptParseCommandLine "$@"
   local name="$__NAME__" 
-  source ${installArchLinuxWrapperFile}
+  source ${archInstallWrapperFile}
   __NAME__="$name" 
-  installArchLinuxWrapperFunction=`basename "$installArchLinuxWrapperFile" .bash`
+  archInstallWrapperFunction=`basename "$archInstallWrapperFile" .bash`
 
-  if $installArchLinuxWrapperFunction --load-environement\
-    ${installArchLinuxWrapperOptions}
+  if $archInstallWrapperFunction --load-environement\
+    ${archInstallWrapperOptions}
     then
       echo hans
     fi

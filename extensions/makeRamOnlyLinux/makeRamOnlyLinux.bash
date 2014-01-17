@@ -2,7 +2,7 @@
 # Copyright 2013 Torben Sickert, Milan Oberkirch
 
 SELF_PATH=$(dirname $(readlink --canonicalize $0))/
-source "${SELF_PATH}installArchLinux.bash" --load-environment
+source "${SELF_PATH}archInstall.bash" --load-environment
 
 __NAME__="makeRamOnlyLinux"
 
@@ -26,13 +26,13 @@ Option descriptions:
     -W --wrapper <filename> Use wrapper in <filename> to generate the
         root-Filesystem to be packed into the initramfs-file.
 
-$(installArchLinuxPrintCommandLineOptionDescriptions "$@" | \
+$(archInstallPrintCommandLineOptionDescriptions "$@" | \
     sed '/^ *-[a-z] --output-system .*$/,/^$/d')
 EOF
     }
     local printHelpMessage=$(echo "$@" | grep --extended-regexp '(^| )(-h|--help)($| )')
     if [ ! "$1" ]; then
-        installArchLinuxLog 'critical' \
+        archInstallLog 'critical' \
             'You have to provide an initramfs file path.' '\n'
     fi
     if [ ! "$1" ] || [ "$printHelpMessage" ]; then
@@ -46,51 +46,51 @@ EOF
         shift
     fi
     local tempDirectory=$(mktemp --directory)
-    local installArchLinuxWrapperFile="./installArchLinux.bash"
-    local installArchLinuxWrapperOptions="--load-environment --output-system $tempDirectory"
+    local archInstallWrapperFile="./archInstall.bash"
+    local archInstallWrapperOptions="--load-environment --output-system $tempDirectory"
     while [ $1 ]; do
       case $1 in
         -W|--wrapper)
-          if [[ "$installArchLinuxWrapperFile" == "./installArchLinux.bash" ]]
+          if [[ "$archInstallWrapperFile" == "./archInstall.bash" ]]
           then
             shift
-            installArchLinuxWrapperFile="$1"
+            archInstallWrapperFile="$1"
           else
-            installArchLinuxWrapperOptions+=" $1 $2"
+            archInstallWrapperOptions+=" $1 $2"
             shift
           fi
           shift;;
         *)
-          installArchLinuxWrapperOptions+=" $1"
+          archInstallWrapperOptions+=" $1"
           shift;;
       esac
     done
-    local installArchLinuxWrapperFunction=`basename "$installArchLinuxWrapperFile" .bash`
+    local archInstallWrapperFunction=`basename "$archInstallWrapperFile" .bash`
 
     local name="$__NAME__"
-    source ${installArchLinuxWrapperFile}
+    source ${archInstallWrapperFile}
     __NAME__="$name"
 
-    if $installArchLinuxWrapperFunction ${installArchLinuxWrapperOptions}
+    if $archInstallWrapperFunction ${archInstallWrapperOptions}
     then
         if [ -d $tempDirectory/etc/X11 ]; then staticXorgConfiguration; fi
         ln --symbolic /usr/lib/systemd/systemd "$tempDirectory/init" && \
-        installArchLinuxLog 'info' \
+        archInstallLog 'info' \
             "Copy initramfs compatible kernel to target location \"${initramfsFilePath}Kernel\"." && \
         cp "$tempDirectory/boot/vmlinuz-linux" "${initramfsFilePath}Kernel" \
             1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
-        installArchLinuxLog 'info' \
+        archInstallLog 'info' \
             'Remove unneeded packages like kernel and initramfs build scripts from ram only system.' && \
-        installArchLinuxChangeRoot "$tempDirectory" pacman --arch \
+        archInstallChangeRoot "$tempDirectory" pacman --arch \
             "$_CPU_ARCHITECTURE" --nodeps --noconfirm --remove linux \
             mkinitcpio 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
-        installArchLinuxLog 'info' \
+        archInstallLog 'info' \
             "Pack initramfs file \"$initramfsFilePath\"." && \
         "${SELF_PATH}/packcpio.sh" "$tempDirectory" "$initramfsFilePath" \
             1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
         rm --recursive --force "$tempDirectory" 1>"$_STANDARD_OUTPUT" \
             2>"$_ERROR_OUTPUT" && \
-        installArchLinuxLog 'info' \
+        archInstallLog 'info' \
             "Initramfs successfully created into \"$initramfsFilePath\"."
     elif [[ $? == 1 ]]; then
         echo

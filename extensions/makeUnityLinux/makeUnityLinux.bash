@@ -2,10 +2,10 @@
 # Copyright 2013, Milan David Oberkirch <oberkirm@informatik.uni-freiburg.de>
 ### This script will build a basic archlinux-system with unity as window manager
 ### and lightdm as display-manager.
-### Depends on installArchLinux.bash.
+### Depends on archInstall.bash.
 
 self_path=$(dirname $(readlink --canonicalize $0))
-source "$self_path/installArchLinux.bash" --load-environment
+source "$self_path/archInstall.bash" --load-environment
 
 __NAME__="makeUnityLinux" 
 function makeUnityLinux() {
@@ -16,24 +16,24 @@ function makeUnityLinux() {
 Usage: $0 [Options]
   $__NAME__ installs linux $(#Wozu ist dein Skript aus Nutzer-Sicht gut?)
 Option descriptions:
-  -W --wrapper <filename> Use Wrapper in <filename> instead of ./installArchLinux.bash
+  -W --wrapper <filename> Use Wrapper in <filename> instead of ./archInstall.bash
 
-$(installArchLinuxPrintCommandLineOptionDescriptions) "$@" 
+$(archInstallPrintCommandLineOptionDescriptions) "$@" 
 EndOfUsageMessage
 }
 
     function makeUnityLinuxParseCommandLine() { #-> 2.
     ### Parse arguments and own options while collecting the options for the
-    ### installArchlinux-wrapper function.
+    ### archInstall-wrapper function.
       while [ $1 ]; do
         case $1 in
           -W|--wrapper)
-            if [[ "$installArchLinuxWrapperFile" == "./installArchLinux.bash" ]];
+            if [[ "$archInstallWrapperFile" == "./archInstall.bash" ]];
             then
               shift
-              installArchLinuxWrapperFile="$1"
+              archInstallWrapperFile="$1"
             else
-              installArchLinuxWrapperOptions+=" $1 $2"
+              archInstallWrapperOptions+=" $1 $2"
               shift
             fi
             shift;;
@@ -44,32 +44,31 @@ EndOfUsageMessage
               shift
             done;;
           *)
-            installArchLinuxWrapperOptions+=" $1" 
+            archInstallWrapperOptions+=" $1" 
             shift;;
         esac
       done
     }
   #endregion
   #region execution-sequence
-    local installArchLinuxWrapperFile="./installArchLinux.bash" 
-    local installArchLinuxWrapperFunction="" 
-    local installArchLinuxWrapperOptions="" 
+    local archInstallWrapperFile="./archInstall.bash" 
+    local archInstallWrapperFunction="" 
+    local archInstallWrapperOptions="" 
     local laterAdditionalPackages=""
     local conflictingPackages="glib2"
 
     makeUnityLinuxParseCommandLine "$@"
 
     local name="$__NAME__" 
-    source ${installArchLinuxWrapperFile}
+    source ${archInstallWrapperFile}
     __NAME__="$name" 
-    installArchLinuxWrapperFunction=`basename "$installArchLinuxWrapperFile" .bash`
+    archInstallWrapperFunction=`basename "$archInstallWrapperFile" .bash`
 
-    if $installArchLinuxWrapperFunction --load-environment\
-       ${installArchLinuxWrapperOptions} --additional-packages xorg
+    if $archInstallWrapperFunction --load-environment\
+       ${archInstallWrapperOptions} --additional-packages xorg
     then
-      installArchLinuxLog 'info'\
-        'Adding unity-repository to configuration.'
-      installArchLinuxChangeRootViaMount "$_OUTPUT_SYSTEM" /bin/bash <<EndOfPatchScript
+      archInstallLog 'info' 'Adding unity-repository to configuration.'
+      archInstallChangeRootViaMount "$_OUTPUT_SYSTEM" /bin/bash <<EndOfPatchScript
 cat <<EndOfUnityRepository >>/etc/pacman.conf
 [Unity-for-Arch]
 SigLevel = Optional TrustAll
@@ -80,35 +79,34 @@ SigLevel = Optional TrustAll
 Server = http://dl.dropbox.com/u/486665/Repos/Unity-for-Arch-Extra/\\\$arch
 EndOfUnityRepository
 EndOfPatchScript
-      installArchLinuxLog 'info'\
-        'Syncing package-sources.'
-      installArchLinuxChangeRootViaMount "$_OUTPUT_SYSTEM" /usr/bin/pacman\
+      archInstallLog 'info' 'Syncing package-sources.'
+      archInstallChangeRootViaMount "$_OUTPUT_SYSTEM" /usr/bin/pacman\
         --sync --refresh --refresh --arch "$_CPU_ARCHITECTURE"
-      installArchLinuxLog 'info'\
+      archInstallLog 'info' \
         'Collecting list of additional packages to install.'
-      local unityPackageList="\
-        `installArchLinuxChangeRootViaMount "$_OUTPUT_SYSTEM" /usr/bin/pacman\
+      local unityPackageList="
+        `archInstallChangeRootViaMount "$_OUTPUT_SYSTEM" /usr/bin/pacman\
             --sync --list Unity-for-Arch Unity-for-Arch-Extra |\
         cut -f2 -d' '`"
-      installArchLinuxLog 'info'\
+      archInstallLog 'info'\
         'Temporary removing conflicting dependencies.'
-      installArchLinuxChangeRootViaMount "$_OUTPUT_SYSTEM" /usr/bin/pacman \
+      archInstallChangeRootViaMount "$_OUTPUT_SYSTEM" /usr/bin/pacman \
         --arch "$_CPU_ARCHITECTURE"\
         --remove --nodeps --nodeps --noconfirm "$conflictingPackages"
-      installArchLinuxLog 'info'\
+      archInstallLog 'info'\
         'Installing unity into target-system.'
-      installArchLinuxLoadCache
-      installArchLinuxChangeRootViaMount "$_OUTPUT_SYSTEM" /usr/bin/pacman \
+      archInstallLoadCache
+      archInstallChangeRootViaMount "$_OUTPUT_SYSTEM" /usr/bin/pacman \
         --arch "$_CPU_ARCHITECTURE" --sync --noconfirm $unityPackageList
       if [[ "$laterAdditionalPackages" ]]; then
-        installArchLinuxChangeRootViaMount "$_OUTPUT_SYSTEM" /usr/bin/pacman \
+        archInstallChangeRootViaMount "$_OUTPUT_SYSTEM" /usr/bin/pacman \
           --arch "$_CPU_ARCHITECTURE" --sync --noconfirm $laterAdditionalPackages
       fi
-      installArchLinuxCache
-      installArchLinuxTidyUpSystem
-      installArchLinuxLog 'info'\
+      archInstallCache
+      archInstallTidyUpSystem
+      archInstallLog 'info'\
         'Enable lightdm as display-manager.'
-      installArchLinuxChangeRootViaMount "$_OUTPUT_SYSTEM" /bin/bash <<EndOfPatchScript
+      archInstallChangeRootViaMount "$_OUTPUT_SYSTEM" /bin/bash <<EndOfPatchScript
 cat <<EndOfLightdmConfig >/etc/lightdm/lightdm.conf
 [LightDM]
 
@@ -122,12 +120,11 @@ autologin-user=$_USER_NAME
 
 EndOfLightdmConfig
 EndOfPatchScript
-      installArchLinuxChangeRootViaMount "$_OUTPUT_SYSTEM" /usr/bin/systemctl\
+      archInstallChangeRootViaMount "$_OUTPUT_SYSTEM" /usr/bin/systemctl\
         enable lightdm.service
-      installArchLinuxChangeRootViaMount "$_OUTPUT_SYSTEM"\
+      archInstallChangeRootViaMount "$_OUTPUT_SYSTEM"\
         /usr/bin/rm -f /usr/lib/systemd/system/lightdm-plymouth.service
-      installArchLinuxLog 'info'\
-        'Finished installing unity.'
+      archInstallLog 'info' 'Finished installing unity.'
     fi
   #endregion
 }

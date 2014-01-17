@@ -18,5 +18,5 @@ mit der Option
 
     -W --wrapper
 
-ein anderes Skript mit zu installArchLinux.bash kompatiblem Interface zum
+ein anderes Skript mit zu archInstall.bash kompatiblem Interface zum
 erstellen des Grundsystems verwendet werden.

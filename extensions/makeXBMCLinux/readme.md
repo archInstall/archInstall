@@ -7,11 +7,11 @@ endregion -->
 
 ### MakeXBMCLinux
 
-makeXBMCLinux ist ein Wrapper-Skript für installArchlinux, welches das gleiche Interface unterstützt. Neben dem Grundsystem wird dabei eine XBMC-Umgebung installiert, welche beim booten automatisch startet.
+makeXBMCLinux ist ein Wrapper-Skript für archInstall, welches das gleiche Interface unterstützt. Neben dem Grundsystem wird dabei eine XBMC-Umgebung installiert, welche beim booten automatisch startet.
 
 ### Interface
 
-Alle Optionen von installArchlinux werden unterstützt, allerdings werden alle nötigen Angaben mit Standard-Werten belegt, das Skript läuft also immer ohne Nutzer-Interaktion durch. Wenn kein Output-System ('--output-system') angegeben wird, wird das System in einen Ordner im aktuellen Verzeichnis installiert (von wo man es dann z.B. per rsync an den Zielort kopieren kann).
+Alle Optionen von archInstall werden unterstützt, allerdings werden alle nötigen Angaben mit Standard-Werten belegt, das Skript läuft also immer ohne Nutzer-Interaktion durch. Wenn kein Output-System ('--output-system') angegeben wird, wird das System in einen Ordner im aktuellen Verzeichnis installiert (von wo man es dann z.B. per rsync an den Zielort kopieren kann).
 Das Skript kann z.B. von makeSquashLinux oder makeRamOnlyLinux eingebunden werden.
 
 Zusätzliche Optionen:
