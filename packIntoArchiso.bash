@@ -29,43 +29,46 @@
 # Dependencies:
 
 #     bash (or any bash like shell)
-#     test           - Check file types and compare values.
-#     mount          - Filesystem mounter.
-#     umount         - Filesystem unmounter.
-#     mktemp         - Create a temporary file or directory.
-#     squashfs-tools - Packs and unpacks the iso embedded squash filesystem.
-#     cdrkit         - Suite of programs for CD/DVD recording, ISO image
-#                      creation, and audio CD extraction
-#     touch          - Change file timestamps or creates them.
-#     grep           - Searches the named input files (or standard input if no
-#                      files are named, or if a single hyphen-minus (-) is
-#                      given as file name) for lines containing a match to
-#                      the given PATTERN.  By default, grep prints the matching
-#                      lines.
-#     shift          - Shifts the command line arguments.
-#     readlink       - Print resolved symbolic links or canonical file names.
+#     test                 - Check file types and compare values.
+#     mount                - Filesystem mounter.
+#     umount               - Filesystem unmounter.
+#     mktemp               - Create a temporary file or directory.
+#     squashfs-tools       - Packs and unpacks the iso embedded squash
+#                            filesystem.
+#     cdrkit               - Suite of programs for CD/DVD recording, ISO image
+#                            creation, and audio CD extraction
+#     touch                - Change file timestamps or creates them.
+#     grep                 - Searches the named input files (or standard input
+#                            if no files are named, or if a single hyphen-minus
+#                            (-) is given as file name) for lines containing a
+#                            match to the given PATTERN.  By default, grep
+#                            prints the matching lines.
+#     shift                - Shifts the command line arguments.
+#     readlink             - Print resolved symbolic links or canonical file
+#                            names.
 
 # Optional dependencies:
 
-#     sudo - Perform action as another user.
+#     sudo                 - Perform action as another user.
+#     arch-install-scripts - Supports to perform an arch-chroot.
 
 __NAME__='packIntoArchiso'
 
 # endregion
-
-# TODO manage debug an normal output
 
 function packIntoArchiso() {
     # Provides the main module scope.
 
 # region configuration
 
-    # region properti es
+    # region properties
 
-        # region c ommand line arguments
+        # region command line arguments
 
     local _VERBOSE='no'
-    local _SQUASH_FILESYSTEM_COMPRESSOR='lzma'
+    local _SQUASH_FILESYSTEM_COMPRESSOR='gzip'
+    local _KEYBOARD_LAYOUT='de-latin1'
+    local _KEY_MAP_CONFIGURATION_FILE_CONTENT="KEYMAP=${_KEYBOARD_LAYOUT}\nFONT=Lat2-Terminus16\nFONT_MAP="
 
         # endregion
 
@@ -79,9 +82,9 @@ function packIntoArchiso() {
     local _TEMPORARY_ROOT_FILESYSTEM_REMASTERING_PATH="$(mktemp --directory)"
     local _RELATIVE_PATHS_TO_SQUASH_FILESYSTEM=(arch/i686/root-image.fs.sfs \
         arch/x86_64/root-image.fs.sfs)
-    local _RELATIVE_SOURCE_FILE_PATH="archInstall.bash"
-    local _RELATIVE_TARGET_FILE_PATH="usr/bin/localInstall"
-    local _BASH_RC_CODE="alias getInstallScript='wget https://raw.github.com/archInstall/archInstall/master/archInstall.bash --output-document archInstall.bash && chmod +x archInstall.bash && ./archInstall.bash'\nalias install='([ -f /root/archInstall.bash ] || getInstallScript);/root/archInstall.bash'"
+    local _RELATIVE_SOURCE_FILE_PATH='archInstall.bash'
+    local _RELATIVE_TARGET_FILE_PATH='usr/bin/'
+    local _BASH_RC_CODE="\nalias getInstallScript='wget https://raw.github.com/archInstall/archInstall/master/archInstall.bash --output-document archInstall.bash && chmod +x archInstall.bash'\nalias install='([ -f /root/archInstall.bash ] || getInstallScript);/root/archInstall.bash'"
 
     # endregion
 
@@ -113,7 +116,6 @@ EOF
     }
     function printCommandLineOptionDescriptions() {
         # Prints descriptions about each available command line option.
-        # NOTE; All letters are used for short options.
         # NOTE: "-k" and "--key-map-configuration" isn't needed in the future.
         cat << EOF
     -h --help Shows this help message.
@@ -124,8 +126,13 @@ EOF
         (default: "$_DEBUG").#
 
     -c --squash-filesystem-compressor Defines the squash filesystem compressor.
-        All supported compressors for "mksquashfs" are possible.
+        All supported compressors for "mksquashfs" are possible
         (default: "$_SQUASH_FILESYSTEM_COMPRESSOR").
+
+    -k --keyboard-layout Defines needed key map (default: "$_KEYBOARD_LAYOUT").
+
+    -k --key-map-configuration FILE_CONTENT Keyboard map configuration
+        (default: "$_KEY_MAP_CONFIGURATION_FILE_CONTENT").
 EOF
     }
     function printHelpMessage() {
@@ -159,6 +166,17 @@ EOF
                 -c|--squash-filesystem-compressor)
                     shift
                     _SQUASH_FILESYSTEM_COMPRESSOR="$1"
+                    shift
+                    ;;
+                -k|--keyboard-layout)
+                    shift
+                    _KEYBOARD_LAYOUT="$1"
+                    shift
+                    ;;
+                -k|--key-map-configuation)
+                    shift
+                    _KEY_MAP_CONFIGURATION_FILE_CONTENT="$1"
+                    shift
                     ;;
 
                 '')
@@ -215,35 +233,70 @@ EOF
     # region tools
 
     function remasterISO() {
-        # Remasters given iso into new iso.
+        # Remasters given iso into new iso. If new systemd programs are used
+        # (if first argument is "true") they could have problems in change root
+        # environment without and exclusive dbus connection.
         log "Mount \"$_SOURCE_PATH\" to \"$_MOUNPOINT_PATH\"." && \
-        mount -t iso9660 -o loop "$_SOURCE_PATH" "$_MOUNPOINT_PATH" && \
+        mount -t iso9660 -o loop "$_SOURCE_PATH" "$_MOUNPOINT_PATH" \
+            1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
         log "Copy content in \"$_MOUNPOINT_PATH\" to \"$_TEMPORARY_REMASTERING_PATH\"." && \
-        cp --archiv "${_MOUNPOINT_PATH}/"* "$_TEMPORARY_REMASTERING_PATH" && \
+        cp --archiv "${_MOUNPOINT_PATH}/"* "$_TEMPORARY_REMASTERING_PATH" \
+            1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
         local path && \
         for path in ${_RELATIVE_PATHS_TO_SQUASH_FILESYSTEM[*]}; do
             log "Extract squash file system in \"${_TEMPORARY_REMASTERING_PATH}/$path\" to \"${_TEMPORARY_FILESYSTEM_REMASTERING_PATH}\"." && \
             unsquashfs -d "${_TEMPORARY_FILESYSTEM_REMASTERING_PATH}" \
-                "${_TEMPORARY_REMASTERING_PATH}/${path}" && \
-            log "Mount root file system in \"$_TEMPORARY_ROOT_FILESYSTEM_REMASTERING_PATH\"." && \
+                "${_TEMPORARY_REMASTERING_PATH}/${path}" \
+                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
+            rm --force "${_TEMPORARY_REMASTERING_PATH}/${path}" \
+                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
+            log "Mount root file system in \"${_TEMPORARY_FILESYSTEM_REMASTERING_PATH}\" to \"$_TEMPORARY_ROOT_FILESYSTEM_REMASTERING_PATH\"." && \
             mount "${_TEMPORARY_FILESYSTEM_REMASTERING_PATH}/"* \
-                "$_TEMPORARY_ROOT_FILESYSTEM_REMASTERING_PATH" && \
+                "$_TEMPORARY_ROOT_FILESYSTEM_REMASTERING_PATH" \
+                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
             log "Copy \"$(dirname "$(readlink --canonicalize "$0")")/$_RELATIVE_SOURCE_FILE_PATH\" to \"${_TEMPORARY_ROOT_FILESYSTEM_REMASTERING_PATH}/${_RELATIVE_TARGET_FILE_PATH}\"." && \
             cp "$(dirname "$(readlink --canonicalize "$0")")/$_RELATIVE_SOURCE_FILE_PATH" \
-                "${_TEMPORARY_ROOT_FILESYSTEM_REMASTERING_PATH}/${_RELATIVE_TARGET_FILE_PATH}" && \
+                "${_TEMPORARY_ROOT_FILESYSTEM_REMASTERING_PATH}/${_RELATIVE_TARGET_FILE_PATH}" \
+                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
+            log "Set key map to \"$_KEYBOARD_LAYOUT\"." && \
+            if [[ "$1" == 'true' ]]; then
+                arch-chroot "$_TEMPORARY_ROOT_FILESYSTEM_REMASTERING_PATH" \
+                    localectl set-keymap "$_KEYBOARD_LAYOUT" \
+                    1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
+                arch-chroot "$_TEMPORARY_ROOT_FILESYSTEM_REMASTERING_PATH" \
+                    set-locale LANG="en_US.utf8" 1>"$_STANDARD_OUTPUT" \
+                    2>"$_ERROR_OUTPUT"
+            else
+                echo -e "$_KEY_MAP_CONFIGURATION_FILE_CONTENT" 1>\
+                    "${_TEMPORARY_ROOT_FILESYSTEM_REMASTERING_PATH}/etc/vconsole.conf" \
+                    2>"$_ERROR_OUTPUT"
+            fi
             log 'Set root symbolic link for root user.' && \
-            touch "${_TEMPORARY_ROOT_FILESYSTEM_REMASTERING_PATH}/root/.bashrc" && \
-            echo -e "$_BASH_RC_CODE" \
-                1>"${_TEMPORARY_ROOT_FILESYSTEM_REMASTERING_PATH}/root/.bashrc" && \
+            local fileName && \
+            for fileName in .bashrc .zshrc; do
+                if [[ -f "${_TEMPORARY_ROOT_FILESYSTEM_REMASTERING_PATH}/root/" ]]; then
+                    echo -e "$_BASH_RC_CODE" \
+                        1>>"${_TEMPORARY_ROOT_FILESYSTEM_REMASTERING_PATH}/root/$fileName"
+                else
+                    echo -e "$_BASH_RC_CODE" \
+                        1>"${_TEMPORARY_ROOT_FILESYSTEM_REMASTERING_PATH}/root/$fileName"
+                fi
+            done
             log "Unmount \"$_TEMPORARY_ROOT_FILESYSTEM_REMASTERING_PATH\"." && \
+            umount "$_TEMPORARY_ROOT_FILESYSTEM_REMASTERING_PATH" \
+                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
+            log "Make new squash file system from \"${_TEMPORARY_FILESYSTEM_REMASTERING_PATH}\" to \"${_TEMPORARY_REMASTERING_PATH}/${path}\"." && \
             mksquashfs "${_TEMPORARY_FILESYSTEM_REMASTERING_PATH}" \
                 "${_TEMPORARY_REMASTERING_PATH}/${path}" -noappend -comp \
-                "$_SQUASH_FILESYSTEM_COMPRESSOR" && \
-            rm --recursive --force "${_TEMPORARY_FILESYSTEM_REMASTERING_PATH}"
-            umount "$_TEMPORARY_ROOT_FILESYSTEM_REMASTERING_PATH"
+                "$_SQUASH_FILESYSTEM_COMPRESSOR" 1>"$_STANDARD_OUTPUT" \
+                2>"$_ERROR_OUTPUT" && \
+            rm --recursive --force \
+                "${_TEMPORARY_FILESYSTEM_REMASTERING_PATH}" \
+                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
             if [[ $? != 0 ]]; then
                 log "Unmount \"$_MOUNPOINT_PATH\"." && \
-                umount "$_MOUNPOINT_PATH"
+                umount "$_MOUNPOINT_PATH" 1>"$_STANDARD_OUTPUT" \
+                    2>"$_ERROR_OUTPUT"
                 return $?
             fi
         done
@@ -256,22 +309,27 @@ EOF
             --volid "$volumeID" -eltorito-boot "isolinux/isolinux.bin" \
             -no-emul-boot -boot-load-size 4 -boot-info-table \
             -eltorito-catalog "isolinux/boot.cat" -output "$_TARGET_PATH" \
-            "$_TEMPORARY_REMASTERING_PATH" && \
-        cd -
+            "$_TEMPORARY_REMASTERING_PATH" 1>"$_STANDARD_OUTPUT" \
+            2>"$_ERROR_OUTPUT" && \
+        cd - 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
         log "Unmount \"$_MOUNPOINT_PATH\"." && \
-        umount "$_MOUNPOINT_PATH"
+        umount "$_MOUNPOINT_PATH" 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
         return $?
     }
     function tidyUp() {
         # Removes temporary created files.
         log "Remove temporary created location \"$_MOUNPOINT_PATH\"." &&
-        rm --recursive --force "$_MOUNPOINT_PATH"
+        rm --recursive --force "$_MOUNPOINT_PATH" 1>"$_STANDARD_OUTPUT" \
+            2>"$_ERROR_OUTPUT"
         log "Remove temporary created location \"$_TEMPORARY_REMASTERING_PATH\"." && \
-        rm --recursive --force "$_TEMPORARY_REMASTERING_PATH"
+        rm --recursive --force "$_TEMPORARY_REMASTERING_PATH" \
+            1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
         log "Remove temporary created location \"$_TEMPORARY_FILESYSTEM_REMASTERING_PATH\"." && \
-        rm --recursive --force "$_TEMPORARY_FILESYSTEM_REMASTERING_PATH"
+        rm --recursive --force "$_TEMPORARY_FILESYSTEM_REMASTERING_PATH" \
+            1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
         log "Remove temporary created location \"$_TEMPORARY_ROOT_FILESYSTEM_REMASTERING_PATH\"." && \
-        rm --recursive --force "$_TEMPORARY_ROOT_FILESYSTEM_REMASTERING_PATH"
+        rm --recursive --force "$_TEMPORARY_ROOT_FILESYSTEM_REMASTERING_PATH" \
+            1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
         return $?
     }
 

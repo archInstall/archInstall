@@ -112,8 +112,8 @@ function archInstall() {
         # NOTE: This properties aren't needed in the future with supporting
         # localectl program.
         "$_SCOPE" _LOCAL_TIME='Europe/Berlin'
-        "$_SCOPE" _KEY_MAP_CONFIGURATION_FILE_CONTENT="KEYMAP=${_KEYBOARD_LAYOUT}\nFONT=Lat2-Terminus16\nFONT_MAP="
         "$_SCOPE" _KEYBOARD_LAYOUT='de-latin1'
+        "$_SCOPE" _KEY_MAP_CONFIGURATION_FILE_CONTENT="KEYMAP=${_KEYBOARD_LAYOUT}\nFONT=Lat2-Terminus16\nFONT_MAP="
         # NOTE: Each value which is present in "/etc/pacman.d/mirrorlist" is ok.
         "$_SCOPE" _COUNTRY_WITH_MIRRORS='Germany'
 
@@ -238,11 +238,11 @@ EOF
     -x --local-time LOCAL_TIME Local time for you system
         (default: "$_LOCAL_TIME").
 
-    -k --key-map-configuration FILE_CONTENT Keyboard map configuration
-        (default: "$_KEY_MAP_CONFIGURATION_FILE_CONTENT").
-
     -b --keyboard-layout LAYOUT Defines needed keyboard layout
         (default: "$_KEYBOARD_LAYOUT").
+
+    -k --key-map-configuration FILE_CONTENT Keyboard map configuration
+        (default: "$_KEY_MAP_CONFIGURATION_FILE_CONTENT").
 
     -m --country-with-mirrors COUNTRY Country for enabling servers to get
         packages from (default: "$_COUNTRY_WITH_MIRRORS").
@@ -363,14 +363,14 @@ EOF
                     _LOCAL_TIME="$1"
                     shift
                     ;;
-                -k|--key-map-configuation)
-                    shift
-                    _KEY_MAP_CONFIGURATION_FILE_CONTENT="$1"
-                    shift
-                    ;;
                 -b|--keyboard-layout)
                     shift
                     _KEYBOARD_LAYOUT="$1"
+                    shift
+                    ;;
+                -k|--key-map-configuation)
+                    shift
+                    _KEY_MAP_CONFIGURATION_FILE_CONTENT="$1"
                     shift
                     ;;
                 -m|--country-with-mirrors)
@@ -722,9 +722,10 @@ EOF
         # endregion
 
     function archInstallConfigure() {
-        # Provides generic linux configuration mechanism. If an argument is
-        # given new systemd like programs are used (they could have problems in
-        # change root environment without and exclusive dbus connection.
+        # Provides generic linux configuration mechanism. If new systemd
+        # programs are used (if first argument is "true") they could have
+        # problems in change root environment without and exclusive dbus
+        # connection.
         archInstallLog "Make keyboard layout permanent to \"${_KEYBOARD_LAYOUT}\"." && \
         if [[ "$1" == 'true' ]]; then
             archInstallChangeRootToMountPoint localectl set-keymap \
