@@ -20,7 +20,8 @@
 # Examples:
 
 #     # Start install progress command (Assuming internet is available):
-#     wget https://raw.github.com/archInstall/archInstall/master/archInstall.bash \
+#     wget \
+#         https://raw.github.com/archInstall/archInstall/master/archInstall.bash \
 #         -O archInstall.bash && chmod +x archInstall.bash && \
 #         ./archInstall.bash --output-system /dev/sda1
 
@@ -35,43 +36,43 @@
 # Dependencies:
 
 #     bash (or any bash like shell)
-#     test - Check file types and compare values.
-#     sed - Stream editor for filtering and transforming text.
-#     wget - The non-interactive network downloader.
-#     xz - Compress or decompress .xz and lzma files.
-#     tar - The GNU version of the tar archiving utility.
-#     mount - Filesystem mounter.
+#     test   - Check file types and compare values.
+#     sed    - Stream editor for filtering and transforming text.
+#     wget   - The non-interactive network downloader.
+#     xz     - Compress or decompress .xz and lzma files.
+#     tar    - The GNU version of the tar archiving utility.
+#     mount  - Filesystem mounter.
 #     umount - Filesystem unmounter.
 #     chroot - Run command or interactive shell with special root directory.
-#     echo - Display a line of text.
-#     ln - Make links between files.
-#     touch - Change file timestamps or creates them.
-#     grep - Searches the named input FILEs (or standard input if no files are
-#            named, or if a single hyphen-minus (-) is given as file name) for
-#            lines containing  a  match to the given PATTERN.  By default, grep
-#            prints the matching lines.
-#     shift - Shifts the command line arguments.
-#     sync - Flushs file system buffers.
+#     echo   - Display a line of text.
+#     ln     - Make links between files.
+#     touch  - Change file timestamps or creates them.
+#     grep   - Searches the named input files (or standard input if no files
+#              are named, or if a single hyphen-minus (-) is given as file
+#              name) for lines containing  a  match to the given PATTERN. By
+#              default, grep prints the matching lines.
+#     shift  - Shifts the command line arguments.
+#     sync   - Flushs file system buffers.
 #     mktemp - Create a temporary file or directory.
-#     cat - Concatenate files and print on the standard output.
-#     blkid - Locate or print block device attributes.
-#     uniq - Report or omit repeated lines.
-#     uname - Prints system informations.
+#     cat    - Concatenate files and print on the standard output.
+#     blkid  - Locate or print block device attributes.
+#     uniq   - Report or omit repeated lines.
+#     uname  - Prints system informations.
 
 # Dependencies for blockdevice integation:
 
 #     grub-bios - A full featured boot manager.
-#     blockdev - Call block device ioctls from the command line.
+#     blockdev  - Call block device ioctls from the command line.
 
 # Optional dependencies:
 
 #     arch-install-scripts - Little framework to generate a linux from scratch.
-#     fakeroot - Run a command in an environment faking root privileges for
-#                file manipulation.
-#     fakechroot - Wrappes some c-lib functions to enable programs like
-#                  "chroot" running without root privilegs.
-#     os-prober - Detects presence of other operating systems.
-#     mountpoint - See if a directory is a mountpoint.
+#     fakeroot             - Run a command in an environment faking root
+#                            privileges for file manipulation.
+#     fakechroot           - Wraps some c-lib functions to enable programs like
+#                            "chroot" running without root privileges.
+#     os-prober            - Detects presence of other operating systems.
+#     mountpoint           - See if a directory is a mountpoint.
 
 __NAME__='archInstall'
 
@@ -82,7 +83,7 @@ function archInstall() {
 
 # region configuration
 
-    # region private properties
+    # region properties
 
         # region command line arguments
 
@@ -834,8 +835,8 @@ EOF
         # root permissions.
         if [[ "$UID" != '0' ]]; then
             archInstallLog "System will be packed into \"$_MOUNTPOINT_PATH.tar\" to provide root owned files. You have to extract this archiv as root."
-            tar cvf "$_MOUNTPOINT_PATH".tar "$_MOUNTPOINT_PATH" --owner root 1>"$_STANDARD_OUTPUT" \
-                2>"$_ERROR_OUTPUT" && \
+            tar cvf "$_MOUNTPOINT_PATH".tar "$_MOUNTPOINT_PATH" --owner root \
+                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
             rm "$_MOUNTPOINT_PATH"* --recursive --force 1>"$_STANDARD_OUTPUT" \
                 2>"$_ERROR_OUTPUT"
             return $?
@@ -966,8 +967,8 @@ EOF
                         'error' "A suitable file for package \"$packageName\" could not be determined."
                 fi
                 xz --decompress --to-stdout "$_PACKAGE_CACHE_PATH/$fileName" \
-                    2>"$_ERROR_OUTPUT" | tar --extract --keep-old-files \
-                    --directory "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" \
+                    2>"$_ERROR_OUTPUT" | tar --extract --directory \
+                    "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" \
                     2>"$_ERROR_OUTPUT"
                 if [[ $? != 0 ]]; then
                     return $?
