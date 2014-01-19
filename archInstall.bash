@@ -49,7 +49,7 @@
 #     touch  - Change file timestamps or creates them.
 #     grep   - Searches the named input files (or standard input if no files
 #              are named, or if a single hyphen-minus (-) is given as file
-#              name) for lines containing  a  match to the given PATTERN. By
+#              name) for lines containing a match to the given PATTERN. By
 #              default, grep prints the matching lines.
 #     shift  - Shifts the command line arguments.
 #     sync   - Flushs file system buffers.
@@ -58,6 +58,7 @@
 #     blkid  - Locate or print block device attributes.
 #     uniq   - Report or omit repeated lines.
 #     uname  - Prints system informations.
+#     rm     - Remove files or directories.
 
 # Dependencies for blockdevice integation:
 
