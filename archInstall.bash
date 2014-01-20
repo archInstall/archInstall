@@ -60,10 +60,11 @@
 #     uname  - Prints system informations.
 #     rm     - Remove files or directories.
 
-# Dependencies for blockdevice integation:
+# Dependencies for blockdevice integration:
 
-#     grub-bios - A full featured boot manager.
-#     blockdev  - Call block device ioctls from the command line.
+#     efibootmgr - Manipulate the EFI Boot Manager.
+#     grub-bios  - A full featured boot manager.
+#     blockdev   - Call block device ioctls from the command line.
 
 # Optional dependencies:
 
@@ -981,10 +982,12 @@ EOF
     }
     function archInstallMakePartitions() {
         # Performs the auto partitioning.
+        # TODO
         if [[ $(echo "$_AUTO_PARTITIONING" | tr '[A-Z]' '[a-z]') == 'yes' ]]
         then
             archInstallLog 'Check for suitable device divisions.'
             local memorySpaceInByte=$(($(cat /proc/meminfo | grep --extended-regexp --only-matching 'MemTotal: +[0-9]+ kB' | sed --regexp-extended 's/[^0-9]+([0-9]+)[^0-9]+/\1/g') * 1024))
+            # TODO check if blockdev is needed in future as dependency
             local blockDeviceSpaceInByte=$(blockdev --getsize64 "$_OUTPUT_SYSTEM")
             local swapSpaceInProcent=$((100 * $memorySpaceInByte / $blockDeviceSpaceInByte))
             local neededBootSpaceInProcent=$((100 * $_NEEDED_BOOT_SPACE_IN_BYTE / $blockDeviceSpaceInByte))
@@ -1050,7 +1053,7 @@ EOF
 PARTLABEL=$_BOOT_PARTITION_LABEL   /boot/        vfat   rw,relatime,fmask=0077,dmask=0077,codepage=437,iocharset=iso8859-1,shortname=mixed,errors=remount-ro 0      0
 # "compress=lzo" has lower compression ratio by better cpu performance.
 PARTLABEL=$_SYSTEM_PARTITION_LABEL /             btrfs  relatime,ssd,discard,space_cache,autodefrag,inode_cache,subvol=root,compress=zlib                    0      0
-PARTLABEL=$_SWAP_PARTITION_LABEL   TODO          swap   TODO
+PARTLABEL=$_SWAP_PARTITION_LABEL   none          swap   defaults                                                                                             0      0
 EOF
             1>>"${_MOUNTPOINT_PATH}etc/fstab" 2>"$_ERROR_OUTPUT"
         fi
@@ -1061,13 +1064,18 @@ EOF
         if echo "$_OUTPUT_SYSTEM" | grep --quiet --extended-regexp \
             '[0-9]$'
         then
-            archInstallLog \
-                'Update boot manager configuration on host system.'
-            hash os-prober 1>"$_STANDARD_OUTPUT" 2>/dev/null || \
-            archInstallLog 'warning' \
-                "Grub may not find your new installed system because \"os-prober\" isn't installed. If your system wasn't found install it and run \"grub-mkconfig -o /boot/grub/grub.cfg\"."
-            grub-mkconfig --output /boot/grub/grub.cfg 1>"$_STANDARD_OUTPUT" \
-                2>"$_ERROR_OUTPUT"
+            if hash grub-mkconfig 1>"$_STANDARD_OUTPUT" 2>/dev/null; then
+                archInstallLog \
+                    'Update boot manager configuration on host system.'
+                hash os-prober 1>"$_STANDARD_OUTPUT" 2>/dev/null || \
+                archInstallLog 'warning' \
+                    "Grub may not find your new installed system because \"os-prober\" isn't installed. If your system wasn't found install it and run \"grub-mkconfig -o /boot/grub/grub.cfg\"."
+                grub-mkconfig --output /boot/grub/grub.cfg 1>"$_STANDARD_OUTPUT" \
+                    2>"$_ERROR_OUTPUT"
+            else
+                archInstallLog 'warning' \
+                    "Grub doesn't seem to be installed. Creating a boot entry failed."
+            fi
         else
             archInstallIntegrateBootLoader
         fi
@@ -1146,14 +1154,13 @@ EOF
     function archInstallGetHostsContent() {
         # Provides the file content for the "/etc/hosts".
         cat << EOF
-#<IP-Adresse>  <Rechnername.Arbeitsgruppe>      <Rechnername>
-127.0.0.1      localhost.localdomain            localhost $1
-::1            ipv6-localhost                   ipv6-localhost ipv6-$1
+#<IP-Adress> <computername.workgroup> <computernames>
+127.0.0.1    localhost.localdomain    localhost $1
+::1          ipv6-localhost           ipv6-localhost ipv6-$1
 EOF
     }
     function archInstallPrepareBlockdevices() {
         # Prepares given block devices to make it ready for fresh installation.
-        # TODO prepare vfat and btrfs partition with right labels
         archInstallLog \
             "Unmount needed devices and devices pointing to our temporary system mount point \"$_MOUNTPOINT_PATH\"."
         umount -f "${_OUTPUT_SYSTEM}"* 1>"$_STANDARD_OUTPUT" 2>/dev/null
@@ -1211,15 +1218,23 @@ EOF
         return $?
     }
     function archInstallIntegrateBootLoader() {
-        # Installs "grub2" as bootloader.
-        archInstallLog 'Install boot manager.'
-        archInstallChangeRootToMountPoint grub-install \
-            --target=i386-pc --recheck "$_OUTPUT_SYSTEM" \
-            1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
-        archInstallLog 'Configure boot manager.' && \
-        archInstallChangeRootToMountPoint grub-mkconfig \
-            --output /boot/grub/grub.cfg 1>"$_STANDARD_OUTPUT" \
-            2>"$_ERROR_OUTPUT"
+        # Creates an uefi boot entry.
+        if hash efibootmgr 1>"$_STANDARD_OUTPUT" 2>/dev/null; then
+            archInstallLog 'Configure efi boot manager.' && \
+            archInstallChangeRootToMountPoint efibootmgr --create --disk \
+                "$_OUTPUT_SYSTEM" --part 1 -l '\vmlinuz-linux' --label \
+                archLinux --unicode \
+                'initrd=\initramfs-linux.img root=PARTLABEL=system rw rootflags=subvol=root quiet loglevel=2 acpi_osi="!Windows 2012"' \
+                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
+            archInstallChangeRootToMountPoint efibootmgr --create --disk \
+                "$_OUTPUT_SYSTEM" --part 1 -l '\vmlinuz-linux' --label \
+                archLinuxFallback --unicode \
+                'initrd=\initramfs-linux-fallback.img acpi_osi="!Windows 2012"' \
+                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
+        else
+            archInstallLog 'warning' \
+                "\"efibootmgr\" doesn't seem to be installed. Creating a boot entry failed."
+        fi
         return $?
     }
     function archInstallLoadCache() {
@@ -1295,7 +1310,6 @@ EOF
                 archInstallPrepareSystemPartition || \
                 archInstallLog 'error' 'Boot partition creation failed.'
             else
-                _PACKAGES+=' grub-bios' && \
                 if [ archInstallDetermineAutoPartitioning ]; then
                     archInstallPrepareBlockdevices || \
                     archInstallLog 'error' \
