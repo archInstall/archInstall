@@ -347,8 +347,10 @@ EOF
             sudo -u root "$0" "$@"
             return $?
         fi
-        remasterISO && \
-        tidyUp
+        remasterISO || archInstallLog 'error' 'Remastering given iso failed.'
+        tidyUp || archInstallLog 'error' 'Tidying up failed.'
+        archInstallLog \
+            "Remastering given image \"$_SOURCE_PATH\" to \"$_TARGET_PARG\" has successfully finished."
         return $?
     fi
 

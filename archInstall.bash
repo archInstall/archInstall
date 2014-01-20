@@ -75,6 +75,7 @@
 #                            "chroot" running without root privileges.
 #     os-prober            - Detects presence of other operating systems.
 #     mountpoint           - See if a directory is a mountpoint.
+#     dosfstools           - Handle dos file systems.
 
 __NAME__='archInstall'
 
@@ -128,8 +129,10 @@ function archInstall() {
         "$_SCOPE" _SWAP_PARTITION_LABEL='swap'
         "$_SCOPE" _SYSTEM_PARTITION_LABEL='system'
 
-        "$_SCOPE" _NEEDED_BOOT_SPACE_IN_BYTE=209715200 # 200 Megabyte
-        "$_SCOPE" _MINIMAL_BOOT_SPACE_IN_PROCENT=40
+        # NOTE: A FAT32 partition has to be at least 512 MB large.
+        "$_SCOPE" _BOOT_SPACE_IN_BYTE=$((512 * 1024 ** 2))
+        "$_SCOPE" _NEEDED_SYSTEM_SPACE_IN_BYTE=$((512 * 1024 ** 2))
+        "$_SCOPE" _MINIMAL_SYSTEM_SPACE_IN_PROCENT=40
         "$_SCOPE" _MAXIMAL_SWAP_SPACE_IN_PROCENT=20
 
         "$_SCOPE" _INSTALL_COMMON_ADDITIONAL_PACKAGES='no'
@@ -273,14 +276,20 @@ EOF
         (default: "$_SYSTEM_PARTITION_LABEL").
 
 
-    -w --needed-boot-space-in-byte NUMBER_OF_BYTES In case if selected auto
+    -w --boot-space-in-byte NUMBER_OF_BYTES In case if selected auto
         partitioning you can define the minimum space needed for your boot
-        partition (default: "$_NEEDED_BOOT_SPACE_IN_BYTE byte").
+        partition (default: "$_BOOT_SPACE_IN_BYTE byte"). This partition
+        is used for kernel and initramfs only.
 
-    -q --minimal-boot-space-in-procent PROCENT Define how much space should
-        be at least used for your boot (for kernel and initramfs) partition.
-        Remaining space will be used for your system and swap partition
-        (default: "$_MINIMAL_BOOT_SPACE_IN_PROCENT%").
+    -q --needed-system-space-in-byte NUMBER_OF_BYTES In case if selected auto
+        partitioning you can define the minimum space needed for your system
+        partition (default: "$_NEEDED_SYSTEM_SPACE_IN_BYTE byte"). This
+        partition is used for the whole operating system.
+
+    -qq --minimal-system-space-in-procent PROCENT Define how much space should
+        be at least used for your system partition. Remaining space will be
+        used for your system and swap partition
+        (default: "$_MINIMAL_SYSTEM_SPACE_IN_PROCENT%").
 
     -i --maximal-swap-space-in-procent PROCENT Define how much procent you
         want to immolate for swap space
@@ -414,14 +423,19 @@ EOF
                     shift
                     ;;
 
-                -w|--needed-boot-space-in-byte)
+                -w|--boot-space-in-byte)
                     shift
-                    _NEEDED_BOOT_SPACE_IN_BYTE="$1"
+                    _BOOT_SPACE_IN_BYTE="$1"
                     shift
                     ;;
-                -q|--minimal-boot-space-in-procent)
+                -q|--needed-system-space-in-byte)
                     shift
-                    _MINIMAL_BOOT_SPACE_IN_PROCENT="$1"
+                    _NEEDED_SYSTEM_IN_BYTE="$1"
+                    shift
+                    ;;
+                -qq|--minimal-system-space-in-procent)
+                    shift
+                    _MINIMAL_SYSTEM_SPACE_IN_PROCENT="$1"
                     shift
                     ;;
                 -i|--maximal-swap-space-in-procent)
@@ -982,51 +996,66 @@ EOF
     }
     function archInstallMakePartitions() {
         # Performs the auto partitioning.
-        # TODO
         if [[ $(echo "$_AUTO_PARTITIONING" | tr '[A-Z]' '[a-z]') == 'yes' ]]
         then
             archInstallLog 'Check for suitable device divisions.'
-            local memorySpaceInByte=$(($(cat /proc/meminfo | grep --extended-regexp --only-matching 'MemTotal: +[0-9]+ kB' | sed --regexp-extended 's/[^0-9]+([0-9]+)[^0-9]+/\1/g') * 1024))
-            # TODO check if blockdev is needed in future as dependency
-            local blockDeviceSpaceInByte=$(blockdev --getsize64 "$_OUTPUT_SYSTEM")
-            local swapSpaceInProcent=$((100 * $memorySpaceInByte / $blockDeviceSpaceInByte))
-            local neededBootSpaceInProcent=$((100 * $_NEEDED_BOOT_SPACE_IN_BYTE / $blockDeviceSpaceInByte))
-            if [[ $swapSpaceInProcent -gt $_MAXIMAL_SWAP_SPACE_IN_PROCENT ]]
-            then
-                swapSpaceInProcent=$_MAXIMAL_SWAP_SPACE_IN_PROCENT
-            fi
-            if [[ $neededBootSpaceInProcent -lt $_MINIMAL_BOOT_SPACE_IN_PROCENT ]]
-            then
-                neededBootSpaceInProcent=$_MINIMAL_BOOT_SPACE_IN_PROCENT
-            fi
-            local let swapPlusBootSpaceInProcent=$(($swapSpaceInProcent + $neededBootSpaceInProcent))
-            archInstallLog 'Check block device size.'
-            test $_NEEDED_BOOT_SPACE_IN_BYTE -le $blockDeviceSpaceInByte && \
-            archInstallLog 'Delete old partition table.' && \
-            parted $_OUTPUT_SYSTEM mklabel msdos --script \
-                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
-            archInstallLog 'Delete first three partitions.' && \
-            (parted "$_OUTPUT_SYSTEM" rm 1 1>"$_STANDARD_OUTPUT" 2>/dev/null \
-                || true) && \
-            (parted "$_OUTPUT_SYSTEM" rm 2 1>"$_STANDARD_OUTPUT" 2>/dev/null \
-                || true) && \
-            (parted "$_OUTPUT_SYSTEM" rm 3 1>"$_STANDARD_OUTPUT" 2>/dev/null \
-                || true) && \
-            archInstallLog 'Create boot partition.' && \
-            parted "$_OUTPUT_SYSTEM" mkpart primary ext4 2048s \
-                ${neededBootSpaceInProcent}% --script set 1 boot on \
-                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
-            if [[ ${_MINIMAL_BOOT_SPACE_IN_PROCENT} -lt 100 ]]; then
-                archInstallLog 'Create swap partition.' && \
-                parted "$_OUTPUT_SYSTEM" mkpart primary linux-swap \
-                    ${neededBootSpaceInProcent}% ${swapPlusBootSpaceInProcent}% \
-                    --script 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
-                archInstallLog 'Create system partition.' && \
-                parted "$_OUTPUT_SYSTEM" mkpart primary ext4 \
-                    ${swapPlusBootSpaceInProcent}% 100% --script \
-                    1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
+            local blockDeviceSpaceInByte=$(blockdev --getsize64 \
+                "$_OUTPUT_SYSTEM") && \
+            if [[ $(($_NEEDED_SYSTEM_SPACE_IN_BYTE + $_BOOT_SPACE_IN_BYTE)) \
+                  -le $blockDeviceSpaceInByte ]]; then
+                local bootSpaceInProcent=$((100 * $_BOOT_SPACE_IN_BYTE / \
+                    $blockDeviceSpaceInByte)) && \
+                local systemSpaceInProcent=$((100 * \
+                    $_NEEDED_SYSTEM_SPACE_IN_BYTE / $blockDeviceSpaceInByte)) && \
+                local memorySpaceInByte=$(($(cat /proc/meminfo | grep \
+                    --extended-regexp --only-matching 'MemTotal: +[0-9]+ kB' | \
+                    sed --regexp-extended 's/[^0-9]+([0-9]+)[^0-9]+/\1/g') * 1024))
+                local swapSpaceInProcent=$((100 * $memorySpaceInByte / \
+                    $blockDeviceSpaceInByte)) && \
+                if [[ $_MAXIMAL_SWAP_SPACE_IN_PROCENT -lt $swapSpaceInProcent ]]
+                then
+                    swapSpaceInProcent=$_MAXIMAL_SWAP_SPACE_IN_PROCENT
+                fi
+                if [[ $systemSpaceInProcent -lt $_MINIMAL_SYSTEM_SPACE_IN_PROCENT ]]
+                then
+                    systemSpaceInProcent=$_MINIMAL_SYSTEM_SPACE_IN_PROCENT
+                fi
+                local let systemPlusBootSpaceInProcent=$(($bootSpaceInProcent + \
+                    $systemSpaceInProcent)) && \
+                local let swapPlusSystemAndBootSpaceInProcent=$(($bootSpaceInProcent \
+                    + $systemSpaceInProcent + $swapSpaceInProcent)) && \
+                archInstallLog 'Check block device size.' && \
+                archInstallLog 'Delete old partition table.' && \
+                # TODO
+                parted $_OUTPUT_SYSTEM mklabel msdos --script \
+                    1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
+                archInstallLog 'Delete first three partitions.' && \
+                (parted "$_OUTPUT_SYSTEM" rm 1 1>"$_STANDARD_OUTPUT" 2>/dev/null \
+                    || true) && \
+                (parted "$_OUTPUT_SYSTEM" rm 2 1>"$_STANDARD_OUTPUT" 2>/dev/null \
+                    || true) && \
+                (parted "$_OUTPUT_SYSTEM" rm 3 1>"$_STANDARD_OUTPUT" 2>/dev/null \
+                    || true) && \
+                archInstallLog 'Create boot partition.' && \
+                parted "$_OUTPUT_SYSTEM" mkpart primary ext4 2048s \
+                    ${vootSpaceInProcent}% --script set 1 boot on \
+                    1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
+                if [[ ${_MINIMAL_SYSTEM_SPACE_IN_PROCENT} -lt 100 ]]; then
+                    archInstallLog 'Create swap partition.' && \
+                    parted "$_OUTPUT_SYSTEM" mkpart primary linux-swap \
+                        ${neededBootSpaceInProcent}% ${swapPlusBootSpaceInProcent}% \
+                        --script 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
+                    archInstallLog 'Create system partition.' && \
+                    parted "$_OUTPUT_SYSTEM" mkpart primary ext4 \
+                        ${swapPlusBootSpaceInProcent}% 100% --script \
+                        1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
+                fi
+                #
+            else
+                archInstallLog 'error' "Not enough space on \"$_OUTPUT_SYSTEM\" (\"$blockDeviceSpaceInByte\" byte). We need at least \"$(($_NEEDED_SYSTEM_SPACE_IN_BYTE + $_BOOT_SPACE_IN_BYTE))\" byte."
             fi
         else
+            # TODO
             archInstallLog \
                 "At least you have to create two partitions. The first one will be used as boot partition labeled to \"${_BOOT_PARTITION_LABEL}\" and second one will be used as system partition and labeled to \"${_SYSTEM_PARTITION_LABEL}\". The third one will be used as swap partition labeled to \"$_SWAP_PARTITION_LABEL\" Press Enter to continue." && \
             read && \
@@ -1036,6 +1065,7 @@ EOF
             read && \
             archInstallLog 'Create partitions manually.' && \
             cfdisk 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
+            #
         fi
         return $?
     }
@@ -1175,36 +1205,41 @@ EOF
     }
     function archInstallPrepareSystemPartition() {
         # Prepares the system partition.
+        local outputDevice="$_OUTPUT_SYSTEM" && \
         if [ -b "${_OUTPUT_SYSTEM}2" ]; then
-            archInstallLog \
-                "Make system partition at \"${_OUTPUT_SYSTEM}3\"."
-            mkfs.btrfs "${_OUTPUT_SYSTEM}3" -L "$_SYSTEM_PARTITION_LABEL" \
-                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
-            archInstallLog 'Mount system partition.' && \
-            mount "$outputDevice" "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" \
-                2>"$_ERROR_OUTPUT"
-            return $?
+            outputDevice="${_OUTPUT_SYSTEM}2"
         fi
+        archInstallLog \
+            "Make system partition at \"${_OUTPUT_SYSTEM}3\"."
+        mkfs.btrfs "$outputDevice" --label "$_SYSTEM_PARTITION_LABEL" \
+            1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
+        archInstallLog 'Mount system partition.' && \
+        mount "$outputDevice" "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" \
+            2>"$_ERROR_OUTPUT"
+        return $?
     }
     function archInstallPrepareBootPartition() {
         # Prepares the boot partition.
         archInstallLog 'Make boot partition.' && \
-        local outputDevice="$_OUTPUT_SYSTEM" && \
-        if [ -b "${_OUTPUT_SYSTEM}1" ]; then
-            outputDevice="${_OUTPUT_SYSTEM}1"
-        fi
-        mkfs.vfat "$outputDevice" -L "$_BOOT_PARTITION_LABEL" \
+        mkfs.vfat -F 32 "${_OUTPUT_SYSTEM}1" \
             1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
+        if hash dosfslabel 1>"$_STANDARD_OUTPUT" 2>/dev/null; then
+            dosfslabel "${_OUTPUT_SYSTEM}1" "$_BOOT_PARTITION_LABEL" \
+                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
+        else
+            archInstallLog 'warning' \
+                "\"dosfslabel\" doesn't seem to be installed. Creating a boot partition label failed."
+        fi
         archInstallLog 'Mount boot partition.' && \
-        mount "$outputDevice" "${_MOUNTPOINT_PATH}boot/" 1>"$_STANDARD_OUTPUT" \
-            2>"$_ERROR_OUTPUT"
+        mount "${_OUTPUT_SYSTEM}1" "${_MOUNTPOINT_PATH}boot/" \
+            1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
        return $?
     }
     function archInstallPrepareSwapPartition() {
         # Prepares the swap partition.
         if [ -b "${_OUTPUT_SYSTEM}3" ]; then
             archInstallLog \
-                "Make swap partition at \"${_OUTPUT_SYSTEM}2\"."
+                "Make swap partition at \"${_OUTPUT_SYSTEM}2\"." && \
             mkswap "${_OUTPUT_SYSTEM}2" -L "$_SWAP_PARTITION_LABEL" \
                 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
             return $?
@@ -1308,7 +1343,7 @@ EOF
             if echo "$_OUTPUT_SYSTEM" | grep --quiet --extended-regexp '[0-9]$'
             then
                 archInstallPrepareSystemPartition || \
-                archInstallLog 'error' 'Boot partition creation failed.'
+                archInstallLog 'error' 'System partition creation failed.'
             else
                 if [ archInstallDetermineAutoPartitioning ]; then
                     archInstallPrepareBlockdevices || \
@@ -1320,7 +1355,7 @@ EOF
             fi
         else
             archInstallLog 'error' \
-                "Could not install into an existsing file \"$_OUTPUT_SYSTEM\"."
+                "Could not install into an existing file \"$_OUTPUT_SYSTEM\"."
         fi
         archInstallPrepareInstallation || \
         archInstallLog 'error' 'Preparing installation failed.'
@@ -1341,7 +1376,7 @@ EOF
         archInstallLog 'error' 'Preparing reboot failed.'
         archInstallPackResult || \
         archInstallLog 'error' \
-            'Packing system into archiv with files owend by root failed.'
+            'Packing system into archiv with files owned by root failed.'
         archInstallLog \
             "Generating operating system into \"$_OUTPUT_SYSTEM\" has successfully finished."
     fi
