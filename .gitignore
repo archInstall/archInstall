@@ -1,8 +1,6 @@
 # C extensions
 *.so
 
-## Generic
-
 # Packages
 *.egg
 *.egg-info
@@ -17,6 +15,9 @@ develop-eggs
 .installed.cfg
 lib
 lib64
+
+# Installer logs
+pip-log.txt
 
 # Unit test / coverage reports
 .coverage
@@ -33,14 +34,6 @@ nosetests.xml
 
 # Vim temporary file
 *.swp
-.roperproject
 
-# PHPStorm and other IDE Files
-*.idea
-*.project
-*.pydevproject
-*.settings
-*.externalToolBuilders
-
-# Gedit autosave backups.
-*~
+# Running time cache files.
+*Cache
