@@ -645,8 +645,9 @@ EOF
         local returnCode=0 && \
         local mountpointPath && \
         for mountpointPath in ${_NEEDED_MOUNTPOINTS[*]}; do
+            mountpointPath="${mountpointPath:1}" && \
             if [ ! -d "${_MOUNTPOINT_PATH}${mountpointPath}" ] && \
-                [ ! -f ${mountpointPath} ]
+                [ ! -f "/${mountpointPath}" ]
             then
                 mkdir --parents "${_MOUNTPOINT_PATH}${mountpointPath}" \
                     1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
@@ -695,7 +696,7 @@ EOF
                     mount "$mountpointPath" \
                         "${_MOUNTPOINT_PATH}${mountpointPath}" --bind
                 else
-                    archInstallInfo 'error' \
+                    archInstallLog 'error' \
                         "Mountpoint \"$mountpointPath\" couldn't be handled."
                 fi
                 ! test $? && returnCode=$?
@@ -954,10 +955,7 @@ EOF
         else
             result=1
         fi
-        if [[ ! "$3" ]]; then
-            _NEEDED_PACKAGES="$(echo "$_NEEDED_PACKAGES" | sed \
-                --regexp-extended 's/(^ | $)//g')"
-        fi
+        [[ ! "$3" ]] && _NEEDED_PACKAGES="${_NEEDED_PACKAGES:1:-1}"
         return $result
     }
     function archInstallDeterminePackageDirectoryName() {
