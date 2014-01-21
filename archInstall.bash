@@ -1160,11 +1160,11 @@ EOF
             1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
         archInstallLog \
             "Creating a root sub volume in \"$outputDevice\"." && \
-        mount PARTLABEL="$_SYSTEM_PARTITION_LABEL" "$_MOUNPOINT_PATH" \
+        mount PARTLABEL="$_SYSTEM_PARTITION_LABEL" "$_MOUNTPOINT_PATH" \
             1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
-        btrfs subvolume create "${_MOUNPOINT_PATH}root" 1>"$_STANDARD_OUTPUT" \
-            2>"$_ERROR_OUTPUT" && \
-        umount "$_MOUNPOINT_PATH" 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
+        btrfs subvolume create "${_MOUNTPOINT_PATH}root" \
+            1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
+        umount "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
         return $?
     }
     function archInstallFormatBootPartition() {
