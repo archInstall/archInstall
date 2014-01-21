@@ -601,10 +601,10 @@ EOF
 
     function archInstallPerformDependencyCheck() {
         # This function check if all given dependencies are present.
-        local depencencies=$1
-        local result=0
-        local dependency
-        for dependency in ${dependencies[*]}; do
+        local depencenciesToCheck=$1 && \
+        local result=0 && \
+        local dependency && \
+        for dependency in ${dependenciesToCheck[*]}; do
             if ! hash "$dependency" 1>"$_STANDARD_OUTPUT" 2>/dev/null; then
                 archInstallLog 'critical' \
                     "Needed dependency \"$dependency\" isn't available." && \
