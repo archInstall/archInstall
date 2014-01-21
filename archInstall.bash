@@ -1024,9 +1024,9 @@ EOF
             cat << EOF
 # Added during installation.
 # <file system>                    <mount point> <type> <options>                                                                                            <dump> <pass>
-PARTLABEL=$_BOOT_PARTITION_LABEL   /boot/        vfat   rw,relatime,fmask=0077,dmask=0077,codepage=437,iocharset=iso8859-1,shortname=mixed,errors=remount-ro 0      0
 # "compress=lzo" has lower compression ratio by better cpu performance.
 PARTLABEL=$_SYSTEM_PARTITION_LABEL /             btrfs  relatime,ssd,discard,space_cache,autodefrag,inode_cache,subvol=root,compress=zlib                    0      0
+PARTLABEL=$_BOOT_PARTITION_LABEL   /boot/        vfat   rw,relatime,fmask=0077,dmask=0077,codepage=437,iocharset=iso8859-1,shortname=mixed,errors=remount-ro 0      0
 EOF
             1>>"${_MOUNTPOINT_PATH}etc/fstab" 2>"$_ERROR_OUTPUT"
         fi
@@ -1236,14 +1236,14 @@ EOF
         archInstallLog \
             "Clear previous installations in \"$_OUTPUT_SYSTEM\" and set right rights." && \
         archInstallLog 'Mount system partition.' && \
-        mount "$outputDevice" "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" \
-            2>"$_ERROR_OUTPUT" && \
+        mount PARTLABEL="$_SYSTEM_PARTITION_LABEL" "$_MOUNTPOINT_PATH" \
+            1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
         rm "$_MOUNTPOINT_PATH"* --recursive --force 1>"$_STANDARD_OUTPUT" \
             2>"$_ERROR_OUTPUT" && \
         archInstallLog \
             "Mount boot partition in \"${_MOUNTPOINT_PATH}boot/\"." && \
         mkdir --parents "${_MOUNTPOINT_PATH}boot/" && \
-        mount "${_OUTPUT_SYSTEM}1" "${_MOUNTPOINT_PATH}boot/" \
+        mount PARTLABEL="$_BOOT_PARTITION_LABEL" "${_MOUNTPOINT_PATH}boot/" \
             1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
         rm "${_MOUNTPOINT_PATH}boot/"* --recursive --force \
             1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
