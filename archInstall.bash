@@ -582,8 +582,10 @@ EOF
         (archInstallChangeRootToMountPoint /usr/bin/pacman \
             --arch "$_CPU_ARCHITECTURE" --sync --refresh \
             1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" || true) && \
-        local neededPackages=$(echo "${_PACKAGES[*]}" | sed -e 's/^ *//g' -e 's/ *$//g')
-        archInstallLog "Install needed packages \"$neededPackages\" to \"$_OUTPUT_SYSTEM\"." && \
+        local neededPackages=$(echo "${_PACKAGES[*]}" | sed -e 's/^ *//g' -e \
+            's/ *$//g')
+        archInstallLog \
+            "Install needed packages \"$neededPackages\" to \"$_OUTPUT_SYSTEM\"." && \
         archInstallChangeRootToMountPoint /usr/bin/pacman --arch \
             "$_CPU_ARCHITECTURE" --sync --force --needed --noconfirm \
             ${_PACKAGES[*]} 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
