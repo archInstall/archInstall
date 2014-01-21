@@ -1145,7 +1145,7 @@ EOF
         archInstallFormatPartitions
         return $?
     }
-    function archInstallPrepareSystemPartition() {
+    function archInstallFormatSystemPartition() {
         # Prepares the system partition.
         local outputDevice="$_OUTPUT_SYSTEM" && \
         if [ -b "${_OUTPUT_SYSTEM}2" ]; then
@@ -1154,13 +1154,10 @@ EOF
         archInstallLog \
             "Make system partition at \"$outputDevice\"."
         mkfs.btrfs --force --label "$_SYSTEM_PARTITION_LABEL" "$outputDevice" \
-            1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
-        archInstallLog 'Mount system partition.' && \
-        mount "$outputDevice" "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" \
-            2>"$_ERROR_OUTPUT"
+            1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
         return $?
     }
-    function archInstallPrepareBootPartition() {
+    function archInstallFormatBootPartition() {
         # Prepares the boot partition.
         archInstallLog 'Make boot partition.' && \
         mkfs.vfat -F 32 "${_OUTPUT_SYSTEM}1" \
@@ -1172,16 +1169,12 @@ EOF
             archInstallLog 'warning' \
                 "\"dosfslabel\" doesn't seem to be installed. Creating a boot partition label failed."
         fi
-        archInstallLog "Mount boot partition in \"${_MOUNTPOINT_PATH}boot/\"." && \
-        mkdir --parents "${_MOUNTPOINT_PATH}boot/" && \
-        mount "${_OUTPUT_SYSTEM}1" "${_MOUNTPOINT_PATH}boot/" \
-            1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
-       return $?
+        return $?
     }
     function archInstallFormatPartitions() {
         # Performs formating part.
-        archInstallPrepareSystemPartition && \
-        archInstallPrepareBootPartition
+        archInstallFormatSystemPartition && \
+        archInstallFormatBootPartition
         return $?
     }
     function archInstallIntegrateBootLoader() {
@@ -1244,8 +1237,17 @@ EOF
         rm "$_MOUNTPOINT_PATH"* --recursive --force 1>"$_STANDARD_OUTPUT" \
             2>"$_ERROR_OUTPUT" && \
         chmod 755 "$_MOUNTPOINT_PATH" && \
+        archInstallLog 'Mount system partition.' && \
+        mount "$outputDevice" "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" \
+            2>"$_ERROR_OUTPUT" && \
+        archInstallLog \
+            "Mount boot partition in \"${_MOUNTPOINT_PATH}boot/\"." && \
+        mkdir --parents "${_MOUNTPOINT_PATH}boot/" && \
+        mount "${_OUTPUT_SYSTEM}1" "${_MOUNTPOINT_PATH}boot/" \
+            1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
         # Make a uniqe array.
-        _PACKAGES=$(echo "${_PACKAGES[*]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')
+        _PACKAGES=$(echo "${_PACKAGES[*]}" | tr ' ' '\n' | sort -u | tr '\n' \
+            ' ')
         return $?
     }
 
@@ -1274,7 +1276,7 @@ EOF
             _PACKAGES+=' arch-install-scripts' && \
             if echo "$_OUTPUT_SYSTEM" | grep --quiet --extended-regexp '[0-9]$'
             then
-                archInstallPrepareSystemPartition || \
+                archInstallFormatSystemPartition || \
                 archInstallLog 'error' 'System partition creation failed.'
             else
                 if [ archInstallDetermineAutoPartitioning ]; then
