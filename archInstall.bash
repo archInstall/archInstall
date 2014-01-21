@@ -627,7 +627,7 @@ EOF
             shift
             "$@" 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
             return $?
-        elif [ -b "$_OUTPUT_SYSTEM" ]; then
+        else
             if [[ "$_PREVENT_USING_NATIVE_ARCH_CHANGE_ROOT" == 'no' ]] && \
                 hash arch-chroot 1>"$_STANDARD_OUTPUT" 2>/dev/null
             then
@@ -637,7 +637,6 @@ EOF
             archInstallChangeRootViaMount "$@"
             return $?
         fi
-        archInstallPerformChangeRoot "$@"
         return $?
     }
     function archInstallChangeRootViaMount() {
