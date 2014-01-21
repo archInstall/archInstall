@@ -817,12 +817,15 @@ EOF
             --only-matching '^[0-9]+: .+: ' | sed --regexp-extended \
             's/^[0-9]+: (.+): $/\1/g')
         do
-            archInstallLog \
-                "Enable dhcp service on network device \"$networkDeviceName\"." && \
-            ln --symbolic --force \
-                '/usr/lib/systemd/system/netctl-auto@.service' \
-                "${_MOUNTPOINT_PATH}etc/systemd/system/multi-user.target.wants/netctl-auto@${networkDeviceName}.service" \
-                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
+            if [[ ! "$(echo "$networkDeviceName" | grep --extended-regexp \
+                  '^(lo|loopback|localhost)$')" ]]; then
+                archInstallLog \
+                    "Enable dhcp service on network device \"$networkDeviceName\"." && \
+                ln --symbolic --force \
+                    '/usr/lib/systemd/system/netctl-auto@.service' \
+                    "${_MOUNTPOINT_PATH}etc/systemd/system/multi-user.target.wants/netctl-auto@${networkDeviceName}.service" \
+                    1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
+            fi
         done
         local serviceName && \
         for serviceName in ${_NEEDED_SERVICES[*]}; do
