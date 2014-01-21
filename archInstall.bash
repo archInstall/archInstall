@@ -66,6 +66,7 @@
 #     grub-bios  - A full featured boot manager.
 #     blockdev   - Call block device ioctls from the command line.
 #     gdisk      - Interactive GUID partition table (GPT) manipulator.
+#     btrfs      - Control a btrfs filesystem.
 
 # Optional dependencies:
 
