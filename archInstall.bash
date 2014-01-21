@@ -792,9 +792,14 @@ EOF
         archInstallLog \
             "Enable dhcp service on all found ethernet adapter." && \
         ln --symbolic --force '/usr/lib/systemd/system/netctl-auto@.service' \
-            "${_MOUNTPOINT_PATH}etc/systemd/system/multi-user.target.wants/netctl-auto@wlp3s0.service" && \
+            "${_MOUNTPOINT_PATH}etc/systemd/system/multi-user.target.wants/netctl-auto@wlp3s0.service" \
+            1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
         ln --symbolic --force '/usr/lib/systemd/system/netctl-ifplugd@.service' \
-            "${_MOUNTPOINT_PATH}etc/systemd/system/multi-user.target.wants/netctl-ifplugd@enp0s25.service" && \
+            "${_MOUNTPOINT_PATH}etc/systemd/system/multi-user.target.wants/netctl-ifplugd@enp0s25.service" \
+            1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
+        ln --symbolic --force '/usr/lib/systemd/system/netctl-ifplugd@.service' \
+            "${_MOUNTPOINT_PATH}etc/systemd/system/multi-user.target.wants/netctl-ifplugd@eth0.service" \
+            1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
         local userName && \
         for userName in ${_USER_NAMES[*]}; do
             # NOTE: We could only create a home directory with right rights if
