@@ -177,8 +177,8 @@ function archInstall() {
         "$_SCOPE" _ERROR_OUTPUT=/dev/null
         # This list should be in the order they should be mounted after use.
         # NOTE: Mount binds has to be declared as absolute paths.
-        local neededMountpoints=(proc sys dev dev/pts run run/shm tmp \
-            etc/resolv.conf)
+        local neededMountpoints=(/proc /sys /dev /dev/pts /run /run/shm /tmp \
+            /etc/resolv.conf)
         "$_SCOPE" _NEEDED_MOUNTPOINTS="${neededMountpoints[*]}"
     fi
 
@@ -698,7 +698,7 @@ EOF
                     archInstallInfo 'error' \
                         "Mountpoint \"$mountpointPath\" couldn't be handled."
                 fi
-                returnCode=$?
+                ! test $? && returnCode=$?
             fi
         done
         test $returnCode && archInstallPerformChangeRoot "$@"
