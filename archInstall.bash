@@ -178,7 +178,7 @@ function archInstall() {
         # This list should be in the order they should be mounted after use.
         # NOTE: Mount binds has to be declared as absolute paths.
         local neededMountpoints=(proc sys dev dev/pts run run/shm tmp \
-            /etc/resolv.conf)
+            etc/resolv.conf)
         "$_SCOPE" _NEEDED_MOUNTPOINTS="${neededMountpoints[*]}"
     fi
 
@@ -1328,8 +1328,8 @@ EOF
         fi
         if [ -d "$_OUTPUT_SYSTEM" ]; then
             _MOUNTPOINT_PATH="$_OUTPUT_SYSTEM" && \
-            if [[ ! "$_OUTPUT_SYSTEM" =~ .*/$ ]]; then
-                _MOUNTPOINT_PATH="$_OUTPUT_SYSTEM"/
+            if [[ ! "$_MOUNTPOINT_PATH" =~ .*/$ ]]; then
+                _MOUNTPOINT_PATH+='/'
             fi
         elif [ -b "$_OUTPUT_SYSTEM" ]; then
             archInstallPerformDependencyCheck \
