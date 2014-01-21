@@ -65,6 +65,7 @@
 #     efibootmgr - Manipulate the EFI Boot Manager.
 #     grub-bios  - A full featured boot manager.
 #     blockdev   - Call block device ioctls from the command line.
+#     gdisk      - Interactive GUID partition table (GPT) manipulator.
 
 # Optional dependencies:
 
@@ -126,14 +127,11 @@ function archInstall() {
         "$_SCOPE" _AUTO_PARTITIONING=''
 
         "$_SCOPE" _BOOT_PARTITION_LABEL='uefiBoot'
-        "$_SCOPE" _SWAP_PARTITION_LABEL='swap'
         "$_SCOPE" _SYSTEM_PARTITION_LABEL='system'
 
         # NOTE: A FAT32 partition has to be at least 512 MB large.
-        "$_SCOPE" _BOOT_SPACE_IN_BYTE=$((512 * 1024 ** 2))
-        "$_SCOPE" _NEEDED_SYSTEM_SPACE_IN_BYTE=$((512 * 1024 ** 2))
-        "$_SCOPE" _MINIMAL_SYSTEM_SPACE_IN_PROCENT=40
-        "$_SCOPE" _MAXIMAL_SWAP_SPACE_IN_PROCENT=20
+        "$_SCOPE" _BOOT_SPACE_IN_MEGA_BYTE=512
+        "$_SCOPE" _NEEDED_SYSTEM_SPACE_IN_MEGA_BYTE=512
 
         "$_SCOPE" _INSTALL_COMMON_ADDITIONAL_PACKAGES='no'
         local additionalPackages=()
@@ -210,7 +208,7 @@ EOF
     }
     function archInstallPrintCommandLineOptionDescriptions() {
         # Prints descriptions about each available command line option.
-        # NOTE; All letters are used for short options.
+        # NOTE; All letters are used for short options except "i" and "s".
         # NOTE: "-k" and "--key-map-configuration" isn't needed in the future.
         cat << EOF
     -h --help Shows this help message.
@@ -269,33 +267,19 @@ EOF
     -e --boot-partition-label LABEL Partition label for uefi boot partition
         (default: "$_BOOT_PARTITION_LABEL").
 
-    -s --swap-partition-label LABEL Partition label for swap partition
-        (default: "$_SWAP_PARTITION_LABEL").
-
     -g --system-partition-label LABEL Partition label for system partition
         (default: "$_SYSTEM_PARTITION_LABEL").
 
 
-    -w --boot-space-in-byte NUMBER_OF_BYTES In case if selected auto
-        partitioning you can define the minimum space needed for your boot
-        partition (default: "$_BOOT_SPACE_IN_BYTE byte"). This partition
+    -w --boot-space-in-mega-byte NUMBER In case if selected auto partitioning
+        you can define the minimum space needed for your boot partition
+        (default: "$_BOOT_SPACE_IN_MEGA_BYTE MegaByte"). This partition
         is used for kernel and initramfs only.
 
-    -q --needed-system-space-in-byte NUMBER_OF_BYTES In case if selected auto
+    -q --needed-system-space-in-mega-byte NUMBER In case if selected auto
         partitioning you can define the minimum space needed for your system
-        partition (default: "$_NEEDED_SYSTEM_SPACE_IN_BYTE byte"). This
-        partition is used for the whole operating system.
-
-    -qq --minimal-system-space-in-procent PROCENT Define how much space should
-        be at least used for your system partition. Remaining space will be
-        used for your system and swap partition
-        (default: "$_MINIMAL_SYSTEM_SPACE_IN_PROCENT%").
-
-    -i --maximal-swap-space-in-procent PROCENT Define how much procent you
-        want to immolate for swap space
-        (default: "$_MAXIMAL_SWAP_SPACE_IN_PROCENT%").
-        Note that $__NAME__ will try to take the same space as your installed
-        memory provides to support hibernation.
+        partition (default: "$_NEEDED_SYSTEM_SPACE_IN_MEGA_BYTE MegaByte").
+        This partition is used for the whole operating system.
 
 
     -z --install-common-additional-packages,
@@ -417,30 +401,15 @@ EOF
                     _SYSTEM_PARTITION_LABEL="$1"
                     shift
                     ;;
-                -s|--swap-partition-label)
-                    shift
-                    _SWAP_PARTITION_LABEL="$1"
-                    shift
-                    ;;
 
-                -w|--boot-space-in-byte)
+                -w|--boot-space-in-mega-byte)
                     shift
-                    _BOOT_SPACE_IN_BYTE="$1"
-                    shift
-                    ;;
-                -q|--needed-system-space-in-byte)
-                    shift
-                    _NEEDED_SYSTEM_IN_BYTE="$1"
+                    _BOOT_SPACE_IN_MEGA_BYTE="$1"
                     shift
                     ;;
-                -qq|--minimal-system-space-in-procent)
+                -q|--needed-system-space-in-mega-byte)
                     shift
-                    _MINIMAL_SYSTEM_SPACE_IN_PROCENT="$1"
-                    shift
-                    ;;
-                -i|--maximal-swap-space-in-procent)
-                    shift
-                    _MAXIMAL_SWAP_SPACE_IN_PROCENT="$1"
+                    _NEEDED_SYSTEM_IN_MEGA_BYTE="$1"
                     shift
                     ;;
 
@@ -998,74 +967,41 @@ EOF
         # Performs the auto partitioning.
         if [[ $(echo "$_AUTO_PARTITIONING" | tr '[A-Z]' '[a-z]') == 'yes' ]]
         then
-            archInstallLog 'Check for suitable device divisions.'
-            local blockDeviceSpaceInByte=$(blockdev --getsize64 \
-                "$_OUTPUT_SYSTEM") && \
-            if [[ $(($_NEEDED_SYSTEM_SPACE_IN_BYTE + $_BOOT_SPACE_IN_BYTE)) \
-                  -le $blockDeviceSpaceInByte ]]; then
-                local bootSpaceInProcent=$((100 * $_BOOT_SPACE_IN_BYTE / \
-                    $blockDeviceSpaceInByte)) && \
-                local systemSpaceInProcent=$((100 * \
-                    $_NEEDED_SYSTEM_SPACE_IN_BYTE / $blockDeviceSpaceInByte)) && \
-                local memorySpaceInByte=$(($(cat /proc/meminfo | grep \
-                    --extended-regexp --only-matching 'MemTotal: +[0-9]+ kB' | \
-                    sed --regexp-extended 's/[^0-9]+([0-9]+)[^0-9]+/\1/g') * 1024))
-                local swapSpaceInProcent=$((100 * $memorySpaceInByte / \
-                    $blockDeviceSpaceInByte)) && \
-                if [[ $_MAXIMAL_SWAP_SPACE_IN_PROCENT -lt $swapSpaceInProcent ]]
-                then
-                    swapSpaceInProcent=$_MAXIMAL_SWAP_SPACE_IN_PROCENT
-                fi
-                if [[ $systemSpaceInProcent -lt $_MINIMAL_SYSTEM_SPACE_IN_PROCENT ]]
-                then
-                    systemSpaceInProcent=$_MINIMAL_SYSTEM_SPACE_IN_PROCENT
-                fi
-                local let systemPlusBootSpaceInProcent=$(($bootSpaceInProcent + \
-                    $systemSpaceInProcent)) && \
-                local let swapPlusSystemAndBootSpaceInProcent=$(($bootSpaceInProcent \
-                    + $systemSpaceInProcent + $swapSpaceInProcent)) && \
-                archInstallLog 'Check block device size.' && \
-                archInstallLog 'Delete old partition table.' && \
-                # TODO
-                parted $_OUTPUT_SYSTEM mklabel msdos --script \
-                    1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
-                archInstallLog 'Delete first three partitions.' && \
-                (parted "$_OUTPUT_SYSTEM" rm 1 1>"$_STANDARD_OUTPUT" 2>/dev/null \
-                    || true) && \
-                (parted "$_OUTPUT_SYSTEM" rm 2 1>"$_STANDARD_OUTPUT" 2>/dev/null \
-                    || true) && \
-                (parted "$_OUTPUT_SYSTEM" rm 3 1>"$_STANDARD_OUTPUT" 2>/dev/null \
-                    || true) && \
-                archInstallLog 'Create boot partition.' && \
-                parted "$_OUTPUT_SYSTEM" mkpart primary ext4 2048s \
-                    ${vootSpaceInProcent}% --script set 1 boot on \
-                    1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
-                if [[ ${_MINIMAL_SYSTEM_SPACE_IN_PROCENT} -lt 100 ]]; then
-                    archInstallLog 'Create swap partition.' && \
-                    parted "$_OUTPUT_SYSTEM" mkpart primary linux-swap \
-                        ${neededBootSpaceInProcent}% ${swapPlusBootSpaceInProcent}% \
-                        --script 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
-                    archInstallLog 'Create system partition.' && \
-                    parted "$_OUTPUT_SYSTEM" mkpart primary ext4 \
-                        ${swapPlusBootSpaceInProcent}% 100% --script \
-                        1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
-                fi
-                #
+            archInstallLog 'Check block device size.' && \
+            local blockDeviceSpaceInMegaByte=$(($(blockdev --getsize64 \
+                "$_OUTPUT_SYSTEM") * 1024 ** 2)) && \
+            if [[ $(($_NEEDED_SYSTEM_SPACE_IN_MEGA_BYTE + \
+                  $_BOOT_SPACE_IN_MEGA_BYTE)) -le \
+                  $blockDeviceSpaceInMegaByte ]]; then
+                archInstallLog 'Create boot and system partitions.' && \
+                gdisk "$_OUTPUT_SYSTEM" <<EOF
+o
+Y
+n
+
+
+${_BOOT_SPACE_IN_MEGA_BYTE}M
+ef00
+n
+
+
+
+w
+Y
+EOF
             else
                 archInstallLog 'error' "Not enough space on \"$_OUTPUT_SYSTEM\" (\"$blockDeviceSpaceInByte\" byte). We need at least \"$(($_NEEDED_SYSTEM_SPACE_IN_BYTE + $_BOOT_SPACE_IN_BYTE))\" byte."
             fi
         else
-            # TODO
             archInstallLog \
-                "At least you have to create two partitions. The first one will be used as boot partition labeled to \"${_BOOT_PARTITION_LABEL}\" and second one will be used as system partition and labeled to \"${_SYSTEM_PARTITION_LABEL}\". The third one will be used as swap partition labeled to \"$_SWAP_PARTITION_LABEL\" Press Enter to continue." && \
+                "At least you have to create two partitions. The first one will be used as boot partition labeled to \"${_BOOT_PARTITION_LABEL}\" and second one will be used as system partition and labeled to \"${_SYSTEM_PARTITION_LABEL}\". Press Enter to continue." && \
             read && \
             archInstallLog \
                 'Show blockdevices. Press Enter to continue.' && \
             lsblk 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
             read && \
             archInstallLog 'Create partitions manually.' && \
-            cfdisk 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
-            #
+            gdisk "$_OUTPUT_SYSTEM" 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
         fi
         return $?
     }
@@ -1083,7 +1019,6 @@ EOF
 PARTLABEL=$_BOOT_PARTITION_LABEL   /boot/        vfat   rw,relatime,fmask=0077,dmask=0077,codepage=437,iocharset=iso8859-1,shortname=mixed,errors=remount-ro 0      0
 # "compress=lzo" has lower compression ratio by better cpu performance.
 PARTLABEL=$_SYSTEM_PARTITION_LABEL /             btrfs  relatime,ssd,discard,space_cache,autodefrag,inode_cache,subvol=root,compress=zlib                    0      0
-PARTLABEL=$_SWAP_PARTITION_LABEL   none          swap   defaults                                                                                             0      0
 EOF
             1>>"${_MOUNTPOINT_PATH}etc/fstab" 2>"$_ERROR_OUTPUT"
         fi
@@ -1197,7 +1132,7 @@ EOF
         umount -f "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" 2>/dev/null
         swapoff "${_OUTPUT_SYSTEM}"* 1>"$_STANDARD_OUTPUT" 2>/dev/null
         archInstallLog \
-            'Make partitions. Make a boot, system and swap partition.' && \
+            'Make partitions. Make a boot and system partition.' && \
         archInstallMakePartitions && \
         archInstallLog 'Format partitions.' && \
         archInstallFormatPartitions
@@ -1235,21 +1170,10 @@ EOF
             1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
        return $?
     }
-    function archInstallPrepareSwapPartition() {
-        # Prepares the swap partition.
-        if [ -b "${_OUTPUT_SYSTEM}3" ]; then
-            archInstallLog \
-                "Make swap partition at \"${_OUTPUT_SYSTEM}2\"." && \
-            mkswap "${_OUTPUT_SYSTEM}2" -L "$_SWAP_PARTITION_LABEL" \
-                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
-            return $?
-        fi
-    }
     function archInstallFormatPartitions() {
         # Performs formating part.
         archInstallPrepareSystemPartition && \
-        archInstallPrepareBootPartition && \
-        archInstallPrepareSwapPartition
+        archInstallPrepareBootPartition
         return $?
     }
     function archInstallIntegrateBootLoader() {
