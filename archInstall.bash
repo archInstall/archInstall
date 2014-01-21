@@ -974,7 +974,7 @@ EOF
                   $_BOOT_SPACE_IN_MEGA_BYTE)) -le \
                   $blockDeviceSpaceInMegaByte ]]; then
                 archInstallLog 'Create boot and system partitions.' && \
-                gdisk "$_OUTPUT_SYSTEM" <<EOF
+                gdisk "$_OUTPUT_SYSTEM" << EOF
 o
 Y
 n
@@ -996,6 +996,7 @@ $_SYSTEM_PARTITION_LABEL
 w
 Y
 EOF
+                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
             else
                 archInstallLog 'error' "Not enough space on \"$_OUTPUT_SYSTEM\" (\"$blockDeviceSpaceInByte\" byte). We need at least \"$(($_NEEDED_SYSTEM_SPACE_IN_BYTE + $_BOOT_SPACE_IN_BYTE))\" byte."
             fi
@@ -1234,17 +1235,19 @@ EOF
             2>"$_ERROR_OUTPUT" && \
         archInstallLog \
             "Clear previous installations in \"$_OUTPUT_SYSTEM\" and set right rights." && \
-        rm "$_MOUNTPOINT_PATH"* --recursive --force 1>"$_STANDARD_OUTPUT" \
-            2>"$_ERROR_OUTPUT" && \
-        chmod 755 "$_MOUNTPOINT_PATH" && \
         archInstallLog 'Mount system partition.' && \
         mount "$outputDevice" "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" \
+            2>"$_ERROR_OUTPUT" && \
+        rm "$_MOUNTPOINT_PATH"* --recursive --force 1>"$_STANDARD_OUTPUT" \
             2>"$_ERROR_OUTPUT" && \
         archInstallLog \
             "Mount boot partition in \"${_MOUNTPOINT_PATH}boot/\"." && \
         mkdir --parents "${_MOUNTPOINT_PATH}boot/" && \
         mount "${_OUTPUT_SYSTEM}1" "${_MOUNTPOINT_PATH}boot/" \
             1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
+        rm "${_MOUNTPOINT_PATH}boot/"* --recursive --force \
+            1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
+        chmod 755 "$_MOUNTPOINT_PATH" && \
         # Make a uniqe array.
         _PACKAGES=$(echo "${_PACKAGES[*]}" | tr ' ' '\n' | sort -u | tr '\n' \
             ' ')
