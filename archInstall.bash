@@ -17,8 +17,7 @@
 #    naming 3.0 unported license.
 #    see http://creativecommons.org/licenses/by/3.0/deed.de
 
-# Examples:
-
+# Examples
 #     # Start install progress command (Assuming internet is available):
 #     wget \
 #         https://raw.github.com/archInstall/archInstall/master/archInstall.bash \
@@ -33,10 +32,7 @@
 # Note that you only get very necessary output until you provide "--verbose" as
 # commandline options.
 
-# Dependencies:
-
-# TODO make a sanity check.
-
+# Dependencies
 #     bash (or any bash like shell)
 #     test       - Check file types and compare values (part of the shell).
 #     shift      - Shifts the command line arguments (part of the shell).
@@ -65,18 +61,16 @@
 #                  name) for lines containing a match to the given PATTERN. By
 #                  default, grep prints the matching lines.
 
-# Dependencies for blockdevice integration:
-
-#     blockdev      - Call block device ioctls from the command line (part of \
-#                     util-linux).
-#     efibootmgr    - Manipulate the EFI Boot Manager (part of efibootmgr).
-#     gdisk         - Interactive GUID partition table (GPT) manipulator
-#                     (part of gptfdisk).
-#     btrfs         - Control a btrfs filesystem (part of btrfs-progs).
+# Dependencies for blockdevice integration
+#     blockdev   - Call block device ioctls from the command line (part of \
+#                  util-linux).
+#     efibootmgr - Manipulate the EFI Boot Manager (part of efibootmgr).
+#     gdisk      - Interactive GUID partition table (GPT) manipulator (part of
+#                  gptfdisk).
+#     btrfs      - Control a btrfs filesystem (part of btrfs-progs).
 
 # Optional dependencies for smart dos filesystem labeling, installing without
-# root permissions or automatic grub integration:
-
+# root permissions or automatic grub integration
 #     dosfslabel  - Handle dos file systems (part of dosfstools).
 #     arch-chroot - Performs an arch chroot with api file system binding (part
 #                   of arch-install-scripts).
@@ -93,11 +87,9 @@ __NAME__='archInstall'
 function archInstall() {
     # Provides the main module scope.
 
-# region configuration
+# region properties
 
-    # region properties
-
-        # region command line arguments
+    # region command line arguments
 
     local _SCOPE='local' && \
     if [[ $(echo "\"$@\"" | grep --extended-regexp \
@@ -150,8 +142,15 @@ function archInstall() {
         local neededServices=()
         "$_SCOPE" _NEEDED_SERVICES="${neededServices[*]}"
 
-        # endregion
+    # endregion
 
+        local dependencies=(bash test shift mount umount mountpoint blkid \
+            chroot echo ln touch sync mktemp cat uniq uname rm sed wget xz \
+            tar grep)
+        "$_SCOPE" _DEPENDENCIES="${dependencies[*]}"
+        local blockIntegrationDependencies=(blockdev efibootmgr gdisk btrfs)
+        "$_SCOPE" _BLOCK_INTEGRATION_DEPENDENCIES=\
+            "${blockIntegrationDependencies[*]}"
         # Define where to mount temporary new filesystem.
         # NOTE: Path has to be end with a system specified delimiter.
         "$_SCOPE" _MOUNTPOINT_PATH='/mnt/'
@@ -182,8 +181,6 @@ function archInstall() {
             /etc/resolv.conf)
         "$_SCOPE" _NEEDED_MOUNTPOINTS="${neededMountpoints[*]}"
     fi
-
-    # endregion
 
 # endregion
 
@@ -603,6 +600,19 @@ EOF
 
         # region change root functions
 
+    function archInstallPerformDependencyCheck() {
+        # This function check if all given dependencies are present.
+        local result=0
+        local dependency
+        for dependency in ${1[*]}; do
+            if ! hash "$dependency" 1>"$_STANDARD_OUTPUT" 2>/dev/null; then
+                archInstallLog 'critical' \
+                    "Needed dependency \"$dependency\" isn't available." && \
+                result=1
+            fi
+        done
+        return $result
+    }
     function archInstallChangeRootToMountPoint() {
         # This function performs a changeroot to currently set mountpoint path.
         archInstallChangeRoot "$_MOUNTPOINT_PATH" "$@"
@@ -1276,6 +1286,8 @@ EOF
 # region controller
 
     if [[ "$0" == *"${__NAME__}.bash" ]]; then
+        archInstallPerformDependencyCheck "$_DEPENDENCIES" || \
+            archInstallLog 'error' 'Satisfying main dependencies failed.'
         archInstallCommandLineInterface "$@" || return $?
         _PACKAGES="${_BASIC_PACKAGES[*]} ${_ADDITIONAL_PACKAGES[*]}" && \
         if [ "$_INSTALL_COMMON_ADDITIONAL_PACKAGES" == 'yes' ]; then
@@ -1291,6 +1303,10 @@ EOF
                 _MOUNTPOINT_PATH="$_OUTPUT_SYSTEM"/
             fi
         elif [ -b "$_OUTPUT_SYSTEM" ]; then
+            archInstallPerformDependencyCheck \
+                "$_BLOCK_INTEGRATION_DEPENDENCIES" || \
+            archInstallLog 'error' \
+                'Satisfying block device dependencies failed.'
             _PACKAGES+=' arch-install-scripts' && \
             if echo "$_OUTPUT_SYSTEM" | grep --quiet --extended-regexp '[0-9]$'
             then
@@ -1299,10 +1315,9 @@ EOF
             else
                 if [ archInstallDetermineAutoPartitioning ]; then
                     archInstallPrepareBlockdevices || \
-                    archInstallLog 'error' \
-                        'Preparing blockdevices failed.'
+                    archInstallLog 'error' 'Preparing blockdevices failed.'
                 else
-                    archInstallLog 'error' 'Autopartitioning failed.'
+                    archInstallLog 'error' 'Auto partitioning failed.'
                 fi
             fi
         else
