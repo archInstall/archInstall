@@ -35,49 +35,56 @@
 
 # Dependencies:
 
+# TODO make a sanity check.
+
 #     bash (or any bash like shell)
-#     test   - Check file types and compare values.
-#     sed    - Stream editor for filtering and transforming text.
-#     wget   - The non-interactive network downloader.
-#     xz     - Compress or decompress .xz and lzma files.
-#     tar    - The GNU version of the tar archiving utility.
-#     mount  - Filesystem mounter.
-#     umount - Filesystem unmounter.
-#     chroot - Run command or interactive shell with special root directory.
-#     echo   - Display a line of text.
-#     ln     - Make links between files.
-#     touch  - Change file timestamps or creates them.
-#     grep   - Searches the named input files (or standard input if no files
-#              are named, or if a single hyphen-minus (-) is given as file
-#              name) for lines containing a match to the given PATTERN. By
-#              default, grep prints the matching lines.
-#     shift  - Shifts the command line arguments.
-#     sync   - Flushs file system buffers.
-#     mktemp - Create a temporary file or directory.
-#     cat    - Concatenate files and print on the standard output.
-#     blkid  - Locate or print block device attributes.
-#     uniq   - Report or omit repeated lines.
-#     uname  - Prints system informations.
-#     rm     - Remove files or directories.
+#     test       - Check file types and compare values (part of the shell).
+#     shift      - Shifts the command line arguments (part of the shell).
+#     mount      - Filesystem mounter (part of util-linux).
+#     umount     - Filesystem unmounter (part of util-linux).
+#     mountpoint - See if a directory is a mountpoint (part of util-linux).
+#     blkid      - Locate or print block device attributes (part of util-linux).
+#     chroot     - Run command or interactive shell with special root directory
+#                  (part of coreutils).
+#     echo       - Display a line of text (part of coreutils).
+#     ln         - Make links between files (part of coreutils).
+#     touch      - Change file timestamps or creates them (part of coreutils).
+#     sync       - Flushs file system buffers (part of coreutils).
+#     mktemp     - Create a temporary file or directory (part of coreutils).
+#     cat        - Concatenate files and print on the standard output (part of
+#                  coreutils).
+#     uniq       - Report or omit repeated lines (part of coreutils).
+#     uname      - Prints system informations (part of coreutils).
+#     rm         - Remove files or directories (part of coreutils).
+#     sed        - Stream editor for filtering and transforming text.
+#     wget       - The non-interactive network downloader.
+#     xz         - Compress or decompress .xz and lzma files.
+#     tar        - The GNU version of the tar archiving utility.
+#     grep       - Searches the named input files (or standard input if no files
+#                  are named, or if a single hyphen-minus (-) is given as file
+#                  name) for lines containing a match to the given PATTERN. By
+#                  default, grep prints the matching lines.
 
 # Dependencies for blockdevice integration:
 
-#     efibootmgr - Manipulate the EFI Boot Manager.
-#     grub-bios  - A full featured boot manager.
-#     blockdev   - Call block device ioctls from the command line.
-#     gdisk      - Interactive GUID partition table (GPT) manipulator.
-#     btrfs      - Control a btrfs filesystem.
+#     blockdev      - Call block device ioctls from the command line (part of \
+#                     util-linux).
+#     efibootmgr    - Manipulate the EFI Boot Manager (part of efibootmgr).
+#     gdisk         - Interactive GUID partition table (GPT) manipulator
+#                     (part of gptfdisk).
+#     btrfs         - Control a btrfs filesystem (part of btrfs-progs).
 
-# Optional dependencies:
+# Optional dependencies for smart dos filesystem labeling, installing without
+# root permissions or automatic grub integration:
 
-#     arch-install-scripts - Little framework to generate a linux from scratch.
-#     fakeroot             - Run a command in an environment faking root
-#                            privileges for file manipulation.
-#     fakechroot           - Wraps some c-lib functions to enable programs like
-#                            "chroot" running without root privileges.
-#     os-prober            - Detects presence of other operating systems.
-#     mountpoint           - See if a directory is a mountpoint.
-#     dosfstools           - Handle dos file systems.
+#     dosfslabel  - Handle dos file systems (part of dosfstools).
+#     arch-chroot - Performs an arch chroot with api file system binding (part
+#                   of arch-install-scripts).
+#     fakeroot    - Run a command in an environment faking root privileges for
+#                   file manipulation.
+#     fakechroot  - Wraps some c-lib functions to enable programs like "chroot"
+#                   running without root privileges.
+#     os-prober   - Detects presence of other operating systems.
 
 __NAME__='archInstall'
 
@@ -129,6 +136,9 @@ function archInstall() {
 
         "$_SCOPE" _BOOT_PARTITION_LABEL='uefiBoot'
         "$_SCOPE" _SYSTEM_PARTITION_LABEL='system'
+
+        "$_SCOPE" _BOOT_ENTRY_LABEL='archLinux'
+        "$_SCOPE" _FALLBACK_BOOT_ENTRY_LABEL='archLinuxFallback'
 
         # NOTE: A FAT32 partition has to be at least 512 MB large.
         "$_SCOPE" _BOOT_SPACE_IN_MEGA_BYTE=512
@@ -209,7 +219,7 @@ EOF
     }
     function archInstallPrintCommandLineOptionDescriptions() {
         # Prints descriptions about each available command line option.
-        # NOTE; All letters are used for short options except "i" and "s".
+        # NOTE; All letters are used for short options.
         # NOTE: "-k" and "--key-map-configuration" isn't needed in the future.
         cat << EOF
     -h --help Shows this help message.
@@ -270,6 +280,12 @@ EOF
 
     -g --system-partition-label LABEL Partition label for system partition
         (default: "$_SYSTEM_PARTITION_LABEL").
+
+
+    -i --boot-entry-label LABEL Boot entry label
+        (default: "$_BOOT_ENTRY_LABEL").
+    -s --fallback-boot-entry-label LABEL Fallback boot entry label
+        (default: "$_FALLBACK_BOOT_ENTRY_LABEL").
 
 
     -w --boot-space-in-mega-byte NUMBER In case if selected auto partitioning
@@ -400,6 +416,17 @@ EOF
                 -g|--system-partition-label)
                     shift
                     _SYSTEM_PARTITION_LABEL="$1"
+                    shift
+                    ;;
+
+                -i|--boot-entry-label)
+                    shift
+                    _BOOT_ENTRY_LABEL="$1"
+                    shift
+                    ;;
+                -s|--fallback-boot-entry-label)
+                    shift
+                    _FALLBACK_BOOT_ENTRY_LABEL="$1"
                     shift
                     ;;
 
@@ -1033,28 +1060,6 @@ EOF
         fi
         return $?
     }
-    function archInstallHandleBootLoader() {
-        # Reconfigures or installs a boot loader.
-        if echo "$_OUTPUT_SYSTEM" | grep --quiet --extended-regexp \
-            '[0-9]$'
-        then
-            if hash grub-mkconfig 1>"$_STANDARD_OUTPUT" 2>/dev/null; then
-                archInstallLog \
-                    'Update boot manager configuration on host system.'
-                hash os-prober 1>"$_STANDARD_OUTPUT" 2>/dev/null || \
-                archInstallLog 'warning' \
-                    "Grub may not find your new installed system because \"os-prober\" isn't installed. If your system wasn't found install it and run \"grub-mkconfig -o /boot/grub/grub.cfg\"."
-                grub-mkconfig --output /boot/grub/grub.cfg 1>"$_STANDARD_OUTPUT" \
-                    2>"$_ERROR_OUTPUT"
-            else
-                archInstallLog 'warning' \
-                    "Grub doesn't seem to be installed. Creating a boot entry failed."
-            fi
-        else
-            archInstallIntegrateBootLoader
-        fi
-        return $?
-    }
     function archInstallUnmountInstalledSystem() {
         # Unmount previous installed system.
         archInstallLog 'Unmount installed system.' && \
@@ -1069,7 +1074,7 @@ EOF
         # Reboots into fresh installed system if previous defined.
         if [ -b "$_OUTPUT_SYSTEM" ]; then
             archInstallGenerateFstabConfigurationFile && \
-            archInstallHandleBootLoader && \
+            archInstallAddBootEntries && \
             archInstallUnmountInstalledSystem
             local returnCode=$? && \
             if [[ $returnCode == 0 ]] && \
@@ -1188,18 +1193,18 @@ EOF
         archInstallFormatBootPartition
         return $?
     }
-    function archInstallIntegrateBootLoader() {
+    function archInstallAddBootEntries() {
         # Creates an uefi boot entry.
         if hash efibootmgr 1>"$_STANDARD_OUTPUT" 2>/dev/null; then
             archInstallLog 'Configure efi boot manager.' && \
             archInstallChangeRootToMountPoint efibootmgr --create --disk \
                 "$_OUTPUT_SYSTEM" --part 1 -l '\vmlinuz-linux' --label \
-                archLinux --unicode \
+                "$_BOOT_ENTRY_LABEL" --unicode \
                 'initrd=\initramfs-linux.img root=PARTLABEL=system rw rootflags=subvol=root quiet loglevel=2 acpi_osi="!Windows 2012"' \
                 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
             archInstallChangeRootToMountPoint efibootmgr --create --disk \
                 "$_OUTPUT_SYSTEM" --part 1 -l '\vmlinuz-linux' --label \
-                archLinuxFallback --unicode \
+                "$_FALLBACK_BOOT_ENTRY_LABEL" --unicode \
                 'initrd=\initramfs-linux-fallback.img acpi_osi="!Windows 2012"' \
                 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
         else
