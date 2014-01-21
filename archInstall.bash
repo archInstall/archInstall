@@ -653,10 +653,6 @@ EOF
                     1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
                 returnCode=$?
             fi
-            # NOTE: "mount-bind" approach.
-            #mount --options bind "/${mountpointPath}" \
-            #    "${_MOUNTPOINT_PATH}${mountpointPath}" 1>"$_STANDARD_OUTPUT" \
-            #    2>"$_ERROR_OUTPUT" || \
             if ! mountpoint -q "${_MOUNTPOINT_PATH}${mountpointPath}" && \
                 test $returnCode
             then
@@ -931,7 +927,7 @@ EOF
         _NEEDED_PACKAGES+=" $1 " && \
         _NEEDED_PACKAGES="$(echo "$_NEEDED_PACKAGES" | sed --regexp-extended \
             's/ +/ /g')" && \
-        local result && \
+        local result=0 && \
         local \
             packageDirectoryPath=$(archInstallDeterminePackageDirectoryName \
             "$@") && \
@@ -951,7 +947,6 @@ EOF
                 archInstallLog 'warning' \
                     "Needed package \"$packageName\" for \"$1\" couldn't be found in \"$2\"."
             done
-            resul=$?
         else
             result=1
         fi
