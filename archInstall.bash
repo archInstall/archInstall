@@ -1146,8 +1146,8 @@ EOF
             outputDevice="${_OUTPUT_SYSTEM}2"
         fi
         archInstallLog \
-            "Make system partition at \"${_OUTPUT_SYSTEM}3\"."
-        mkfs.btrfs "$outputDevice" --label "$_SYSTEM_PARTITION_LABEL" \
+            "Make system partition at \"$outputDevice\"."
+        mkfs.btrfs "$outputDevice" --label --force "$_SYSTEM_PARTITION_LABEL" \
             1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
         archInstallLog 'Mount system partition.' && \
         mount "$outputDevice" "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" \
