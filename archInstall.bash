@@ -70,7 +70,7 @@
 #     btrfs      - Control a btrfs filesystem (part of btrfs-progs).
 
 # Optional dependencies for smart dos filesystem labeling, installing without
-# root permissions or automatic grub integration
+# root permissions or automatic network configuration.
 #     dosfslabel  - Handle dos file systems (part of dosfstools).
 #     arch-chroot - Performs an arch chroot with api file system binding (part
 #                   of arch-install-scripts).
@@ -79,6 +79,7 @@
 #     fakechroot  - Wraps some c-lib functions to enable programs like "chroot"
 #                   running without root privileges.
 #     os-prober   - Detects presence of other operating systems.
+#     ip          - Determines network adapter (part of iproute2).
 
 __NAME__='archInstall'
 
@@ -780,7 +781,7 @@ EOF
         fi
         archInstallLog 'Set hosts.' && \
         archInstallGetHostsContent "$_HOSTNAME" \
-            1>"${_MOUNTPOINT_PATH}etc/hosts"  2>"$_ERROR_OUTPUT" && \
+            1>"${_MOUNTPOINT_PATH}etc/hosts" 2>"$_ERROR_OUTPUT" && \
         if [[ "$1" != 'true' ]]; then
             archInstallLog 'Set root password to "root".' && \
             archInstallChangeRootToMountPoint /usr/bin/env bash -c \
@@ -790,17 +791,6 @@ EOF
         archInstallEnableServices && \
         archInstallLog "Add users: \"$(echo ${_USER_NAMES[*]} | sed \
             's/ /", "/g')\"." && \
-        archInstallLog \
-            "Enable dhcp service on all found ethernet adapter." && \
-        ln --symbolic --force '/usr/lib/systemd/system/netctl-auto@.service' \
-            "${_MOUNTPOINT_PATH}etc/systemd/system/multi-user.target.wants/netctl-auto@wlp3s0.service" \
-            1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
-        ln --symbolic --force '/usr/lib/systemd/system/netctl-ifplugd@.service' \
-            "${_MOUNTPOINT_PATH}etc/systemd/system/multi-user.target.wants/netctl-ifplugd@enp0s25.service" \
-            1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
-        ln --symbolic --force '/usr/lib/systemd/system/netctl-ifplugd@.service' \
-            "${_MOUNTPOINT_PATH}etc/systemd/system/multi-user.target.wants/netctl-ifplugd@eth0.service" \
-            1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
         local userName && \
         for userName in ${_USER_NAMES[*]}; do
             # NOTE: We could only create a home directory with right rights if
@@ -822,7 +812,19 @@ EOF
     }
     function archInstallEnableServices() {
         # Enable all needed services.
-        local serviceName
+        local networkDeviceName && \
+        for networkDeviceName in $(ip addr | grep --extended-regexp \
+            --only-matching '^[0-9]+: .+: ' | sed --regexp-extended \
+            's/^[0-9]+: (.+): $/\1/g')
+        do
+            archInstallLog \
+                "Enable dhcp service on network device \"$networkDeviceName\"." && \
+            ln --symbolic --force \
+                '/usr/lib/systemd/system/netctl-auto@.service' \
+                "${_MOUNTPOINT_PATH}etc/systemd/system/multi-user.target.wants/netctl-auto@${networkDeviceName}.service" \
+                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
+        done
+        local serviceName && \
         for serviceName in ${_NEEDED_SERVICES[*]}; do
             archInstallLog "Enable \"$serviceName\" service."
             archInstallChangeRootToMountPoint systemctl enable \
