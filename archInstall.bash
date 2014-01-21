@@ -601,7 +601,7 @@ EOF
 
     function archInstallPerformDependencyCheck() {
         # This function check if all given dependencies are present.
-        local depencenciesToCheck=$1 && \
+        local dependenciesToCheck="$1" && \
         local result=0 && \
         local dependency && \
         for dependency in ${dependenciesToCheck[*]}; do
@@ -1286,7 +1286,7 @@ EOF
 # region controller
 
     if [[ "$0" == *"${__NAME__}.bash" ]]; then
-        archInstallPerformDependencyCheck "$_DEPENDENCIES" || \
+        archInstallPerformDependencyCheck "${_DEPENDENCIES[*]}" || \
             archInstallLog 'error' 'Satisfying main dependencies failed.'
         archInstallCommandLineInterface "$@" || return $?
         _PACKAGES="${_BASIC_PACKAGES[*]} ${_ADDITIONAL_PACKAGES[*]}" && \
@@ -1304,7 +1304,7 @@ EOF
             fi
         elif [ -b "$_OUTPUT_SYSTEM" ]; then
             archInstallPerformDependencyCheck \
-                "$_BLOCK_INTEGRATION_DEPENDENCIES" || \
+                "${_BLOCK_INTEGRATION_DEPENDENCIES[*]}" || \
             archInstallLog 'error' \
                 'Satisfying block device dependencies failed.'
             _PACKAGES+=' arch-install-scripts' && \
