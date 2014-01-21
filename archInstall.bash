@@ -987,6 +987,12 @@ n
 
 
 
+c
+1
+$_BOOT_PARTITION_LABEL
+c
+2
+$_SYSTEM_PARTITION_LABEL
 w
 Y
 EOF
@@ -1147,7 +1153,7 @@ EOF
         fi
         archInstallLog \
             "Make system partition at \"$outputDevice\"."
-        mkfs.btrfs "$outputDevice" --label --force "$_SYSTEM_PARTITION_LABEL" \
+        mkfs.btrfs --label --force "$_SYSTEM_PARTITION_LABEL" "$outputDevice" \
             1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
         archInstallLog 'Mount system partition.' && \
         mount "$outputDevice" "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" \
