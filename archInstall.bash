@@ -640,8 +640,8 @@ EOF
     function archInstallChangeRootViaMount() {
         # Performs a change root by mounting needed host locations in change
         # root environment.
-        local returnCode=0
-        local mountpointPath
+        local returnCode=0 && \
+        local mountpointPath && \
         for mountpointPath in ${_NEEDED_MOUNTPOINTS[*]}; do
             if [ ! -d "${_MOUNTPOINT_PATH}${mountpointPath}" ] && \
                 [ ! -f ${mountpointPath} ]
@@ -702,7 +702,7 @@ EOF
         test $returnCode && archInstallPerformChangeRoot "$@"
         returnCode=$?
         # Reverse mountpoint list to unmount them in reverse order.
-        local reverseNeededMountpoints
+        local reverseNeededMountpoints && \
         for mountpointPath in ${_NEEDED_MOUNTPOINTS[*]}; do
             reverseNeededMountpoints="$mountpointPath ${reverseNeededMountpoints[*]}"
         done
@@ -740,6 +740,7 @@ EOF
             fakeroot fakechroot chroot "$@" 1>"$_STANDARD_OUTPUT" \
                 2>"$_ERROR_OUTPUT"
         fi
+        return $?
     }
 
         # endregion
