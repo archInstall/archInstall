@@ -986,6 +986,7 @@ n
 
 
 
+
 w
 Y
 EOF
@@ -1165,7 +1166,8 @@ EOF
             archInstallLog 'warning' \
                 "\"dosfslabel\" doesn't seem to be installed. Creating a boot partition label failed."
         fi
-        archInstallLog 'Mount boot partition.' && \
+        archInstallLog "Mount boot partition in \"${_MOUNTPOINT_PATH}boot/\"." && \
+        mkdir --parents "${_MOUNTPOINT_PATH}boot/" && \
         mount "${_OUTPUT_SYSTEM}1" "${_MOUNTPOINT_PATH}boot/" \
             1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
        return $?
