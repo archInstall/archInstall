@@ -149,8 +149,7 @@ function archInstall() {
             tar grep)
         "$_SCOPE" _DEPENDENCIES="${dependencies[*]}"
         local blockIntegrationDependencies=(blockdev efibootmgr gdisk btrfs)
-        "$_SCOPE" _BLOCK_INTEGRATION_DEPENDENCIES=\
-            "${blockIntegrationDependencies[*]}"
+        "$_SCOPE" _BLOCK_INTEGRATION_DEPENDENCIES="${blockIntegrationDependencies[*]}"
         # Define where to mount temporary new filesystem.
         # NOTE: Path has to be end with a system specified delimiter.
         "$_SCOPE" _MOUNTPOINT_PATH='/mnt/'
