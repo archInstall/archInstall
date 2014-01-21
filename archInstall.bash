@@ -739,10 +739,10 @@ EOF
         # Perform the available change root program wich needs at least rights.
         if [[ "$UID" == '0' ]]; then
             chroot "$@" 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
-        else
-            fakeroot fakechroot chroot "$@" 1>"$_STANDARD_OUTPUT" \
-                2>"$_ERROR_OUTPUT"
+            return $?
         fi
+        fakeroot fakechroot chroot "$@" 1>"$_STANDARD_OUTPUT" \
+            2>"$_ERROR_OUTPUT"
         return $?
     }
 
