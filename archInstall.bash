@@ -918,12 +918,18 @@ EOF
     function archInstallDeterminePackageDependencies() {
         # Determines all package dependencies. Returns a list of needed
         # packages for given package determined by given database.
-        _NEEDED_PACKAGES+=" $1"
+        # NOTE: We append and prepend always a whitespace to simply identify
+        # duplicates without using extended regular expression and packname
+        # escaping.
+        _NEEDED_PACKAGES+=" $1 " && \
+        _NEEDED_PACKAGES="$(echo "$_NEEDED_PACKAGES" | sed --regexp-extended \
+            's/ +/ /g')" && \
+        local result && \
         local \
             packageDirectoryPath=$(archInstallDeterminePackageDirectoryName \
             "$@") && \
         if [ "$packageDirectoryPath" ]; then
-            local packageDescription
+            local packageDescription 
             for packageDependencyDescription in $(cat \
                 "${packageDirectoryPath}depends" | grep --perl-regexp \
                 --null-data --only-matching '%DEPENDS%(\n.+)+' | grep \
@@ -934,13 +940,19 @@ EOF
                 echo "$_NEEDED_PACKAGES" 2>"$_ERROR_OUTPUT" | grep \
                     " $packageName " 1>/dev/null 2>/dev/null || \
                 archInstallDeterminePackageDependencies "$packageName" \
-                    "$2" || \
+                    "$2" recursive || \
                 archInstallLog 'warning' \
                     "Needed package \"$packageName\" for \"$1\" couldn't be found in \"$2\"."
             done
+            resul=$?
         else
-            return 1
+            result=1
         fi
+        if [[ ! "$3" ]]; then
+            _NEEDED_PACKAGES="$(echo "$_NEEDED_PACKAGES" | sed \
+                --regexp-extended 's/(^ | $)//g')"
+        fi
+        return $result
     }
     function archInstallDeterminePackageDirectoryName() {
         # Determines the package directory name from given package name in
