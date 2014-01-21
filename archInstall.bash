@@ -1056,9 +1056,11 @@ EOF
     }
     function archInstallUnmountInstalledSystem() {
         # Unmount previous installed system.
-        archInstallLog 'Unmount installed system.'
+        archInstallLog 'Unmount installed system.' && \
         sync 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
         cd / 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
+        umount "${_MOUNTPOINT_PATH}/boot" 1>"$_STANDARD_OUTPUT" \
+            2>"$_ERROR_OUTPUT"
         umount "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
         return $?
     }
@@ -1153,9 +1155,16 @@ EOF
             outputDevice="${_OUTPUT_SYSTEM}2"
         fi
         archInstallLog \
-            "Make system partition at \"$outputDevice\"."
+            "Make system partition at \"$outputDevice\"." && \
         mkfs.btrfs --force --label "$_SYSTEM_PARTITION_LABEL" "$outputDevice" \
-            1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
+            1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
+        archInstallLog \
+            "Creating a root sub volume in \"$outputDevice\"." && \
+        mount PARTLABEL="$_SYSTEM_PARTITION_LABEL" "$_MOUNPOINT_PATH" \
+            1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
+        btrfs subvolume create "${_MOUNPOINT_PATH}root" 1>"$_STANDARD_OUTPUT" \
+            2>"$_ERROR_OUTPUT" && \
+        umount "$_MOUNPOINT_PATH" 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
         return $?
     }
     function archInstallFormatBootPartition() {
@@ -1236,8 +1245,8 @@ EOF
         archInstallLog \
             "Clear previous installations in \"$_OUTPUT_SYSTEM\" and set right rights." && \
         archInstallLog 'Mount system partition.' && \
-        mount PARTLABEL="$_SYSTEM_PARTITION_LABEL" "$_MOUNTPOINT_PATH" \
-            1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
+        mount PARTLABEL="$_SYSTEM_PARTITION_LABEL" -o subvol=root \
+            "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
         rm "$_MOUNTPOINT_PATH"* --recursive --force 1>"$_STANDARD_OUTPUT" \
             2>"$_ERROR_OUTPUT" && \
         archInstallLog \
