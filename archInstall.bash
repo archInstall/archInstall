@@ -60,6 +60,7 @@
 #                  are named, or if a single hyphen-minus (-) is given as file
 #                  name) for lines containing a match to the given PATTERN. By
 #                  default, grep prints the matching lines.
+#     which      - Shows the full path of (shell) commands.
 
 # Dependencies for blockdevice integration
 #     blockdev   - Call block device ioctls from the command line (part of \
@@ -155,11 +156,16 @@ function archInstall() {
         # NOTE: Path has to be end with a system specified delimiter.
         "$_SCOPE" _MOUNTPOINT_PATH='/mnt/'
         # After determining dependencies a list like this will be stored:
-        #     acl attr bzip2 curl expat glibc gpgme libarchive libassuan
-        #     libgpg-error libssh2 openssl pacman xz zlib pacman-mirrorlist
-        #     coreutils bash grep gawk file tar ncurses readline libcap util-linux
-        #     pcre arch-install-scripts filesystem lzo2
-        local neededPackages=()
+        # "pacman", "bash", "readline", "glibc", "libarchive", "acl", "attr",
+        # "bzip2", "expat", "lzo2", "openssl", "perl", "gdbm", "sh", "db",
+        # "gcc-libs", "xz", "zlib", "curl", "ca-certificates", "run-parts",
+        # "findutils", "coreutils", "pam", "cracklib", "libtirpc",
+        # "libgssglue", "pambase", "gmp", "libcap", "sed", "krb5", "e2fsprogs",
+        # "util-linux", "shadow", "libldap", "libsasl", "keyutils", "libssh2",
+        # "gpgme", "libgpg-error", "pth", "awk", "mpfr", "gnupg", "libksba",
+        # "libgcrypt", "libassuan", "pinentry", "ncurses", "dirmngr",
+        # "pacman-mirrorlist", "archlinux-keyring"
+        local neededPackages=(filesystem which)
         "$_SCOPE" _NEEDED_PACKAGES="${neededPackages[*]}"
         local packagesSourceUrls=(
             'http://mirror.de.leaseweb.net/archlinux' \
@@ -177,8 +183,8 @@ function archInstall() {
         "$_SCOPE" _ERROR_OUTPUT=/dev/null
         # This list should be in the order they should be mounted after use.
         # NOTE: Mount binds has to be declared as absolute paths.
-        local neededMountpoints=(/proc /sys /dev /dev/pts /run /run/shm /tmp \
-            /etc/resolv.conf)
+        local neededMountpoints=(/proc /sys /sys/firmware/efi/efivars /dev \
+            /dev/pts /dev/shm /run /tmp)
         "$_SCOPE" _NEEDED_MOUNTPOINTS="${neededMountpoints[*]}"
     fi
 
@@ -537,9 +543,10 @@ EOF
         (pacman --arch "$_CPU_ARCHITECTURE" --sync --refresh \
             --root "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" \
             2>"$_ERROR_OUTPUT" || true) && \
-        local neededPackages=$(echo "${_PACKAGES[*]}" | sed -e 's/^ *//g' -e 's/ *$//g')
         archInstallLog \
-            "Install needed packages \"$neededPackages\" in new operating system located at \"$_MOUNTPOINT_PATH\"." && \
+            "Install needed packages \"$(echo "${_PACKAGES[*]}" | sed \
+            --regexp-extended 's/(^ +| +$)//g' | sed \
+            's/ /", "/g')\" to \"$_OUTPUT_SYSTEM\"."
         # NOTE: "${_PACKAGES[*]}" shouldn't be in quotes to get pacstrap
         # working.
         "${_PACKAGE_CACHE_PATH}/patchedOfflinePacman.bash" -d \
@@ -555,7 +562,7 @@ EOF
     function archInstallGenericLinuxSteps() {
         # This functions performs creating an arch linux system from any linux
         # system base.
-        archInstallLog 'Create a list with urls for needed packages.'
+        archInstallLog 'Create a list with urls for needed packages.' && \
         (archInstallDownloadAndExtractPacman \
             $(archInstallCreatePackageUrlList)) && \
         # Create root filesystem only if not exists.
@@ -575,6 +582,7 @@ EOF
         sed --in-place "s/^[ \t]*SigLevel[ \t].*/SigLevel = Never/" \
             "${_MOUNTPOINT_PATH}etc/pacman.conf" 1>"$_STANDARD_OUTPUT" \
             2>"$_ERROR_OUTPUT" && \
+        archInstallLog 'Create temporary mirrors to download new packages.' && \
         archInstallAppendTemporaryInstallMirrors && \
         (archInstallLoadCache || archInstallLog \
              'No package cache was loaded.') && \
@@ -582,17 +590,17 @@ EOF
         (archInstallChangeRootToMountPoint /usr/bin/pacman \
             --arch "$_CPU_ARCHITECTURE" --sync --refresh \
             1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" || true) && \
-        local neededPackages=$(echo "${_PACKAGES[*]}" | sed -e 's/^ *//g' -e \
-            's/ *$//g')
         archInstallLog \
-            "Install needed packages \"$neededPackages\" to \"$_OUTPUT_SYSTEM\"." && \
+            "Install needed packages \"$(echo "${_PACKAGES[*]}" | sed \
+            --regexp-extended 's/(^ +| +$)//g' | sed \
+            's/ /", "/g')\" to \"$_OUTPUT_SYSTEM\"."
         archInstallChangeRootToMountPoint /usr/bin/pacman --arch \
             "$_CPU_ARCHITECTURE" --sync --force --needed --noconfirm \
             ${_PACKAGES[*]} 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
-        local returnCode=$?
+        local returnCode=$? && \
         (archInstallCache || archInstallLog 'warning' \
             'Caching current downloaded packages and generated database failed.')
-        test $returnCode && archInstallConfigurePacman
+        [[ $returnCode == 0 ]] && archInstallConfigurePacman
         return $?
     }
 
@@ -642,27 +650,21 @@ EOF
     function archInstallChangeRootViaMount() {
         # Performs a change root by mounting needed host locations in change
         # root environment.
-        local returnCode=0 && \
         local mountpointPath && \
         for mountpointPath in ${_NEEDED_MOUNTPOINTS[*]}; do
             mountpointPath="${mountpointPath:1}" && \
-            if [ ! -d "${_MOUNTPOINT_PATH}${mountpointPath}" ] && \
-                [ ! -f "/${mountpointPath}" ]
-            then
+            if [ ! -e "${_MOUNTPOINT_PATH}${mountpointPath}" ]; then
                 mkdir --parents "${_MOUNTPOINT_PATH}${mountpointPath}" \
                     1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
-                returnCode=$?
             fi
-            if ! mountpoint -q "${_MOUNTPOINT_PATH}${mountpointPath}" && \
-                test $returnCode
-            then
+            if ! mountpoint -q "${_MOUNTPOINT_PATH}${mountpointPath}"; then
                 if [ "$mountpointPath" == 'proc' ]; then
-                    mount "$mountpointPath" \
+                    mount "/${mountpointPath}" \
                         "${_MOUNTPOINT_PATH}${mountpointPath}" --types \
                         "$mountpointPath" --options nosuid,noexec,nodev \
                         1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
                 elif [ "$mountpointPath" == 'sys' ]; then
-                    mount "$mountpointPath" \
+                    mount "/${mountpointPath}" \
                         "${_MOUNTPOINT_PATH}${mountpointPath}" --types sysfs \
                         --options nosuid,noexec,nodev 1>"$_STANDARD_OUTPUT" \
                         2>"$_ERROR_OUTPUT"
@@ -675,12 +677,12 @@ EOF
                         --types devpts --options \
                         mode=0620,gid=5,nosuid,noexec 1>"$_STANDARD_OUTPUT" \
                         2>"$_ERROR_OUTPUT"
-                elif [ "$mountpointPath" == 'run/shm' ]; then
+                elif [ "$mountpointPath" == 'dev/shm' ]; then
                     mount shm "${_MOUNTPOINT_PATH}${mountpointPath}" --types \
                         tmpfs --options mode=1777,nosuid,nodev \
                         1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
                 elif [ "$mountpointPath" == 'run' ]; then
-                    mount "$mountpointPath" \
+                    mount "/${mountpointPath}" \
                         "${_MOUNTPOINT_PATH}${mountpointPath}" --types tmpfs \
                         --options nosuid,nodev,mode=0755 \
                         1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
@@ -688,26 +690,26 @@ EOF
                     mount run "${_MOUNTPOINT_PATH}${mountpointPath}" --types \
                         tmpfs --options mode=1777,strictatime,nodev,nosuid \
                         1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
-                elif [ -f "$mountpointPath" ]; then
-                    mount "$mountpointPath" \
+                elif [ -f "/${mountpointPath}" ]; then
+                    mount "/${mountpointPath}" \
                         "${_MOUNTPOINT_PATH}${mountpointPath}" --bind
                 else
-                    archInstallLog 'error' \
-                        "Mountpoint \"$mountpointPath\" couldn't be handled."
+                    archInstallLog 'warning' \
+                        "Mountpoint \"/${mountpointPath}\" couldn't be handled."
                 fi
-                ! test $? && returnCode=$?
             fi
         done
-        test $returnCode && archInstallPerformChangeRoot "$@"
-        returnCode=$?
+        archInstallPerformChangeRoot "$@"
+        local returnCode=$?
         # Reverse mountpoint list to unmount them in reverse order.
         local reverseNeededMountpoints && \
         for mountpointPath in ${_NEEDED_MOUNTPOINTS[*]}; do
             reverseNeededMountpoints="$mountpointPath ${reverseNeededMountpoints[*]}"
         done
         for mountpointPath in ${reverseNeededMountpoints[*]}; do
+            mountpointPath="${mountpointPath:1}" && \
             if mountpoint -q "${_MOUNTPOINT_PATH}${mountpointPath}" || \
-                [ -f ${mountpointPath} ]
+                [ -f "/${mountpointPath}" ]
             then
                 # If unmounting doesn't work try to unmount in lazy mode
                 # (when mountpoints are not needed anymore).
@@ -719,11 +721,9 @@ EOF
                 (archInstallLog 'warning' "Unmounting \"${_MOUNTPOINT_PATH}${mountpointPath}\" in force mode fails so unmount it if mountpoint isn't busy anymore." && \
                  umount -l "${_MOUNTPOINT_PATH}${mountpointPath}" \
                      1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT")
-                # NOTE: "returnCode" remaines with an error code if there was given
-                # one in all iterations.
-                if [[ $? != 0 ]]; then
-                    returnCode=$?
-                fi
+                # NOTE: "returnCode" remains with an error code if there was
+                # given one in all iterations.
+                [[ $? != 0 ]] && returnCode=$?
             else
                 archInstallLog 'warning' \
                     "Location \"${_MOUNTPOINT_PATH}${mountpointPath}\" should be a mountpoint but isn't."
@@ -787,10 +787,9 @@ EOF
                 2>"$_ERROR_OUTPUT"
         fi
         archInstallEnableServices && \
-        archInstallLog "Add users: \"$(echo ${_USER_NAMES[*]} | sed \
-            's/ /", "/g')\"." && \
         local userName && \
         for userName in ${_USER_NAMES[*]}; do
+            archInstallLog "Add user: \"$userName\"." && \
             # NOTE: We could only create a home directory with right rights if
             # we are root.
             (archInstallChangeRootToMountPoint useradd \
@@ -830,37 +829,31 @@ EOF
             archInstallLog "Enable \"$serviceName\" service."
             archInstallChangeRootToMountPoint systemctl enable \
                 "$serviceName".service 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
-            if [[ $? != 0 ]]; then
-                return $?
-            fi
+            [[ $? != 0 ]] && return $?
         done
     }
     function archInstallTidyUpSystem() {
         # Deletes some unneeded locations in new installs operating system.
-        local returnCode=0
-        archInstallLog 'Tidy up new build system.'
-        local filePath
+        local returnCode=0 && \
+        archInstallLog 'Tidy up new build system.' && \
+        local filePath && \
         for filePath in ${_UNNEEDED_FILE_LOCATIONS[*]}; do
             archInstallLog \
-                "Deleting \"${_MOUNTPOINT_PATH}$filePath\"."
+                "Deleting \"${_MOUNTPOINT_PATH}$filePath\"." && \
             rm "${_MOUNTPOINT_PATH}$filePath" --recursive \
                 --force 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
-            if [[ $? != 0 ]]; then
-                return $?
-            fi
+            [[ $? != 0 ]] && return $?
         done
     }
     function archInstallAppendTemporaryInstallMirrors() {
         # Appends temporary used mirrors to download missing packages during
         # installation.
-        local url
+        local url && \
         for url in ${_PACKAGE_SOURCE_URLS[*]}; do
             echo "Server = $url/\$repo/os/$_CPU_ARCHITECTURE" \
                 1>>"${_MOUNTPOINT_PATH}etc/pacman.d/mirrorlist" \
                 2>"$_ERROR_OUTPUT"
-            if [[ $? != 0 ]]; then
-                return $?
-            fi
+            [[ $? != 0 ]] && return $?
         done
     }
     function archInstallPackResult() {
@@ -892,9 +885,7 @@ EOF
                 2>"$_ERROR_OUTPUT"
             # NOTE: "returnCode" remaines with an error code if there was given
             # one in all iterations.
-            if [[ $? != 0 ]]; then
-                returnCode=$?
-            fi
+            [[ $? != 0 ]] && returnCode=$?
         done
         echo "$listBufferFile"
         return $returnCode
@@ -932,7 +923,7 @@ EOF
             packageDirectoryPath=$(archInstallDeterminePackageDirectoryName \
             "$@") && \
         if [ "$packageDirectoryPath" ]; then
-            local packageDescription 
+            local packageDescription && \
             for packageDependencyDescription in $(cat \
                 "${packageDirectoryPath}depends" | grep --perl-regexp \
                 --null-data --only-matching '%DEPENDS%(\n.+)+' | grep \
@@ -950,7 +941,9 @@ EOF
         else
             result=1
         fi
-        [[ ! "$3" ]] && _NEEDED_PACKAGES="${_NEEDED_PACKAGES:1:-1}"
+        # Trim resulting list.
+        [[ ! "$3" ]] && _NEEDED_PACKAGES="$(echo "${_NEEDED_PACKAGES}" | sed \
+            --regexp-extended 's/(^ +| +$)//g')"
         return $result
     }
     function archInstallDeterminePackageDirectoryName() {
@@ -986,8 +979,11 @@ EOF
         local listBufferFile="$1" && \
         if archInstallDeterminePacmansNeededPackages "$listBufferFile"; then
             archInstallLog \
-                "Download and extract each package into our new system located in \"$_MOUNTPOINT_PATH\"."
-            local packageName
+                "Needed packages are: \"$(echo "${_NEEDED_PACKAGES[*]}" | sed \
+                's/ /", "/g')\"." && \
+            archInstallLog \
+                "Download and extract each package into our new system located in \"$_MOUNTPOINT_PATH\"." && \
+            local packageName && \
             for packageName in ${_NEEDED_PACKAGES[*]}; do
                 local packageUrl=$(grep "$packageName-[0-9]" \
                     "$listBufferFile" | head --lines 1)
@@ -1011,12 +1007,11 @@ EOF
                     2>"$_ERROR_OUTPUT" | tar --extract --directory \
                     "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" \
                     2>"$_ERROR_OUTPUT"
-                if [[ $? != 0 ]]; then
-                    return $?
-                fi
+                [[ $? != 0 ]] && return $?
             done
+        else
+            return $?
         fi
-        return $?
     }
     function archInstallMakePartitions() {
         # Performs the auto partitioning.
@@ -1275,9 +1270,9 @@ EOF
         # a package cache directory.
         mkdir --parents "$_PACKAGE_CACHE_PATH" 1>"$_STANDARD_OUTPUT" \
             2>"$_ERROR_OUTPUT" && \
+        archInstallLog \
+            "Clear previous installations in \"$_OUTPUT_SYSTEM\" and set right rights." && \
         if [ -b "$_OUTPUT_SYSTEM" ]; then
-            archInstallLog \
-                "Clear previous installations in \"$_OUTPUT_SYSTEM\" and set right rights." && \
             archInstallLog 'Mount system partition.' && \
             mount PARTLABEL="$_SYSTEM_PARTITION_LABEL" -o subvol=root \
                 "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
@@ -1294,7 +1289,8 @@ EOF
             rm "${_MOUNTPOINT_PATH}boot/"* --recursive --force \
                 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
         fi
-        chmod 755 "$_MOUNTPOINT_PATH" && \
+        chmod 755 "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" \
+            2>"$_ERROR_OUTPUT" && \
         # Make a uniqe array.
         _PACKAGES=$(echo "${_PACKAGES[*]}" | tr ' ' '\n' | sort -u | tr '\n' \
             ' ')
@@ -1328,8 +1324,7 @@ EOF
             archInstallPerformDependencyCheck \
                 "${_BLOCK_INTEGRATION_DEPENDENCIES[*]}" || \
             archInstallLog 'error' \
-                'Satisfying block device dependencies failed.'
-            _PACKAGES+=' arch-install-scripts' && \
+                'Satisfying block device dependencies failed.' && \
             if echo "$_OUTPUT_SYSTEM" | grep --quiet --extended-regexp '[0-9]$'
             then
                 archInstallFormatSystemPartition || \
