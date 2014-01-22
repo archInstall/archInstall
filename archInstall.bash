@@ -165,7 +165,7 @@ function archInstall() {
         # "gpgme", "libgpg-error", "pth", "awk", "mpfr", "gnupg", "libksba",
         # "libgcrypt", "libassuan", "pinentry", "ncurses", "dirmngr",
         # "pacman-mirrorlist", "archlinux-keyring"
-        local neededPackages=(filesystem which)
+        local neededPackages=(filesystem)
         "$_SCOPE" _NEEDED_PACKAGES="${neededPackages[*]}"
         local packagesSourceUrls=(
             'http://mirror.de.leaseweb.net/archlinux' \
@@ -930,7 +930,7 @@ EOF
             packageDirectoryPath=$(archInstallDeterminePackageDirectoryName \
             "$@") && \
         if [ "$packageDirectoryPath" ]; then
-            local packageDescription && \
+            local packageDependencyDescription && \
             for packageDependencyDescription in $(cat \
                 "${packageDirectoryPath}depends" | grep --perl-regexp \
                 --null-data --only-matching '%DEPENDS%(\n.+)+' | grep \
@@ -938,22 +938,24 @@ EOF
             do
                 local packageName=$(echo "$packageDependencyDescription" | \
                     grep --extended-regexp --only-matching '^[-a-zA-Z0-9]+')
-                if echo "$_NEEDED_PACKAGES" 2>"$_ERROR_OUTPUT" | grep \
+                if ! echo "$_NEEDED_PACKAGES" 2>"$_ERROR_OUTPUT" | grep \
                     " $packageName " 1>/dev/null 2>/dev/null
                 then
                     archInstallDeterminePackageDependencies "$packageName" \
                         "$2" recursive || \
                     archInstallLog 'warning' \
-                        "Needed package \"$packageName\" for \"$1\" couldn't be found in \"$2\"."
+                        "Needed package \"$packageName\" for \"$1\" couldn't be found in database in \"$2\"."
                 fi
             done
         else
             returnCode=1
         fi
         # Trim resulting list.
-        [[ ! "$3" ]] && _NEEDED_PACKAGES="$(echo "${_NEEDED_PACKAGES}" | sed \
-            --regexp-extended 's/(^ +| +$)//g')"
-        return $retunCode
+        if [[ ! "$3" ]]; then
+            _NEEDED_PACKAGES="$(echo "${_NEEDED_PACKAGES}" | sed \
+                --regexp-extended 's/(^ +| +$)//g')"
+        fi
+        return $returnCode
     }
     function archInstallDeterminePackageDirectoryName() {
         # Determines the package directory name from given package name in
