@@ -115,7 +115,7 @@ EOF
     >>> $0 --help
 EOF
     }
-    function printCommandLineOptionDescriptions() {
+    function printCommandLineOptionDescription() {
         # Prints descriptions about each available command line option.
         # NOTE: "-k" and "--key-map-configuration" isn't needed in the future.
         cat << EOF
@@ -143,7 +143,7 @@ EOF
         echo -e '\nExamples:\n'
         printUsageExamples "$@"
         echo -e '\nOption descriptions:\n'
-        printCommandLineOptionDescriptions "$@"
+        printCommandLineOptionDescription "$@"
         echo
     }
     function commandLineInterface() {

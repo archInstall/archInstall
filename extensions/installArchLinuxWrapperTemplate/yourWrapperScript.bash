@@ -5,7 +5,7 @@
 self_path=$(dirname $(readlink --canonicalize $0))
 source "$self_path/archInstall.bash" --load-environement
 
-__NAME__="yourWrapperScript" 
+__NAME__="yourWrapperScript"
 function yourWrapperScript() {
 ### Wrapper for archInstall to do exactly the same.
 
@@ -17,7 +17,7 @@ $__NAME__ installs linux, arch linux
 
 Option descriptions:
 -W --wrapper <filename> Use Wrapper in <filename> instead of ./archInstall.bash
-$(archInstallPrintCommandLineOptionDescriptions) "$@" 
+$(archInstallPrintCommandLineOptionDescription) "$@" 
 EndOfUsageMessage
   }
 
@@ -38,30 +38,29 @@ EndOfUsageMessage
           fi
           shift;;
         *)
-          archInstallWrapperOptions+=" $1" 
+          archInstallWrapperOptions+=" $1"
           shift;;
       esac
     done
   }
 
-  local archInstallWrapperFile="./archInstall.bash" 
-  local archInstallWrapperFunction="" 
-  local archInstallWrapperOptions="" 
+  local archInstallWrapperFile="./archInstall.bash"
+  local archInstallWrapperFunction=''
+  local archInstallWrapperOptions=''
 
   yourWrapperScriptParseCommandLine "$@"
-  local name="$__NAME__" 
+  local name="$__NAME__"
   source ${archInstallWrapperFile}
-  __NAME__="$name" 
-  archInstallWrapperFunction=`basename "$archInstallWrapperFile" .bash`
+  __NAME__="$name"
+  archInstallWrapperFunction=$(basename "$archInstallWrapperFile" .bash)
 
-  if $archInstallWrapperFunction --load-environement\
-    ${archInstallWrapperOptions}
-    then
+  if $archInstallWrapperFunction --load-environement \
+      ${archInstallWrapperOptions}
+  then
       echo hans
-    fi
-}
+  fi
 
 if [[ "$0" == *${__NAME__}.bash ]]; then
-  "$__NAME__" "$@" 
-  exit
+    "$__NAME__" "$@" 
+    exit
 fi

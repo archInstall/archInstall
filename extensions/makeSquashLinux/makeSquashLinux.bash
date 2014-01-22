@@ -25,7 +25,7 @@ Option descriptions:
     -X --xbmc Use "../makeXBMCLinux/makeXBMCLinux.bash" as wrapper.
     -T --temp-folder <path> Store temporary files in <path>.
 
-$(archInstallPrintCommandLineOptionDescriptions "$@" | \
+$(archInstallPrintCommandLineOptionDescription "$@" | \
   sed '/^ *-[a-z] --output-system .*$/,/^$/d')
 EOF
   }

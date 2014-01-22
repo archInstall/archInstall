@@ -18,7 +18,7 @@ Usage: $0 [Options]
 Option descriptions:
   -W --wrapper <filename> Use Wrapper in <filename> instead of ./archInstall.bash
 
-$(archInstallPrintCommandLineOptionDescriptions) "$@" 
+$(archInstallPrintCommandLineOptionDescription) "$@" 
 EndOfUsageMessage
 }
 

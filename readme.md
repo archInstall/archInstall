@@ -70,7 +70,7 @@ Mit:
 >>> ./archInstall.bash --verbose
 ```
 
-bekommt man einen etwas geschwätzigeren Installations Vorgang.
+bekommt man einen etwas geschwätzigeren Installationsvorgang.
 Mit:
 
 ```bash
@@ -79,10 +79,10 @@ Mit:
 
 werden alle Ausgaben jeglicher verwendeten Subprogramme mit ausgegeben.
 
-Alle wichtigen Parameter wie Installations Ort haben Standardwerte.
-So Wird im obigen Fall einfach auf das erste gefundene Block Device installiert
-(/dev/sda).
-Will man lieber eine unbeaufsichtigte Installation:
+Alle Parameter wie Installations haben Standardwerte. So wird im obigen Fall
+einfach in das aktuelle Verzeichnis ein Ordner mit dem Programmnamen erstellt
+und darin das Betriebssystem installiert (./archInstall/). ill man lieber eine
+unbeaufsichtigte Installation:
 
 ```bash
 >>> ./archInstall.bash --host-name testSystem --auto-partitioning
@@ -91,18 +91,19 @@ Will man lieber eine unbeaufsichtigte Installation:
 Installation auf ein Block Device
 ---------------------------------
 
-Im typischen Fall will man von einer Life-CD booten um das System auf
-einer Festplatte zu installieren. Hierbei müssen folgende Aufgaben erfüllt
-werden.
+Im typischen Fall will man von einer Life-CD booten um das System auf einer
+Festplatte oder Partition zu installieren. Hierbei müssen folgende Aufgaben
+erfüllt werden.
 
 * Einrichtung einer Internet Verbindung (siehe auch Abschnitt "Offline Installation")
 * Partitionierung der Ziel Festplatte
 * Formatierung der Ziel Partitionen
+* Aufbauen der Dateisystemstruktur
 * Konfiguration des Betriebssystems
 * Installation und Einrichtung eines Boot-Loaders
 
-Alle Aufgaben bis auf die Einrichtung der Internet Verbindung (wird in der Regel
-von der Host Umgebung geregelt) könne mit archInstall automatisiert
+Alle Aufgaben bis auf die Einrichtung der Internet Verbindung (wird in der
+Regel von der Host Umgebung geregelt) könne mit archInstall automatisiert
 durchgeführt werden. Will man z.B auf das Block Device "/dev/sdb" installieren
 und sich nicht selber um die Partitionierung kümmern und den kompletten
 verfügbaren Platz für das Haupt System verwenden (es soll also keine Swap- oder
@@ -110,57 +111,28 @@ Daten Partition erstellt werden).
 sieht das z.B. so aus:
 
 ```bash
->>> ./archInstall.bash --output-system /dev/sdb --auto-partitioning \
-    --minimal-boot-space-in-procent 100
-```
-
-Möchte man eine System-, Daten- und Swap Partition haben, installiert folgender
-Befehl:
-
-```bash
 >>> ./archInstall.bash --output-system /dev/sdb --auto-partitioning
 ```
 
-diese in einem "sinnvollen" Verhältnis. Es wird versucht den Swap genauso groß
-wie den installierten RAM auszulegen um für spätere "Suspend to Disk"
-Szenarien vorbereitet zu sein.
-Standardmäßig werden jedoch nicht mehr als 20% für die Swap Partition eingesetzt.
-Die Systempartition nimmt in aller Regel mindestens 40% des verfügbaren Platzes
-ein. Der Rest wird dann für die Daten Partition eingesetzt. Will man dieses
-Verhalten individualisieren:
-
-```bash
->>> ./archInstall.bash --needed-boot-space-in-byte 500000000 \
-    --minimal-boot-space-in-procent 50 --maximal-swap-space-in-procent 10 \
-    --output-system /dev/sdb --auto-partitioning
-```
-
-So werden in jedem Fall mindestens ca. 466 MB für das System reserviert und
-mindestens 50% des Festplattenplatz für das System eingesetzt. Der Swap-space
-ist wenn möglich so groß wie der RAM jedoch nicht mehr als 10% des Block Devices
-"/dev/sdb". Der Rest wird für die Daten Partition (also maximal 40%) eingesetzt.
-
-Möchte man die Partitionierung nicht voll automatisch (oder wie eben
-beschrieben halbautomatische) vornehmen. Erreicht man durch weglassen des
-Parameters "--auto-partitioning" eine ncurses basierte Oberfläche, die das
-manuelle Konfiguration des Systems erlaubt.
+Auf diese Weise wird eine uefi Boot-Partition mit 512 MegaByte eingerichtet.
+Der restliche Platz wird für die Systempartition eingesetzt. Sind noch weitere
+Partitionen gewünscht kann man diese während der Installation durch weglassen
+des entsprechenden Parameters selber konfigurieren. Die erste Partition wird
+dann als Boot-Partition und die Zweite als Systempartition betrachtet. Weitere
+Partitionen werden ignoriert. Manuelle Partitionierung:
 
 ```bash
 >>> ./archInstall.bash --output-system /dev/sdb
 ```
 
-archInstall nimmt dann die erste Partition als System Partition.
-Ist noch eine weitere Vorhanden, wird diese als Swap Space verwendet. Wenn auch
-eine dritte erkannt wird, detektiert archInstall diese als Daten Partition.
-Alle weiteren Partitionen bleiben unberührt.
-
-An dieser Stelle sei noch erwähnt, dass archInstall alle erstellten
-Partition automatisch mit Labels versieht. Um dieses Verhalten zu
-individualisieren einfach folgende Optionen nutzen:
+An dieser Stelle sei noch erwähnt, dass archInstall alle erstellten Partition
+automatisch mit Labels in der Partitionstabelle und auf der Partition selbst
+versieht. Um dieses Verhalten zu individualisieren einfach folgende Optionen
+nutzen:
 
 ```bash
->>> ./archInstall.bash --boot-partition-label boot \
-    --swap-partition-label auslagerung --data-partition-label stuff
+>>> ./archInstall.bash --boot-partition-label uefiBoot \
+    --system-partition-label system
 ```
 
 Installation auf eine Partition
@@ -175,11 +147,15 @@ verwendet werden:
 ```
 
 Hier wird auf die zweite Partition des zweiten Block Devices installiert.
-Sofern "grub2" auf dem Hostsystem installiert ist und archInstall mit
-ausreichend Rechten ausgeführt wurde, integriert archInstall die
-alternative Installation in grub boot menu. Dieses Feature funktioniert jedoch
-nur wenn "os-prober" installiert ist. Sonst muss man hier von Hand nachbessern.
-Um die alternative Linux Version auch booten zu können.
+archInstall versucht bei der Installation auf ein Blockdevice stets einen
+entsprechenden Uefi-Boot-Eintrag für den Kernel mit einem Standard Initramfs
+und einem Ausweich-Initiramfs zu konfigurieren. Die folgenden Parameter
+definieren dessen Label:
+
+```bash
+>>> ./archInstall.bash --output-system /dev/sdb2 --boot-entry-label archLinux \
+    --fallback-boot-entry-label archLinuxFallback
+```
 
 Installation in einen Ordner
 ----------------------------
@@ -201,20 +177,22 @@ Automatische Konfiguration
 --------------------------
 
 archInstall konfiguriert das neu eingerichtete System vollautomatisch.
-Folgende Taske wurden automatisiert:
+Folgende Tasks wurden automatisiert:
 
 * Tastaturlayout einstellen
 * Einrichten der richtigen Zeit Zone
 * Setzen des Hostnames
 * Setzen des default root Passworts nach "root"
-* Erstellen eines Benutzers bzw. Benutzerordner.
-  Das Passwort wird initial wie der Benutzer gesetzt.
-* dhcp Dienst einrichten (siehe automatisches Einrichten von Diensten)
-* Installation der Basis Programme (siehe automatische Installation von Programmen)
+* Erstellen eines Benutzers bzw. Benutzerordner. Das Passwort wird initial wie
+  der Name des Benutzers gesetzt.
+* dhcp Dienst für alle Netzwerk-Interfaces einrichten (siehe automatisches
+  Einrichten von Diensten)
+* Installation der Basis Programme (siehe automatische Installation von
+  Programmen)
 * Einrichten der Signaturen für den Paketmanager "Pacman", um vertrauenswürdige
   Pakete erhalten zu können.
 * Einrichten aller in der nähe liegenden Server um schnelle Packet Updates und
-  Paket Installationen zu gewährleisten.
+  Paketinstallationen zu gewährleisten.
 * Einrichten der richtigen Paketquellen abhängig von der aktuellen CPU
   Architektur.
 
@@ -223,8 +201,6 @@ Will man hierauf selber Einfluss nehmen, gibt es folgende Möglichkeiten:
 ```bash
 >>> ./archInstall.bash --host-name test --user-names test \
     --cpu-architecture x86_64 --local-time /Europe/London \
-    --key-map-configuration \
-    KEYMAP="de-latin1\nFONT=Lat2-Terminus16\nFONT_MAP=" \
     --keyboard-layout de-latin1 --country-with-mirrors Germany \
     --prevent-using-pacstrap --additional-packages python vim \
     --needed-services sshd dhcpcd apache
@@ -252,6 +228,8 @@ Wrappers.
 Im einfachsten Fall würde der Code der archInstall sinnvoll erweitert so
 aussehen:
 
+TODO
+
     #!/usr/bin/env bash
 
     source archInstall.bash
@@ -266,7 +244,7 @@ aussehen:
 
     # Prepare result ...
 
-Beachte, dass trotz des sourcen von archInstall auf diese Weise keine
+Beachte, dass trotz des Sourcens von archInstall auf diese Weise keine
 Konflikte zwischen dem Wrapper-Scope und dem archInstall-Scope entstehen
 können. Die Einzige globale Variable ist "archInstall" selbst.
 
@@ -277,11 +255,11 @@ das so:
 >>> source archInstall.bash --load-environment
 ```
 
-Jetzt haben wir den gesamten Scope auch im Decorator zur Verfügung.
-Alle Methoden sind mit dem Prefix "archInstall" ausgestattet, um
-Namens Konflikte und versehentlich überschreiben von Methoden zu vermeiden.
-Will man sich also einen Überblick über alle verfügbaren Methoden machen,
-einfach in der shell folgendes eintippen:
+Jetzt haben wir den gesamten Scope auch im Decorator zur Verfügung. Alle
+Methoden sind mit dem Prefix "archInstall" ausgestattet, um Namens Konflikte
+und versehentlich überschreiben von Methoden zu vermeiden. Will man sich also
+einen Überblick über alle verfügbaren Methoden machen, einfach in der shell
+folgendes eintippen:
 
 ```bash
 >>> source archInstall.bash --load-environment
@@ -293,253 +271,23 @@ einfach in der shell folgendes eintippen:
 Siehe hierzu auch "archInstall API".
 
 archInstall API
---------------------
+---------------
 
-Folgende Umgebungsvariablen können mit:
+Viele nützlich Umgebungsvariablen und Funktionen können mit
 
 ```bash
 >>> source archInstall.bash --load-environment
 ```
 
-geladen werden:
-
-```bash
-# Name des Moduls archInstall.
-__NAME__
-# "local" oder "export" je nachdem ob mit "--load-environment" geladen
-# wurde.
-_SCOPE
-
-# Abbilder der CLI-Parameter.
-_VERBOSE, _LOAD_ENVIRONMENT='no', _USER_NAMES, _HOSTNAME,
-
-_CPU_ARCHITECTURE, _OUTPUT_SYSTEM,
-
-_LOCAL_TIME, _KEY_MAP_CONFIGURATION_FILE_CONTENT, _KEYBOARD_LAYOUT,
-_COUNTRY_WITH_MIRRORS,
-
-_AUTOMATIC_REBOOT, _PREVENT_USING_PACSTRAP,
-_PREVENT_USING_NATIVE_ARCH_CHANGE_ROOT, _AUTO_PARTITIONING,
-
-_BOOT_PARTITION_LABEL, _SYSTEM_PARTITION_LABEL,
-
-_BOOT_ENTRY_LABEL, _FALLBACK_BOOT_ENTRY_LABEL,
-
-_BOOT_SPACE_IN_MEGA_BYTE, _NEEDED_SYSTEM_SPACE_IN_MEGA_BYTE,
-
-_INSTALL_COMMON_ADDITIONAL_PACKAGES, _ADDITIONAL_PACKAGES, _NEEDED_SERVICES,
-_PACKAGE_CACHE_PATH
-
-# Sinnvolle Umgebungsvariablen deren Wert z.T. zur Laufzeit ermittelt wurde.
-_NEEDED_PACKAGES, _PACKAGE_SOURCE_URLS, _BASIC_PACKAGES,
-_COMMON_ADDITIONAL_PACKAGES, _PACKAGES, _UNNEEDED_FILE_LOCATIONS,
-_STANDARD_OUTPUT, _ERROR_OUTPUT, _NEEDED_MOUNTPOINTS
-```
-
-Diese Methoden können von außen geladen und verwendet werden:
-
-```bash
-# Startet den archInstall Controller. Initiiert das Hauptprogramm.
-archInstall()
-
-# Liefert eine Beschreibung wie das Program verwendet werden kann.
-# Wenn die Variable "__NAME__" auf den Namen des Wrappers zeigt kann diese
-# Methode im Decorator Pattern Attraktiv sein.
-archInstallPrintUsageMessage()
-
-# Liefert Beispiele wie das Program ausgeführt werden soll.
-# Werden im Decorator Pattern die Variablen durch gereicht und die
-# "__NAME__" Variable gesetzt, macht das Sinn.
-archInstallPrintUsageExamples()
-
-# Liefert eine Beschreibung allen verfügbaren Optionen.
-archInstallPrintCommandLineOptionDescriptions()
-
-# Vereinigt die Ausgabe der letzten drei Methoden.
-archInstallPrintHelpMessage()
-
-# Parset Kommandozeilen-Eingaben und liefert aussagekräftige Fehler, wie
-# "No such, file or directory!" :-). Ne Spass.
-archInstallCommandLineInterface()
-
-# Liefert eine einfache Methode zum Loggen. Wenn zwei Argumente übergeben
-# wurde, wird der erste als Loglevel interpretiert. Loglevel wie "critical"
-# oder "error" werden auch ohne cli flag "--verbose" angezeigt.
-# "error" führt zusätzlich zum Abbruch des Programms mit Fehlercode 1.
-#
-# >>> archInstallLog <LOG_NACHRICHT>
-# >>> archInstallLog <LOG_LEVEL> <LOG_NACHRICHT>
-# >>> archInstallLog <LOG_LEVEL> <LOG_NACHRICHT> <STRING_VOR_DER_NACHRICHT>
-#
-archInstallLog()
-
-# Installiert das Betriebssystem dorthin wo "_MOUNPOINT_PATH" hin zeigt.
-# "_MOUNPOINT_PATH=test archInstallWithPacstrap" ist also eine
-# sinnvolle Verwendung.
-archInstallWithPacstrap()
-
-# Diese Funktion erstellt in "_MOUNTPOINT_PATH" ein basis Linux (siehe).
-# Sie benötigt außer posix konforme System Schnittstellen keinerlei
-# zusätzliche Anwendungen wie "pacman".
-archInstallGenericLinuxSteps()
-
-# Diese Methode dient als Wrapper for "archInstallChangeRoot".
-# Sie ist äquivalent zu dem Aufruf "archInstall $_MOUNPOINT_PATH".
-#
-# >>> archInstallChangeRootToMountPoint <ARGUMENTE>*
-#
-archInstallChangeRootToMountPoint()
-
-# Diese Funktion unterstützt das gleiche Interface wie "chroot" nur werden
-# abhängig von verfügbaren tools wie die "arch-install-scripts" möglichst
-# viele API-Dateisystem zum darunter liegenden System bereitgestellt.
-# Sollte kein "arch-chroot" wird sichergestellt, dass auf jeden Fall (siehe
-# "_NEEDED_MOUNTPOINTS") diese Orte in der neuen Umgebung bereitgestellt
-# werden:
-# "/proc", "/sys", "/dev", "/dev/pts", "/dev/shm", "/run", "/tmp",
-# "/etc/resolv.conf"
-#
-# >>> archInstallChangeRoot <CHROOT_ARGUMENTE>*
-#
-archInstallChangeRoot()
-
-# (wird von "archInstallChangeRoot()" aufgerufen) Diese Funktion wird
-# verwendet, wenn "arch-chroot" nicht zur Verfügung steht oder die Flag
-# "--prevent-using-native-arch-chroot" gesetzt ist.
-#
-# >>> archInstallChangeRoot <CHROOT_ARGUMENTE>*
-#
-archInstallChangeRootViaMount()
-
-# Hier wird das linux native "chroot" oder "fakechroot" Program gewrappt.
-# Sind keine root Rechte vorhanden "fakeroot" und "fakechroot" installiert.
-# wird statt "chroot $@", "fakeroot fakechroot chroot $@" aufgerufen.
-#
-# >>> archInstallChangeRoot <CHROOT_ARGUMENTE>*
-#
-archInstallPerformChangeRoot()
-
-# Erledigt den meisten Linux typischen Konfigurationsaufwand wie
-# Erstellen eines Hostnamen oder des Tastaturlayouts.
-archInstallConfigure()
-
-# Alle benötigten Dienste (siehe "--needed-services" werden aktiviert.
-archInstallEnableServices()
-
-# Nicht benötigte Orte werden aufgeräumt (siehe "_UNNEEDED_LOCATIONS").
-archInstallTidyUpSystem()
-
-# Erstellt eine Basisliste an verfügbaren Quellen um die ersten Pakete zu
-# beziehen (siehe "_PACKAGE_SOURCE_URLS").
-archInstallAppendTemporaryInstallMirrors()
-
-# Verpackt ein erfolgreich erstelltes Linux in ein tar-Archiv.
-archInstallPackResult()
-
-# Ermittelt eine aktuelle Liste aller Pakete aus den core Repositories von
-# pacman. Sie enthält die konkrete Url zu jeder Paket bzw. deren neusten
-# Version.
-archInstallCreatePackageUrlList()
-
-# Ermittelt die aktuellen Abhängigkeiten von pacman.
-archInstallDeterminePacmansNeededPackages()
-
-# Liest die Datenbank Dateien von Pacman und ermittelt welche Abhängigkeiten
-# notwendig sind um das übergebene Programm installieren zu können.
-# In archInstall wird diese Funktion nur verwendet um "pacman" selbst
-# lauffähig zu bekommen. Ab da übernimmt dieser das Auflösen von Abhängigkeiten.
-# Im Decorator Pattern kann diese Funktion jedoch sehr wertvoll werden, um
-# beliebige Abhängigkeiten zu ermitteln.
-#
-# >>> archInstallDeterminePackageDependencies <PAKET> <DATENBANK_DATEI>
-#
-archInstallDeterminePackageDependencies()
-
-# Ermittelt den Namen eines Paketordner in den Datenbankarchiven von
-# Pacman zu einem Program
-#
-# >>> archInstallDeterminePackageDirectoryName <PROGRAMM_NAME>
-#
-archInstallDeterminePackageDirectoryName()
-
-# Installiert die neuste pacman Version.
-#
-# >>> archInstallDownloadAndExtractPacman <LISTE_ALLER_URLS_ZU_ALLEN_PAKETEN>
-#
-archInstallDownloadAndExtractPacman()
-
-# Partitioniert ein Block Device "_OUTPUT_SYSTEM" nach einer sinnvollen
-# Heuristik. Siehe hierzu "Installation auf ein Block Device".
-archInstallMakePartitions()
-
-# Erstellt autmatisch eine bootfähiger fstab Konfigurationsdatei in
-# "_MOUNTPOINT_PATH/etc/fstab".
-archInstallGenerateFstabConfigurationFile()
-
-# Konfiguriert Grub2, so dass alle vorhanden Betriebssysteme im Bootmenu
-# angezeigt werden.
-archInstallHandleBootLoader()
-
-# Unmounted "_MOUNTPOINT_PATH".
-archInstallUnmountInstalledSystem()
-
-# Macht einen Neustart wenn die Installation erfolgreich war und die Flag
-# "--no-reboot" nicht gesetzt ist.
-archInstallPrepareNextBoot()
-
-# Schreibt pacmans config so um, dass Paketsignaturüberprüfung
-# übersprungen werden. Dies ist notwendig wenn pacman ohne ein bereits
-# installiertes Pacman initial installiert werden soll.
-archInstallConfigurePacman()
-
-# Ermittelt ob der Benutzer automatische Partitionierung wünscht.
-# So wird unbeabsichtigt Löschen von Daten verhindert.
-archInstallDetermineAutoPartitioning()
-
-# Generert sinnvollen Inhalt für "/etc/hosts".
-#
-# >>> archInstallGetHostsContent <HOST_NAME>
-#
-archInstallGetHostsContent()
-
-# Bereitet das Installations block device vor. Erstellt Partitionen und
-# vergibt Labels.
-archInstallPrepareBlockdevices()
-
-# Bereitet die System-Partition vor. Erstellt ein Dateisystem.
-archInstallPrepareSystemPartition()
-
-# Bereitet die Boot-Partition vor. Erstellt ein Dateisystem.
-archInstallPrepareBootPartition()
-
-# Bereitet die Swap-Partition vor. Erstellt ein Dateisystem.
-archInstallPrepareSwapPartition()
-
-# Formatiert alle notwendigen Partitionen.
-archInstallFormatPartitions()
-
-# Installiert "grub2" als Bootloader.
-archInstallIntegrateBootLoader()
-
-# Bereitet den Paket Cache vor der von pacman während der Installation
-# verwendet werden kann.
-archInstallLoadCache()
-
-# Speichert alle bisher geladenen Pakete aus dem aktuell verwendeten Pacman
-# im Paket Cache (siehe "_PACKAGE_CACHE_PATH").
-archInstallCache()
-
-# Erstellt sofern nicht vorhanden den Paket Cache und bereinigt das
-# Installations Ziel.
-archInstallPrepareInstallation()
-```
+geladen werden. Um eine Übersicht zu erhalten sollte man sie die
+API-Dokumentation anschauen.
 
 archInstall Options
 -------------------
 
-archInstall stellt ein Alphabet voller Optionen zur Verfügung.
-Während bisher zum einfachen Verständnis immer sog. Long-Options verwendet
-wurden, gibt es für jede Option auch einen Shortcut.
+archInstall stellt ein Alphabet voller Optionen zur Verfügung. Während bisher
+zum einfachen Verständnis immer sog. Long-Options verwendet wurden, gibt es für
+jede Option auch einen Shortcut.
 
 ```bash
 >>> ./archInstall.bash --user-names mustermann --host-name lfs
@@ -551,8 +299,9 @@ ist äquivalent zu:
 >>> ./archInstall.bash -u mustermann -n lfs
 ```
 
-Alle Optionen bis auf "--host-name" und "--auto-partitioning"
-haben Standardwerte. Alle Standardwert können mit Hilfe von:
+Alle Optionen bis auf "--host-name" und "--auto-partitioning" haben
+Standardwerte. Diese beiden werden sofern nicht von vorne herein angegeben
+interaktiv abgefragt. Alle Standardwert können mit Hilfe von:
 
 ```bash
 >>> ./archInstall.bash -h
@@ -570,11 +319,10 @@ oder
 >>> ./archInstall.bash --keyboard-layout de-latin1 -h
 ```
 
-angesehen werden. Letzteres macht Sinn, da sich Standardwerte aufgrund schon
-ermittelten Informationen verändern können.
-So wird der Standardwert von
+eingesehen werden. Letzteres macht Sinn, da sich Standardwerte aufgrund schon
+ermittelten Informationen verändern können. So wird der Standardwert von
 "--key-map-configuration="KEYMAP=de-latin1\nFONT=Lat2-Terminus16\nFONT_MAP="
-nach Eingabe von 
+nach Eingabe von
 
 ```bash
 >>> ./archInstall.bash --keyboard-layout us
@@ -624,15 +372,17 @@ Auf diese Weise kann man getrost folgendes tun:
     # Working with result in "$myTarget"
 
 Selbst wenn der Wert von "--output-system" über die CLI gesetzt wurde ist sie
-im Wrapper wieder überschrieben werden.
+im Wrapper wieder überschrieben. Auf diese weise kann man exklusiven Zugriff
+auf Parameter im Wrapper vornehmen.
+```
 
 Offline Installieren
 --------------------
 
-archInstall erstellt bei jeder Installation automatisch einen Paket-Cache
-um weitere Installationen zu beschleunigen. Ist dieser einmal erstellt oder
-wird dieser zusammen mit dem archInstall (z.b. auf einem usb-stick)
-ausgeliefert kann auch Offline installiert werden.
+archInstall erstellt bei jeder Installation automatisch einen Paket-Cache, um
+weitere Installationen zu beschleunigen. Ist dieser einmal erstellt oder wird
+dieser zusammen mit dem archInstall (z.b. auf einem usb-stick) ausgeliefert
+kann Offline installiert werden.
 
 Selbst wenn mit einem bereits vorhandenem pacstrap installiert wird, wird
 dieser temporär kopiert, gepatched und anschließend offlinefähig ausgeführt!
@@ -648,14 +398,14 @@ Installieren ohne root Rechte
 Prinzipiell ist es sogar möglich auch ohne root Rechte ein System aufzusetzen.
 Hierbei werden jedoch folgende Einschnitte gemacht:
 
-* Die Programm "tar", "fakeroot" und "fakechroot" müssen installiert sein.
+* Die Programm "fakeroot" und "fakechroot" müssen zusätzlich installiert sein.
 * Ein bereits installiertes Pacstrap kann nicht eingesetzt werden
-* Dem zusätzlich erstellten Benutzer kann während der Installation kein
-  Home-Ordner erstellt werden, da die Rechte nicht richtig gesetzt werden
-  könnten.
+* Zusätzlich erstellten Benutzer kann während der Installation kein automatisch
+  erstellter Home-Ordner geliefert werden, da die Rechte oder root nicht
+  richtig gesetzt werden könnten.
 * Es kann nur in "Ordner" (bzw. siehe nächsten Punkt) installiert werden.
-* Das System wird in ein tar-Archiv ohne Speicherung entsprechende Datei Rechte
-  Attribute gepackt.
+* Das System wird in ein tar-Archiv ohne Speicherung entsprechender Datei
+  Rechte Attribute gepackt.
 * Das Tar Archiv muss als "root" entpackt werden bevor das Ergebnis verwendet
   oder fehlerfrei gebootet werden kann.
 
@@ -666,21 +416,20 @@ Während der Entwicklung haben sich eine Reihe von Optionen bewährt um Fehler
 bei der Entwicklung von Wrappern zu finden.
 
 Die Option "--prevent-using-pacstrap" oder "-p" verhindert ein bereits
-installierten Pacman für die Installation zu verwenden.
-Dies ist notwendig wenn man sein Pacman so konfiguriert hat, das z.B. Pakete
-wie der Kernel oder Pacman von manipulierten User Repositories abhängen. Mit
-"--prevent-using-pacstrap" wird eine neue Version von Pacman in einer
-\u201cChangeRoot\u201d Umgebung ausgeführt.
+installierten Pacman für die Installation zu verwenden. Dies ist notwendig wenn
+man sein Pacman so konfiguriert hat, das z.B. Pakete wie der Kernel oder Pacman
+von manipulierten User Repositories abhängen. Mit "--prevent-using-pacstrap"
+wird eine neue Version von Pacman in einer Change-Root-Umgebung ausgeführt.
 
 "--prevent-using-native-arch-chroot" oder "-y" ist sinnvoll wenn man Indexing
 Dienste wie Ubuntu's "Zeitgeist" oder "Dropbox" verwendet, die das Unmounten
 von Mountpoints während der Installation verhindern, da sie auf diesen noch
 lesen/schreiben.
 
-Installiert man von einer Life-CD auf ein Block Device bootet das System nach
-erfolgreicher Installation automatisch in das neu generierte System.
-Will man noch etwas nachbessern oder Überprüfen, bietet sich die
-selbsterklärende Option "--no-reboot" bzw. "-r" an.
+Installiert man von einer Live-CD auf ein Block Device bootet das System nach
+erfolgreicher Installation automatisch in das neu generierte System. Will man
+noch etwas nachbessern oder Überprüfen, bietet sich die selbsterklärende Option
+"--no-reboot" bzw. "-r" an.
 
 Möchte man die Pakete "base-devel", "sudo" und "python" haben, geht das mit
 dem Shortcut: "--install-common-additional-packages" oder "-z".
@@ -725,45 +474,3 @@ selber setzten will, eignet sich folgender Pattern:
     archInstall "$@" --output-system "$myTarget"
 
     # ...
-
-Abhängigkeiten
---------------
-
-* bash (or any bash like shell)
-* test - Check file types and compare values.
-* sed - Stream editor for filtering and transforming text.
-* wget - The non-interactive network downloader.
-* xz - Compress or decompress .xz and lzma files.
-* tar - The GNU version of the tar archiving utility.
-* mount - Filesystem mounter.
-* umount - Filesystem unmounter.
-* chroot - Run command or interactive shell with special root directory.
-* echo - Display a line of text.
-* ln - Make links between files.
-* touch - Change file timestamps or creates them.
-* grep - Searches the named input files (or standard input if no files are
-         named, or if a single hyphen-minus (-) is given as file name) for
-         lines containing  a  match to the given PATTERN.  By default, grep
-         prints the matching lines.
-* shift - Shifts the command line arguments.
-* sync - Flushs file system buffers.
-* mktemp - Create a temporary file or directory.
-* cat - Concatenate files and print on the standard output.
-* blkid - Locate or print block device attributes.
-* uniq - Report or omit repeated lines.
-* uname - Prints system informations.
-
-Abhängigkeiten für Block Device Integration
-------------------------------------------
-
-* grub-bios - A full featured boot manager.
-* blockdev - Call block device ioctls from the command line.
-
-Optionale Abhängigkeiten
-------------------------
-
-* arch-install-scripts - Little framework to generate a linux from scratch.
-* fakechroot - Wraps some c-lib functions to enable programs like
-               "chroot" running without root privilegs.
-* os-prober - Detects presence of other operating systems.
-* mountpoint - See if a directory is a mountpoint.

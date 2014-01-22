@@ -26,7 +26,7 @@ Option descriptions:
     -W --wrapper <filename> Use wrapper in <filename> to generate the
         root-Filesystem to be packed into the initramfs-file.
 
-$(archInstallPrintCommandLineOptionDescriptions "$@" | \
+$(archInstallPrintCommandLineOptionDescription "$@" | \
     sed '/^ *-[a-z] --output-system .*$/,/^$/d')
 EOF
     }

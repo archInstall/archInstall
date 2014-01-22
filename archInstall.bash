@@ -220,7 +220,7 @@ EOF
     >>> $0 --output-system /dev/sda1 --verbose -f vim net-tools
 EOF
     }
-    function archInstallPrintCommandLineOptionDescriptions() {
+    function archInstallPrintCommandLineOptionDescription() {
         # Prints descriptions about each available command line option.
         # NOTE; All letters are used for short options.
         # NOTE: "-k" and "--key-map-configuration" isn't needed in the future.
@@ -323,7 +323,7 @@ EOF
         echo -e '\nExamples:\n'
         archInstallPrintUsageExamples "$@"
         echo -e '\nOption descriptions:\n'
-        archInstallPrintCommandLineOptionDescriptions "$@"
+        archInstallPrintCommandLineOptionDescription "$@"
         echo
     }
     function archInstallCommandLineInterface() {
@@ -507,6 +507,16 @@ EOF
     function archInstallLog() {
         # Handles logging messages. Returns non zero and exit on log level
         # error to support chaining the message into toolchain.
+        #
+        # Examples:
+        #
+        # >>> archInstallLog test
+        # info: test
+        # >>> archInstallLog debug message
+        # debug: message
+        # >>> archInstallLog info message '\n'
+        #
+        # info: message
         local loggingType='info' && \
         local message="$1" && \
         if [ "$2" ]; then
@@ -617,6 +627,11 @@ EOF
 
     function archInstallPerformDependencyCheck() {
         # This function check if all given dependencies are present.
+        #
+        # Examples:
+        #
+        # >>> archInstallPerformDependencyCheck "mkdir pacstrap mktemp"
+        # ...
         local dependenciesToCheck="$1" && \
         local result=0 && \
         local dependency && \
@@ -1351,12 +1366,9 @@ EOF
                 archInstallFormatSystemPartition || \
                 archInstallLog 'error' 'System partition creation failed.'
             else
-                if [ archInstallDetermineAutoPartitioning ]; then
-                    archInstallPrepareBlockdevices || \
-                    archInstallLog 'error' 'Preparing blockdevices failed.'
-                else
-                    archInstallLog 'error' 'Auto partitioning failed.'
-                fi
+                archInstallDetermineAutoPartitioning && \
+                archInstallPrepareBlockdevices || \
+                archInstallLog 'error' 'Preparing blockdevices failed.'
             fi
         else
             archInstallLog 'error' \

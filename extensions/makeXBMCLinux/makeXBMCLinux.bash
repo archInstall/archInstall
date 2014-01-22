@@ -29,7 +29,7 @@ Option descriptions:
         root-filesystem. This option doesn't work in combination with
         "--ram-only".
 
-$(installArchLinuxPrintCommandLineOptionDescriptions) "$@"
+$(installArchLinuxPrintCommandLineOptionDescription) "$@"
 EOF
     }
 
