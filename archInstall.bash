@@ -571,13 +571,16 @@ EOF
         (test -e "${_MOUNTPOINT_PATH}etc/mtab" 1>"$_STANDARD_OUTPUT" \
             2>"$_ERROR_OUTPUT" || echo "rootfs / rootfs rw 0 0" \
             1>"${_MOUNTPOINT_PATH}etc/mtab" 2>"$_ERROR_OUTPUT") && \
-        ((cp '/etc/resolv.conf' "${_MOUNTPOINT_PATH}etc/" 1>"$_STANDARD_OUTPUT" \
-              2>"$_ERROR_OUTPUT" &&
-          [[ "$_PREVENT_USING_NATIVE_ARCH_CHANGE_ROOT" == 'no' ]] && \
-          hash arch-chroot 1>"$_STANDARD_OUTPUT" 2>/dev/null && \
-          mv "${_MOUNTPOINT_PATH}etc/resolv.conf" \
-              "${_MOUNTPOINT_PATH}etc/resolv.conf.old" 1>"$_STANDARD_OUTPUT" \
-              2>/dev/null) || true) && \
+        # Copy systems resolv.conf to new installed system.
+        # If the native "arch-chroot" is used it will mount the file into the
+        # change root environment.
+        cp '/etc/resolv.conf' "${_MOUNTPOINT_PATH}etc/" 1>"$_STANDARD_OUTPUT" \
+            2>"$_ERROR_OUTPUT" && \
+        [[ "$_PREVENT_USING_NATIVE_ARCH_CHANGE_ROOT" == 'no' ]] && \
+        hash arch-chroot 1>"$_STANDARD_OUTPUT" 2>/dev/null && \
+        mv "${_MOUNTPOINT_PATH}etc/resolv.conf" \
+            "${_MOUNTPOINT_PATH}etc/resolv.conf.old" 1>"$_STANDARD_OUTPUT" \
+            2>/dev/null
         sed --in-place --quiet '/^[ \t]*CheckSpace/ !p' \
             "${_MOUNTPOINT_PATH}etc/pacman.conf" 1>"$_STANDARD_OUTPUT" \
             2>"$_ERROR_OUTPUT" && \
