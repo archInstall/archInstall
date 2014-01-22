@@ -502,6 +502,7 @@ EOF
                 done
             fi
         fi
+        return 0
     }
     function archInstallLog() {
         # Handles logging messages. Returns non zero and exit on log level
@@ -522,6 +523,7 @@ EOF
         if [ "$loggingType" == 'error' ]; then
             exit 1
         fi
+        return 0
     }
 
     # endregion
@@ -563,8 +565,8 @@ EOF
         # This functions performs creating an arch linux system from any linux
         # system base.
         archInstallLog 'Create a list with urls for needed packages.' && \
-        (archInstallDownloadAndExtractPacman \
-            $(archInstallCreatePackageUrlList)) && \
+        archInstallDownloadAndExtractPacman \
+            $(archInstallCreatePackageUrlList) && \
         # Create root filesystem only if not exists.
         (test -e "${_MOUNTPOINT_PATH}etc/mtab" 1>"$_STANDARD_OUTPUT" \
             2>"$_ERROR_OUTPUT" || echo "rootfs / rootfs rw 0 0" \
@@ -831,6 +833,7 @@ EOF
                 "$serviceName".service 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
             [[ $? != 0 ]] && return $?
         done
+        return 0
     }
     function archInstallTidyUpSystem() {
         # Deletes some unneeded locations in new installs operating system.
@@ -844,6 +847,7 @@ EOF
                 --force 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
             [[ $? != 0 ]] && return $?
         done
+        return 0
     }
     function archInstallAppendTemporaryInstallMirrors() {
         # Appends temporary used mirrors to download missing packages during
@@ -855,6 +859,7 @@ EOF
                 2>"$_ERROR_OUTPUT"
             [[ $? != 0 ]] && return $?
         done
+        return 0
     }
     function archInstallPackResult() {
         # Packs the resulting system to provide files owned by root without
@@ -867,6 +872,7 @@ EOF
                 2>"$_ERROR_OUTPUT"
             return $?
         fi
+        return 0
     }
     function archInstallCreatePackageUrlList() {
         # Generates all web urls for needed packages.
@@ -904,6 +910,7 @@ EOF
                 2>"$_ERROR_OUTPUT" && \
             archInstallDeterminePackageDependencies 'pacman' \
                 "$databaseLocation"
+            return $?
         else
             archInstallLog 'error' \
                 "No database file (\"$_PACKAGE_CACHE_PATH/core.db\") available."
@@ -918,7 +925,7 @@ EOF
         _NEEDED_PACKAGES+=" $1 " && \
         _NEEDED_PACKAGES="$(echo "$_NEEDED_PACKAGES" | sed --regexp-extended \
             's/ +/ /g')" && \
-        local result=0 && \
+        local returnCode=0 && \
         local \
             packageDirectoryPath=$(archInstallDeterminePackageDirectoryName \
             "$@") && \
@@ -939,12 +946,12 @@ EOF
                     "Needed package \"$packageName\" for \"$1\" couldn't be found in \"$2\"."
             done
         else
-            result=1
+            returnCode=1
         fi
         # Trim resulting list.
         [[ ! "$3" ]] && _NEEDED_PACKAGES="$(echo "${_NEEDED_PACKAGES}" | sed \
             --regexp-extended 's/(^ +| +$)//g')"
-        return $result
+        return $retunCode
     }
     function archInstallDeterminePackageDirectoryName() {
         # Determines the package directory name from given package name in
@@ -992,8 +999,8 @@ EOF
                 # If "fileName" couldn't be determined via server determine it
                 # via current package cache.
                 if [ ! "$fileName" ]; then
-                    fileName=$(ls $_PACKAGE_CACHE_PATH \
-                    | grep "$packageName-[0-9]" | head --lines 1)
+                    fileName=$(ls $_PACKAGE_CACHE_PATH | grep \
+                        "$packageName-[0-9]" | head --lines 1)
                 fi
                 if [ "$fileName" ]; then
                     wget "$packageUrl" --timestamping --continue \
@@ -1007,11 +1014,13 @@ EOF
                     2>"$_ERROR_OUTPUT" | tar --extract --directory \
                     "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" \
                     2>"$_ERROR_OUTPUT"
-                [[ $? != 0 ]] && return $?
+                local returnCode=$? && [[ $returnCode != 0 ]] && \
+                    return $returnCode
             done
         else
             return $?
         fi
+        return 0
     }
     function archInstallMakePartitions() {
         # Performs the auto partitioning.
@@ -1109,6 +1118,7 @@ EOF
             fi
             return $returnCode
         fi
+        return $?
     }
     function archInstallConfigurePacman() {
         # Disables signature checking for incoming packages.
@@ -1153,6 +1163,7 @@ EOF
                 fi
             done
         fi
+        return 0
     }
     function archInstallGetHostsContent() {
         # Provides the file content for the "/etc/hosts".
@@ -1291,10 +1302,11 @@ EOF
         fi
         chmod 755 "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" \
             2>"$_ERROR_OUTPUT" && \
+        local returnCode=$?
         # Make a uniqe array.
         _PACKAGES=$(echo "${_PACKAGES[*]}" | tr ' ' '\n' | sort -u | tr '\n' \
             ' ')
-        return $?
+        return $returnCode
     }
 
     # endregion
@@ -1364,6 +1376,7 @@ EOF
         archInstallLog \
             "Generating operating system into \"$_OUTPUT_SYSTEM\" has successfully finished."
     fi
+    return 0
 
 # endregion
 
