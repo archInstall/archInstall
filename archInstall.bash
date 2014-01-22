@@ -1036,7 +1036,8 @@ EOF
                   $_BOOT_SPACE_IN_MEGA_BYTE)) -le \
                   $blockDeviceSpaceInMegaByte ]]; then
                 archInstallLog 'Create boot and system partitions.' && \
-                gdisk "$_OUTPUT_SYSTEM" << EOF
+                gdisk "$_OUTPUT_SYSTEM" << EOF \
+                    1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
 o
 Y
 n
@@ -1058,7 +1059,6 @@ $_SYSTEM_PARTITION_LABEL
 w
 Y
 EOF
-                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
             else
                 archInstallLog 'error' "Not enough space on \"$_OUTPUT_SYSTEM\" (\"$blockDeviceSpaceInByte\" byte). We need at least \"$(($_NEEDED_SYSTEM_SPACE_IN_BYTE + $_BOOT_SPACE_IN_BYTE))\" byte."
             fi
