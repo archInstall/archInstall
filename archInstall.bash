@@ -946,6 +946,7 @@ EOF
                     "Needed package \"$packageName\" for \"$1\" couldn't be found in \"$2\"."
             done
         else
+            echo "$packageDirectoryPath"
             returnCode=1
         fi
         # Trim resulting list.
@@ -1333,6 +1334,7 @@ EOF
                 _MOUNTPOINT_PATH+='/'
             fi
         elif [ -b "$_OUTPUT_SYSTEM" ]; then
+            _PACKAGES+=' efibootmgr' && \
             archInstallPerformDependencyCheck \
                 "${_BLOCK_INTEGRATION_DEPENDENCIES[*]}" || \
             archInstallLog 'error' \
