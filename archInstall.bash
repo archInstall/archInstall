@@ -1012,6 +1012,7 @@ EOF
                     archInstallLog \
                         'error' "A suitable file for package \"$packageName\" could not be determined."
                 fi
+                archInstallLog "Install package \"$fileName\" manually." && \
                 xz --decompress --to-stdout "$_PACKAGE_CACHE_PATH/$fileName" \
                     2>"$_ERROR_OUTPUT" | tar --extract --directory \
                     "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" \
