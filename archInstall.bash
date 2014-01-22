@@ -938,15 +938,16 @@ EOF
             do
                 local packageName=$(echo "$packageDependencyDescription" | \
                     grep --extended-regexp --only-matching '^[-a-zA-Z0-9]+')
-                echo "$_NEEDED_PACKAGES" 2>"$_ERROR_OUTPUT" | grep \
-                    " $packageName " 1>/dev/null 2>/dev/null || \
-                archInstallDeterminePackageDependencies "$packageName" \
-                    "$2" recursive || \
-                archInstallLog 'warning' \
-                    "Needed package \"$packageName\" for \"$1\" couldn't be found in \"$2\"."
+                if echo "$_NEEDED_PACKAGES" 2>"$_ERROR_OUTPUT" | grep \
+                    " $packageName " 1>/dev/null 2>/dev/null
+                then
+                    archInstallDeterminePackageDependencies "$packageName" \
+                        "$2" recursive || \
+                    archInstallLog 'warning' \
+                        "Needed package \"$packageName\" for \"$1\" couldn't be found in \"$2\"."
+                fi
             done
         else
-            echo "$packageDirectoryPath"
             returnCode=1
         fi
         # Trim resulting list.
