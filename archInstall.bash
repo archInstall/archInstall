@@ -1086,12 +1086,11 @@ EOF
             archInstallLog \
                 "At least you have to create two partitions. The first one will be used as boot partition labeled to \"${_BOOT_PARTITION_LABEL}\" and second one will be used as system partition and labeled to \"${_SYSTEM_PARTITION_LABEL}\". Press Enter to continue." && \
             read && \
-            archInstallLog \
-                'Show blockdevices. Press Enter to continue.' && \
-            lsblk 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
+            archInstallLog 'Show blockdevices. Press Enter to continue.' && \
+            lsblk && \
             read && \
             archInstallLog 'Create partitions manually.' && \
-            gdisk "$_OUTPUT_SYSTEM" 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
+            gdisk "$_OUTPUT_SYSTEM"
         fi
         return $?
     }

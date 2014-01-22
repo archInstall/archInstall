@@ -88,8 +88,8 @@ unbeaufsichtigte Installation:
 >>> ./archInstall.bash --host-name testSystem --auto-partitioning
 ```
 
-Installation auf ein Block Device
----------------------------------
+Installation auf Blockgeräte
+----------------------------
 
 Im typischen Fall will man von einer Life-CD booten um das System auf einer
 Festplatte oder Partition zu installieren. Hierbei müssen folgende Aufgaben
@@ -157,8 +157,8 @@ definieren dessen Label:
     --fallback-boot-entry-label archLinuxFallback
 ```
 
-Installation in einen Ordner
-----------------------------
+Installation in Ordner
+----------------------
 
 Um archInstall für komplexere Szenarien zu verwenden oder nachträgliche
 Manipulationen vorzunehmen ist es sinnvoll zunächst in einen Ordner zu
@@ -215,8 +215,8 @@ auf:
 
 zu werfen.
 
-archInstall im Decorator Pattern
---------------------------------
+Decorator Pattern
+-----------------
 
 Um eigene Betriebssystem Module zu entwerfen bietet archInstall eine
 Vielzahl von Schnittstellen um seine internen Mechanismen separate nach Außen
@@ -270,8 +270,9 @@ folgendes eintippen:
 
 Siehe hierzu auch "archInstall API".
 
-archInstall API
----------------
+<!--|deDE:Applikations-Interface-->
+Application Interface
+---------------------
 
 Viele nützlich Umgebungsvariablen und Funktionen können mit
 
@@ -282,8 +283,8 @@ Viele nützlich Umgebungsvariablen und Funktionen können mit
 geladen werden. Um eine Übersicht zu erhalten sollte man sie die
 API-Dokumentation anschauen.
 
-archInstall Options
--------------------
+Options
+-------
 
 archInstall stellt ein Alphabet voller Optionen zur Verfügung. Während bisher
 zum einfachen Verständnis immer sog. Long-Options verwendet wurden, gibt es für
@@ -374,7 +375,6 @@ Auf diese Weise kann man getrost folgendes tun:
 Selbst wenn der Wert von "--output-system" über die CLI gesetzt wurde ist sie
 im Wrapper wieder überschrieben. Auf diese weise kann man exklusiven Zugriff
 auf Parameter im Wrapper vornehmen.
-```
 
 Offline Installieren
 --------------------
