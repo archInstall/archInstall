@@ -34,8 +34,7 @@ zusätzlichen Optionen. Neben der obligatorischen archInstall.bash benötigt
 dieses Skript packcpio.sh, welches im selben Ordner liegen muss.
 
 <!--|deDE:Beispiel-->
-Example
--------
+#### Example
 
 Der folgende Befehl erzeugt ein Basis-ArchLinux-System in ein initramfs namens
 "baseArchLinux.img" und kopiert einen dazu kompatiblen Kernel nach
