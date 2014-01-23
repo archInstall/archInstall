@@ -420,7 +420,7 @@ Hierbei werden jedoch folgende Einschnitte gemacht:
 * Das Tar Archiv muss als "root" entpackt werden bevor das Ergebnis verwendet
   oder fehlerfrei gebootet werden kann.
 
-<!--:deDE:Nützliche Tipps und Fehlerbehebung-->
+<!--|deDE:Nützliche Tipps und Fehlerbehebung-->
 Useful tips and debugging informations
 --------------------------------------
 
