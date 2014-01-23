@@ -88,8 +88,9 @@ unbeaufsichtigte Installation:
 >>> ./archInstall.bash --host-name testSystem --auto-partitioning
 ```
 
-Installation auf Blockgeräte
-----------------------------
+<!--|deDE:Installation auf Blockgeräte-->
+Install to blockdevice
+----------------------
 
 Im typischen Fall will man von einer Life-CD booten um das System auf einer
 Festplatte oder Partition zu installieren. Hierbei müssen folgende Aufgaben
@@ -135,8 +136,9 @@ nutzen:
     --system-partition-label system
 ```
 
-Installation auf eine Partition
--------------------------------
+<!--|deDE:Installation auf eine Partition-->
+Install to partition
+--------------------
 
 Um z.B. aus einem Produktivsystem heraus eine alternative Linux Distribution
 auf eine weitere Partition zu installieren kann einfach folgender Befehl
@@ -157,8 +159,9 @@ definieren dessen Label:
     --fallback-boot-entry-label archLinuxFallback
 ```
 
-Installation in Ordner
-----------------------
+<!--|deDE:Installation in Ordner-->
+Install to folder
+-----------------
 
 Um archInstall für komplexere Szenarien zu verwenden oder nachträgliche
 Manipulationen vorzunehmen ist es sinnvoll zunächst in einen Ordner zu
@@ -173,8 +176,9 @@ Dieser Befehl installiert ein vollständiges System in den eigenen Home-Ordner
 >>> ./archInstall.bash --output-system ~/test
 ```
 
-Automatische Konfiguration
---------------------------
+<!--|deDE:Automatische Konfiguration-->
+Automatic configuration
+-----------------------
 
 archInstall konfiguriert das neu eingerichtete System vollautomatisch.
 Folgende Tasks wurden automatisiert:
@@ -215,6 +219,7 @@ auf:
 
 zu werfen.
 
+<!--|deDE:Dekorator Muster-->
 Decorator Pattern
 -----------------
 
@@ -228,11 +233,13 @@ Wrappers.
 Im einfachsten Fall würde der Code der archInstall sinnvoll erweitert so
 aussehen:
 
-TODO
-
     #!/usr/bin/env bash
+    # -*- coding: utf-8 -*-
 
-    source archInstall.bash
+    # Program description...
+
+    source "$(dirname "$(readlink --canonicalize "$0")")"archInstall.bash \
+        --load-environment
 
     # Do your own stuff cli logic here..
     # All your functions and variables are separated from the archInstall
@@ -244,9 +251,9 @@ TODO
 
     # Prepare result ...
 
-Beachte, dass trotz des Sourcens von archInstall auf diese Weise keine
-Konflikte zwischen dem Wrapper-Scope und dem archInstall-Scope entstehen
-können. Die Einzige globale Variable ist "archInstall" selbst.
+Beachte, dass trotz des laden von archInstall auf diese Weise keine Konflikte
+zwischen dem Wrapper-Scope und dem archInstall-Scope entstehen können. Die
+einzige globale Variable ist "archInstall" selbst.
 
 Will man nun von den internen Features von archInstall partizipieren geht
 das so:
@@ -283,6 +290,7 @@ Viele nützlich Umgebungsvariablen und Funktionen können mit
 geladen werden. Um eine Übersicht zu erhalten sollte man sie die
 API-Dokumentation anschauen.
 
+<!--|deDE:Optionen-->
 Options
 -------
 
@@ -376,8 +384,9 @@ Selbst wenn der Wert von "--output-system" über die CLI gesetzt wurde ist sie
 im Wrapper wieder überschrieben. Auf diese weise kann man exklusiven Zugriff
 auf Parameter im Wrapper vornehmen.
 
-Offline Installieren
---------------------
+<!--|deDE:Offline Installieren-->
+Install offline
+---------------
 
 archInstall erstellt bei jeder Installation automatisch einen Paket-Cache, um
 weitere Installationen zu beschleunigen. Ist dieser einmal erstellt oder wird
@@ -392,8 +401,9 @@ Pakete im Package Cache vorhanden sein. Ist dies nicht der Fall wird
 archInstall versuchen diese nach zu laden und im Offline-Fall einen Fehler
 zurückgeben.
 
-Installieren ohne root Rechte
------------------------------
+<!--|deDE:Installieren ohne root Rechte-->
+Install without having root permissions
+---------------------------------------
 
 Prinzipiell ist es sogar möglich auch ohne root Rechte ein System aufzusetzen.
 Hierbei werden jedoch folgende Einschnitte gemacht:
@@ -409,8 +419,9 @@ Hierbei werden jedoch folgende Einschnitte gemacht:
 * Das Tar Archiv muss als "root" entpackt werden bevor das Ergebnis verwendet
   oder fehlerfrei gebootet werden kann.
 
-Nützliches, Tipps, Debugging
-----------------------------
+<!--:deDE:Nützliche Tipps und Fehlerbehebung-->
+Useful tips and debugging informations
+--------------------------------------
 
 Während der Entwicklung haben sich eine Reihe von Optionen bewährt um Fehler
 bei der Entwicklung von Wrappern zu finden.

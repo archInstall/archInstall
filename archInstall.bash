@@ -13,74 +13,90 @@
 # Copyright Torben Sickert 16.12.2012
 
 # License
+# -------
+
 #    This library written by Torben Sickert stand under a creative commons
 #    naming 3.0 unported license.
 #    see http://creativecommons.org/licenses/by/3.0/deed.de
 
-# Examples
-#     # Start install progress command (Assuming internet is available):
-#     wget \
-#         https://raw.github.com/archInstall/archInstall/master/archInstall.bash \
-#         -O archInstall.bash && chmod +x archInstall.bash && \
-#         ./archInstall.bash --output-system /dev/sda1
+# archInstall provides a generic way to install an arch linux from any linux
+# environment without maintaining the install process.
 
-#     # Call a global function (Configures your current system):
-#     source archInstall.bash --load-environment && \
-#         _MOUNTPOINT_PATH='/' _USER_NAMES='hans' \
-#         _LOCAL_TIME='Europe/Berlin' archInstallConfigure
+# Examples
+# --------
+
+# Start install progress command (Assuming internet is available):
+# >>> wget \
+# ... https://raw.github.com/archInstall/archInstall/master/archInstall.bash \
+# ...     -O archInstall.bash && chmod +x archInstall.bash && \
+# ... ./archInstall.bash --output-system /dev/sda1
+# ...
+
+# Call a global function (Configures your current system):
+# >>> source archInstall.bash --load-environment && \
+# ...     _MOUNTPOINT_PATH='/' _USER_NAMES='hans' \
+# ...     _LOCAL_TIME='Europe/Berlin' archInstallConfigure
 
 # Note that you only get very necessary output until you provide "--verbose" as
 # commandline options.
 
 # Dependencies
-#     bash (or any bash like shell)
-#     test       - Check file types and compare values (part of the shell).
-#     shift      - Shifts the command line arguments (part of the shell).
-#     mount      - Filesystem mounter (part of util-linux).
-#     umount     - Filesystem unmounter (part of util-linux).
-#     mountpoint - See if a directory is a mountpoint (part of util-linux).
-#     blkid      - Locate or print block device attributes (part of util-linux).
-#     chroot     - Run command or interactive shell with special root directory
-#                  (part of coreutils).
-#     echo       - Display a line of text (part of coreutils).
-#     ln         - Make links between files (part of coreutils).
-#     touch      - Change file timestamps or creates them (part of coreutils).
-#     sync       - Flushs file system buffers (part of coreutils).
-#     mktemp     - Create a temporary file or directory (part of coreutils).
-#     cat        - Concatenate files and print on the standard output (part of
-#                  coreutils).
-#     uniq       - Report or omit repeated lines (part of coreutils).
-#     uname      - Prints system informations (part of coreutils).
-#     rm         - Remove files or directories (part of coreutils).
-#     sed        - Stream editor for filtering and transforming text.
-#     wget       - The non-interactive network downloader.
-#     xz         - Compress or decompress .xz and lzma files.
-#     tar        - The GNU version of the tar archiving utility.
-#     grep       - Searches the named input files (or standard input if no files
-#                  are named, or if a single hyphen-minus (-) is given as file
-#                  name) for lines containing a match to the given PATTERN. By
-#                  default, grep prints the matching lines.
-#     which      - Shows the full path of (shell) commands.
+# ------------
+
+# - bash (or any bash like shell)
+# - test       - Check file types and compare values (part of the shell).
+# - shift      - Shifts the command line arguments (part of the shell).
+# - mount      - Filesystem mounter (part of util-linux).
+# - umount     - Filesystem unmounter (part of util-linux).
+# - mountpoint - See if a directory is a mountpoint (part of util-linux).
+# - blkid      - Locate or print block device attributes (part of util-linux).
+# - chroot     - Run command or interactive shell with special root directory
+#                (part of coreutils).
+# - echo       - Display a line of text (part of coreutils).
+# - ln         - Make links between files (part of coreutils).
+# - touch      - Change file timestamps or creates them (part of coreutils).
+# - sync       - Flushs file system buffers (part of coreutils).
+# - mktemp     - Create a temporary file or directory (part of coreutils).
+# - cat        - Concatenate files and print on the standard output (part of
+#                coreutils).
+# - uniq       - Report or omit repeated lines (part of coreutils).
+# - uname      - Prints system informations (part of coreutils).
+# - rm         - Remove files or directories (part of coreutils).
+# - sed        - Stream editor for filtering and transforming text.
+# - wget       - The non-interactive network downloader.
+# - xz         - Compress or decompress .xz and lzma files.
+# - tar        - The GNU version of the tar archiving utility.
+# - grep       - Searches the named input files (or standard input if no files
+#                are named, or if a single hyphen-minus (-) is given as file
+#                name) for lines containing a match to the given PATTERN. By
+#                default, grep prints the matching lines.
+# - which      - Shows the full path of (shell) commands.
 
 # Dependencies for blockdevice integration
-#     blockdev   - Call block device ioctls from the command line (part of \
-#                  util-linux).
-#     efibootmgr - Manipulate the EFI Boot Manager (part of efibootmgr).
-#     gdisk      - Interactive GUID partition table (GPT) manipulator (part of
-#                  gptfdisk).
-#     btrfs      - Control a btrfs filesystem (part of btrfs-progs).
+# ----------------------------------------
 
-# Optional dependencies for smart dos filesystem labeling, installing without
-# root permissions or automatic network configuration.
-#     dosfslabel  - Handle dos file systems (part of dosfstools).
-#     arch-chroot - Performs an arch chroot with api file system binding (part
-#                   of arch-install-scripts).
-#     fakeroot    - Run a command in an environment faking root privileges for
-#                   file manipulation.
-#     fakechroot  - Wraps some c-lib functions to enable programs like "chroot"
-#                   running without root privileges.
-#     os-prober   - Detects presence of other operating systems.
-#     ip          - Determines network adapter (part of iproute2).
+# - blockdev   - Call block device ioctls from the command line (part of
+#                util-linux).
+# - efibootmgr - Manipulate the EFI Boot Manager (part of efibootmgr).
+# - gdisk      - Interactive GUID partition table (GPT) manipulator (part of
+#                gptfdisk).
+# - btrfs      - Control a btrfs filesystem (part of btrfs-progs).
+
+# Optional dependencies
+# ---------------------
+
+# for smart dos filesystem labeling, installing without root permissions or
+# automatic network configuration.
+
+# - dosfslabel  - Handle dos file systems (part of dosfstools).
+# - arch-chroot - Performs an arch chroot with api file system binding (part
+#                 of arch-install-scripts).
+# - fakeroot    - Run a command in an environment faking root privileges for
+#                 file manipulation.
+# - fakechroot  - Wraps some c-lib functions to enable programs like "chroot"
+#                 running without root privileges.
+# - os-prober   - Detects presence of other operating systems.
+# - ip          - Determines network adapter (part of iproute2).
 
 __NAME__='archInstall'
 

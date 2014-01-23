@@ -3,6 +3,19 @@
 vim: set tabstop=4 shiftwidth=4 expandtab:
 vim: foldmethod=marker foldmarker=region,endregion:
 
+endregion
+
+region header
+
+Copyright Torben Sickert 16.12.2012
+
+License
+-------
+
+   This library written by Torben Sickert stand under a creative commons
+   naming 3.0 unported license.
+   see http://creativecommons.org/licenses/by/3.0/deed.de
+
 endregion -->
 
 ### MakeSquashLinux
@@ -15,10 +28,10 @@ dieses als squash-Dateisystem. Zusätzlich wird eine Netzwerk-Boot-fähige
 initramfs erzeugt und ein für aufs gepatchter Kernel aus den Paket-Quellen
 kopiert.
 
-/!\ MakeSquashLinux kann nicht von Wrappern verwendet werden, welche nach dem
-generieren des Grundsystems weitere Anpassungen vornehmen möchten.
-[!] Da der Download der squash-Datei ein paar Sekunden in Anspruch nimmt, wird
-beim booten per 'plymouth' ein splash-screen angezeigt.
+MakeSquashLinux kann nicht von Wrappern verwendet werden, welche nach dem
+generieren des Grundsystems weitere Anpassungen vornehmen möchten. Da der
+Download der squash-Datei ein paar Sekunden in Anspruch nimmt, wird beim
+booten per 'plymouth' ein splash-screen angezeigt.
 
 #### Interface
 
@@ -30,9 +43,9 @@ beim booten per 'plymouth' ein splash-screen angezeigt.
         -W --wrapper <file>  Use wrapper in <file> to generate the root-Filesystem
         -X --xbmc Use "../makeXBMCLinux/makeXBMCLinux.bash" as wrapper.
 
-[!] Wrapper sind hier Skripte, welche den Standard-Setup von archInstall
-durch weitere Konfiguration oder Programme ergänzen (makeSquashLinux ist also
-selbst auch ein Wrapper).
+Wrapper sind hier Skripte, welche den Standard-Setup von archInstall durch
+weitere Konfiguration oder Programme ergänzen (makeSquashLinux ist also selbst
+auch ein Wrapper).
 
 Darüberhinaus können alle Optionen von archInstall verwendet werden. Als
 Pfade werden lokale Dateinamen und scp-kompatible Pfade akzeptiert.
@@ -40,15 +53,16 @@ So ist es möglich die einzelnen Dateien auf verschiedenen Rechnern zu speichern
 (mit den intitramfs-Optionen ist es sogar möglich das root-squashfs aus einem
 mit dem Ort des Kernels oder tftp-Servers nicht verbundenen Netz zu laden).
 
-[!] scp-Pfade haben die Form "user@ssh-server:/pfad/zu/datei"
+scp-Pfade haben die Form "user@ssh-server:/pfad/zu/datei"
 
-#### Initramfs Parameter
+<!--|deDE:Initramfs-Parameter-->
+#### Initramfs parameter
 
 Um über das Netzwerk booten zu können müssen dem initramfs auf der
 Kernel-Kommandozeile einige Informationen mitgegeben werden:
 
 * Art der Netzwerkverbindung: `ip=<client-ip>::<gw-ip>:<netmask>:<hostname>:<device>:<autoconf>`
-    [!] Alle Parameter sind optional.
+    Alle Parameter sind optional.
     `<client-ip>`: Statische IP-Adresse, die angefordert werden soll.
     `<gw-ip>`: IP-Adresse des Gateways.
     `<netmask>`: Netsmaske. Wenn leer wird diese aus der client-ip generiert und/oder durch die Antwort von DHCP/BOOTP überschrieben.
@@ -58,8 +72,8 @@ Kernel-Kommandozeile einige Informationen mitgegeben werden:
     Beispiel:  `ip=::::::`
 
 * Ort des root-Dateisystems:
-    /!\ Der 'url'-Parameter überschreibt 'nfsroot', unabhängig von der Reihenfolge. 
-    * Bei squashfs werden URLs mit den Protokollen http, https und ftp unterstützt (eine DNS-Auflösung findet nicht statt): 
+    Der 'url'-Parameter überschreibt 'nfsroot', unabhängig von der Reihenfolge.
+    * Bei squashfs werden URLs mit den Protokollen http, https und ftp unterstützt (eine DNS-Auflösung findet nicht statt):
     `url="<protocol>://<server-ip>[:<port>]/<path-to-file>"`
     `<protocol>`: Es werden http, https und ftp unterstützt.
     `<server-ip>`: IP-Adresse des Hosts, auf dem die squashfs-Datei liegt.
