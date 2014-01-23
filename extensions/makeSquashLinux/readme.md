@@ -18,7 +18,7 @@ License
 
 endregion -->
 
-### MakeSquashLinux
+### makeSquashLinux
 
 MakeSquashLinux generiert ein ArchLinux-System (oder ein beliebiges auf
 ArchLinux basierendes System, welches mit einem Script generiert werden kann,

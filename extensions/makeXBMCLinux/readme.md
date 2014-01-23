@@ -18,7 +18,7 @@ License
 
 endregion -->
 
-### MakeXBMCLinux
+### makeXBMCLinux
 
 makeXBMCLinux ist ein Wrapper-Skript für archInstall, welches das gleiche
 Interface unterstützt. Neben dem Grundsystem wird dabei eine XBMC-Umgebung
