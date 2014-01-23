@@ -13,45 +13,46 @@
 # Copyright Torben Sickert 16.12.2012
 
 # License
-#    This library written by Torben Sickert stand under a creative commons
-#    naming 3.0 unported license.
-#    see http://creativecommons.org/licenses/by/3.0/deed.de
+# -------
 
-# Examples:
+# This library written by Torben Sickert stand under a creative commons naming
+# 3.0 unported license. see http://creativecommons.org/licenses/by/3.0/deed.de
 
-#     # Start install progress command (Assuming internet is available):
-#     ./packIntoArchIso.bash /path/to/archiso/file.iso \
-#         /path/to/newly/packed/archiso/file.iso
+# Example
+# -------
+
+# Start install progress command (Assuming internet is available):
+# >>> ./packIntoArchIso.bash /path/to/archiso/file.iso \
+# ...     /path/to/newly/packed/archiso/file.iso
 
 # Note that you only get very necessary output until you provide "--verbose" as
 # commandline options.
 
-# Dependencies:
+# Dependencies
+# ------------
 
-#     bash (or any bash like shell)
-#     test           - Check file types and compare values.
-#     mount          - Filesystem mounter.
-#     echo           - Display a line of text.
-#     umount         - Filesystem unmounter.
-#     mktemp         - Create a temporary file or directory.
-#     squashfs-tools - Packs and unpacks the iso embedded squash
-#                      filesystem.
-#     cdrkit         - Suite of programs for CD/DVD recording, ISO image
-#                      creation, and audio CD extraction
-#     touch          - Change file timestamps or creates them.
-#     grep           - Searches the named input files (or standard input if no
-#                      files are named, or if a single hyphen-minus (-) is
-#                      given as file name) for lines containing a match to the
-#                      given PATTERN. By default, grep prints the matching
-#                      lines.
-#     shift          - Shifts the command line arguments.
-#     readlink       - Print resolved symbolic links or canonical file names.
-#     rm             - Remove files or directories.
+# - bash (or any bash like shell)
+# - test           - Check file types and compare values.
+# - mount          - Filesystem mounter.
+# - echo           - Display a line of text.
+# - umount         - Filesystem unmounter.
+# - mktemp         - Create a temporary file or directory.
+# - squashfs-tools - Packs and unpacks the iso embedded squash filesystem.
+# - cdrkit         - Suite of programs for CD/DVD recording, ISO image
+#                    creation, and audio CD extraction.
+# - touch          - Change file timestamps or creates them.
+# - grep           - Searches the named input files (or standard input if no
+#                    files are named, or if a single hyphen-minus (-) is given
+#                    as file name) for lines containing a match to the given
+#                    PATTERN. By default, grep prints the matching lines.
+# - shift          - Shifts the command line arguments.
+# - readlink       - Print resolved symbolic links or canonical file names.
+# - rm             - Remove files or directories.
 
 # Optional dependencies:
 
-#     sudo                 - Perform action as another user.
-#     arch-install-scripts - Supports to perform an arch-chroot.
+# - sudo                 - Perform action as another user.
+# - arch-install-scripts - Supports to perform an arch-chroot.
 
 __NAME__='packIntoArchiso'
 
