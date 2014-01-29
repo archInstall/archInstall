@@ -186,7 +186,7 @@ function archInstall() {
             'http://mirror.de.leaseweb.net/archlinux' \
             'http://archlinux.limun.org' 'http://mirrors.kernel.org/archlinux')
         "$_SCOPE" _PACKAGE_SOURCE_URLS="${packagesSourceUrls[*]}"
-        local basicPackages=(base)
+        local basicPackages=(base ifplugd)
         "$_SCOPE" _BASIC_PACKAGES="${basicPackages[*]}"
         local commonAdditionalPackages=(base-devel sudo python)
         "$_SCOPE" _COMMON_ADDITIONAL_PACKAGES="${commonAdditionalPackages[*]}"
