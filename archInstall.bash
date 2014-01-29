@@ -872,7 +872,7 @@ EOF
                     description='A simple WPA encrypted wireless connection' && \
                     additionalProperties="\nSecurity=wpa\nESSID='home'\nKey='home'"
                 fi
-            cat << EOF
+            cat << EOF 1>"${_MOUNTPOINT_PATH}etc/netctl/${networkDeviceName}-dhcp" 2>"$_ERROR_OUTPUT"
 Description='${description}'
 Interface=${networkDeviceName}
 Connection=${connection}
@@ -882,7 +882,6 @@ IP=dhcp
 ## for IPv6 autoconfiguration
 #IP6=stateless${additionalProperties}
 EOF
-            1>>"${_MOUNTPOINT_PATH}etc/netctl/${networkDeviceName}-dhcp" 2>"$_ERROR_OUTPUT"
                 ln --symbolic --force \
                     "/usr/lib/systemd/system/${serviceName}@.service" \
                     "${_MOUNTPOINT_PATH}etc/systemd/system/multi-user.target.wants/${serviceName}@${networkDeviceName}.service" \
@@ -1147,14 +1146,13 @@ EOF
             genfstab -L -p "${_MOUNTPOINT_PATH%?}" \
                 1>>"${_MOUNTPOINT_PATH}etc/fstab" 2>"$_ERROR_OUTPUT"
         else
-            cat << EOF
+            cat << EOF 1>>"${_MOUNTPOINT_PATH}etc/fstab" 2>"$_ERROR_OUTPUT"
 # Added during installation.
 # <file system>                    <mount point> <type> <options>                                                                                            <dump> <pass>
 # "compress=lzo" has lower compression ratio by better cpu performance.
 PARTLABEL=$_SYSTEM_PARTITION_LABEL /             btrfs  relatime,ssd,discard,space_cache,autodefrag,inode_cache,subvol=root,compress=zlib                    0      0
 PARTLABEL=$_BOOT_PARTITION_LABEL   /boot/        vfat   rw,relatime,fmask=0077,dmask=0077,codepage=437,iocharset=iso8859-1,shortname=mixed,errors=remount-ro 0      0
 EOF
-            1>>"${_MOUNTPOINT_PATH}etc/fstab" 2>"$_ERROR_OUTPUT"
         fi
         return $?
     }
