@@ -790,7 +790,10 @@ EOF
                 "$_KEYBOARD_LAYOUT" 1>"$_STANDARD_OUTPUT" \
                 2>"$_ERROR_OUTPUT" && \
             archInstallChangeRootToMountPoint localectl set-locale \
-                LANG="en_US.utf8" 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
+                LANG="en_US.utf8" 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
+            archInstallChangeRootToMountPoint locale-gen set-keymap \
+                "$_KEYBOARD_LAYOUT" 1>"$_STANDARD_OUTPUT" \
+                2>"$_ERROR_OUTPUT"
         else
             echo -e "$_KEY_MAP_CONFIGURATION_FILE_CONTENT" 1>\
                 "${_MOUNTPOINT_PATH}etc/vconsole.conf" 2>"$_ERROR_OUTPUT"
@@ -851,11 +854,19 @@ EOF
         do
             if [[ ! "$(echo "$networkDeviceName" | grep --extended-regexp \
                   '^(lo|loopback|localhost)$')" ]]; then
-                archInstallLog \
-                    "Enable dhcp service on network device \"$networkDeviceName\"." && \
+                local serviceName='dhcpcd'
+                if [[ "${networkDeviceName:0:1}" == 'e' ]]; then
+                    archInstallLog \
+                        "Enable dhcp service on wired network device \"$networkDeviceName\"." && \
+                    serviceName='netctl-ifplugd'
+                elif [[ "${networkDeviceName:0:1}" == 'w' ]]; then
+                    archInstallLog \
+                        "Enable dhcp service on wireless network device \"$networkDeviceName\"." && \
+                    serviceName='netctl-auto'
+                fi
                 ln --symbolic --force \
-                    '/usr/lib/systemd/system/netctl-auto@.service' \
-                    "${_MOUNTPOINT_PATH}etc/systemd/system/multi-user.target.wants/netctl-auto@${networkDeviceName}.service" \
+                    "/usr/lib/systemd/system/${serviceName}@.service" \
+                    "${_MOUNTPOINT_PATH}etc/systemd/system/multi-user.target.wants/${serviceName}@${networkDeviceName}.service" \
                     1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
             fi
         done
