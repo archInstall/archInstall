@@ -1296,7 +1296,7 @@ EOF
         if hash efibootmgr 1>"$_STANDARD_OUTPUT" 2>/dev/null; then
             archInstallLog 'Configure efi boot manager.' && \
             cat << EOF 1>"${_MOUNTPOINT_PATH}/boot/startup.nsh" 2>"$_ERROR_OUTPUT"
-initrd=\initramfs-linux.img root=PARTLABEL=${_SYSTEM_PARTITION_LABEL} rw rootflags=subvol=root quiet loglevel=2 acpi_osi="!Windows 2012"
+\vmlinuz-linux initrd=\initramfs-linux.img root=PARTLABEL=${_SYSTEM_PARTITION_LABEL} rw rootflags=subvol=root quiet loglevel=2 acpi_osi="!Windows 2012"
 EOF
             archInstallChangeRootToMountPoint efibootmgr --create --disk \
                 "$_OUTPUT_SYSTEM" --part 1 -l '\vmlinuz-linux' --label \
