@@ -1354,13 +1354,13 @@ EOF
         # a package cache directory.
         mkdir --parents "$_PACKAGE_CACHE_PATH" 1>"$_STANDARD_OUTPUT" \
             2>"$_ERROR_OUTPUT" && \
-        archInstallLog \
-            "Clear previous installations in \"$_OUTPUT_SYSTEM\" and set right rights." && \
         if [ -b "$_OUTPUT_SYSTEM" ]; then
             archInstallLog 'Mount system partition.' && \
             mount PARTLABEL="$_SYSTEM_PARTITION_LABEL" -o subvol=root \
                 "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
         fi
+        archInstallLog \
+            "Clear previous installations in \"$_MOUNTPOINT_PATH\"." && \
         rm "$_MOUNTPOINT_PATH"* --recursive --force 1>"$_STANDARD_OUTPUT" \
             2>"$_ERROR_OUTPUT" && \
         if [ -b "$_OUTPUT_SYSTEM" ]; then
@@ -1373,6 +1373,7 @@ EOF
             rm "${_MOUNTPOINT_PATH}boot/"* --recursive --force \
                 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
         fi
+        archInstallLog 'Set filesystem rights.' && \
         chmod 755 "$_MOUNTPOINT_PATH" 1>"$_STANDARD_OUTPUT" \
             2>"$_ERROR_OUTPUT" && \
         local returnCode=$?
