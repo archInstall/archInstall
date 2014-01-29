@@ -854,16 +854,35 @@ EOF
         do
             if [[ ! "$(echo "$networkDeviceName" | grep --extended-regexp \
                   '^(lo|loopback|localhost)$')" ]]; then
-                local serviceName='dhcpcd'
+                local serviceName='dhcpcd' && \
+                local connection='ethernet' && \
+                local description='A basic dhcp connection' && \
+                local additionalProperties='' && \
                 if [[ "${networkDeviceName:0:1}" == 'e' ]]; then
                     archInstallLog \
                         "Enable dhcp service on wired network device \"$networkDeviceName\"." && \
-                    serviceName='netctl-ifplugd'
+                    serviceName='netctl-ifplugd' && \
+                    connection='ethernet' && \
+                    description='A basic ethernet dhcp connection'
                 elif [[ "${networkDeviceName:0:1}" == 'w' ]]; then
                     archInstallLog \
                         "Enable dhcp service on wireless network device \"$networkDeviceName\"." && \
-                    serviceName='netctl-auto'
+                    serviceName='netctl-auto' && \
+                    connection='wireless' && \
+                    description='A simple WPA encrypted wireless connection' && \
+                    additionalProperties="\nSecurity=wpa\nESSID='home'\nKey='home'"
                 fi
+            cat << EOF
+Description='${description}'
+Interface=${networkDeviceName}
+Connection=${connection}
+IP=dhcp
+## for DHCPv6
+#IP6=dhcp
+## for IPv6 autoconfiguration
+#IP6=stateless${additionalProperties}
+EOF
+            1>>"${_MOUNTPOINT_PATH}etc/netctl/${networkDeviceName}-dhcp" 2>"$_ERROR_OUTPUT"
                 ln --symbolic --force \
                     "/usr/lib/systemd/system/${serviceName}@.service" \
                     "${_MOUNTPOINT_PATH}etc/systemd/system/multi-user.target.wants/${serviceName}@${networkDeviceName}.service" \
