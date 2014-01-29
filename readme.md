@@ -62,10 +62,8 @@ Umgebung) gestartet werden.
 
 In diesem Fall werden alle benötigten Informationen zur Einrichtung
 (nur Hostname) des Systems vor Beginn des Installations Prozesses interaktiv
-abgefragt.
-Zu Beachten ist: ohne zusätzliche Parameter gibt das Module keinen Feedback über den
-aktuellen Zustand des Installations Vorgangs.
-Mit:
+abgefragt. Zu Beachten ist: ohne zusätzliche Parameter gibt das Module keinen
+Feedback über den aktuellen Zustand des Installations Vorgangs. Mit:
 
 ```bash
 >>> ./archInstall.bash --verbose
