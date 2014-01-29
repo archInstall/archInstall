@@ -1269,13 +1269,14 @@ EOF
             archInstallLog 'Configure efi boot manager.' && \
             archInstallChangeRootToMountPoint efibootmgr --create --disk \
                 "$_OUTPUT_SYSTEM" --part 1 -l '\vmlinuz-linux' --label \
-                "$_BOOT_ENTRY_LABEL" --unicode \
-                'initrd=\initramfs-linux.img root=PARTLABEL=system rw rootflags=subvol=root quiet loglevel=2 acpi_osi="!Windows 2012"' \
-                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
-            archInstallChangeRootToMountPoint efibootmgr --create --disk \
-                "$_OUTPUT_SYSTEM" --part 1 -l '\vmlinuz-linux' --label \
                 "$_FALLBACK_BOOT_ENTRY_LABEL" --unicode \
                 'initrd=\initramfs-linux-fallback.img acpi_osi="!Windows 2012"' \
+                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
+            # NOTE: Boot entry to boot on next reboot should be added at last.
+            archInstallChangeRootToMountPoint efibootmgr --create --disk \
+                "$_OUTPUT_SYSTEM" --part 1 -l '\vmlinuz-linux' --label \
+                "$_BOOT_ENTRY_LABEL" --unicode \
+                'initrd=\initramfs-linux.img root=PARTLABEL=system rw rootflags=subvol=root quiet loglevel=2 acpi_osi="!Windows 2012"' \
                 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
         else
             archInstallLog 'warning' \
