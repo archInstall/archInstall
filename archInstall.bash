@@ -1170,7 +1170,7 @@ EOF
         # Reboots into fresh installed system if previous defined.
         if [ -b "$_OUTPUT_SYSTEM" ]; then
             archInstallGenerateFstabConfigurationFile && \
-            archInstallAddBootEntries && \
+            archInstallAddBootEntries
             archInstallUnmountInstalledSystem
             local returnCode=$? && \
             if [[ $returnCode == 0 ]] && \
@@ -1302,13 +1302,17 @@ EOF
                 "$_OUTPUT_SYSTEM" --part 1 -l '\vmlinuz-linux' --label \
                 "$_FALLBACK_BOOT_ENTRY_LABEL" --unicode \
                 'initrd=\initramfs-linux-fallback.img acpi_osi="!Windows 2012"' \
-                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
+                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" || \
+            archInstallLog 'warning' \
+                "Adding boot entry \"${_FALLBACK_BOOT_ENTRY_LABEL}\" failed."
             # NOTE: Boot entry to boot on next reboot should be added at last.
             archInstallChangeRootToMountPoint efibootmgr --create --disk \
                 "$_OUTPUT_SYSTEM" --part 1 -l '\vmlinuz-linux' --label \
                 "$_BOOT_ENTRY_LABEL" --unicode \
                 "initrd=\initramfs-linux.img root=PARTLABEL=${_SYSTEM_PARTITION_LABEL} rw rootflags=subvol=root quiet loglevel=2 acpi_osi=\"!Windows 2012\"" \
-                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
+                1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" || \
+            archInstallLog 'warning' \
+                "Adding boot entry \"${_BOOT_ENTRY_LABEL}\" failed."
         else
             archInstallLog 'warning' \
                 "\"efibootmgr\" doesn't seem to be installed. Creating a boot entry failed."
