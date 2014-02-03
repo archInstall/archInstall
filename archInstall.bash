@@ -1301,7 +1301,7 @@ EOF
             archInstallChangeRootToMountPoint efibootmgr --create --disk \
                 "$_OUTPUT_SYSTEM" --part 1 -l '\vmlinuz-linux' --label \
                 "$_FALLBACK_BOOT_ENTRY_LABEL" --unicode \
-                'initrd=\initramfs-linux-fallback.img acpi_osi="!Windows 2012"' \
+                "initrd=\initramfs-linux-fallback.img root=PARTLABEL=${_SYSTEM_PARTITION_LABEL} rw rootflags=subvol=root break=premount break=postmount acpi_osi=\"!Windows 2012\"" \
                 1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" || \
             archInstallLog 'warning' \
                 "Adding boot entry \"${_FALLBACK_BOOT_ENTRY_LABEL}\" failed."
