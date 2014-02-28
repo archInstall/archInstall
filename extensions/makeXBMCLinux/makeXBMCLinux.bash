@@ -2,7 +2,7 @@
 # Copyright 2013 Torben Sickert, Milan Oberkirch
 
 SELF_PATH=$(dirname $(readlink --canonicalize $0))/
-source "${SELF_PATH}installArchLinux.bash" --load-environment
+source "${SELF_PATH}archInstall.bash" --load-environment
 
 __NAME__='makeXBMCLinux'
 
@@ -74,7 +74,7 @@ EOF
     # NOTE: the global "__NAME__" variable has to be restored to let
     # "installArchLinux" know that it should be executed instead of
     # beeing sourced.
-    local command="installArchLinux --output-system $_OUTPUT_SYSTEM"
+    local command="archInstall --output-system $_OUTPUT_SYSTEM"
     local name="$__NAME__"
     if [ "$_WRAPPER_FILENAME" ]; then
         source "$_WRAPPER_FILENAME"

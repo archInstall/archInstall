@@ -107,7 +107,7 @@ Server = http://repo.archlinux.fr/\$arch
 MODULES="i915 radeon nouveau squashfs aufs"
 BINARIES="mksquashfs unsquashfs"
 FILES=""
-HOOKS="base udevNoCleanUp plymouth pcmcia keyboard block net filesystems squashfs"
+HOOKS="base udevNoCleanUp pcmcia keyboard block net filesystems squashfs"
 !
     ### Hook to download and mount the squashfs located by the url-parameter.
     cat <<! > $tempDirectory/usr/lib/initcpio/hooks/squashfs
@@ -127,7 +127,9 @@ run_hook() {
 }
 
 squashfs_mount_helper() {
-  ( mount -t squashfs "\$root" "\$1" && \
+  ( modprobe squashfs && \
+    modprobe loop && \
+    mount -t squashfs "\$root" "\$1" && \
     mkdir /tmpfs && \
     mount -t tmpfs none /tmpfs && \
     mount -t aufs -o "dirs=/tmpfs:\$1=ro" none "\$1") || \
@@ -138,6 +140,7 @@ squashfs_mount_helper() {
 #!/bin/bash
 
 build() {
+  add_module loop
   add_module squashfs
   add_runscript
 }
@@ -330,13 +333,11 @@ EndSection
     archInstallLog 'info' \
       'Installing packages needed for generating kernel and initramfs.'
     # NOTE: We need a repeated call of pacman to make sure that
-    # "mkinitcpio-nfs-utils" and "plymouth" are available when building kernel
+    # "mkinitcpio-nfs-utils" is available when building kernel
     # in the next step.
     archInstallChangeRootViaMount "$tempDirectory" /usr/bin/pacman \
       --arch "$_CPU_ARCHITECTURE" --sync --noconfirm --refresh --refresh\
       --needed squashfs-tools mkinitcpio-nfs-utils base-devel yaourt
-    archInstallChangeRootViaMount "$tempDirectory" /usr/bin/yaourt \
-      --arch "$_CPU_ARCHITECTURE" --sync --noconfirm --refresh plymouth
     archInstallChangeRootViaMount "$tempDirectory" /usr/bin/yaourt \
       --arch "$_CPU_ARCHITECTURE" --sync --noconfirm --refresh linux-pf
     archInstallLog 'info' \
