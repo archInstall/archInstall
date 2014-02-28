@@ -831,9 +831,12 @@ EOF
             # NOTE: We could only create a home directory with right rights if
             # we are root.
             (archInstallChangeRootToMountPoint useradd \
-                 --home-dir "/home/$userName/" --groups users \
-                 $([[ "$UID" == '0' ]] || echo '--no-create-home') \
-                 --no-user-group --shell $(which bash) "$userName" \
+                 $(if [[ "$UID" == '0' ]]; then 
+                       echo '--create-home'
+                   else
+                       echo '--no-create-home'
+                   fi) \
+                 "$userName" \
                  1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" || \
              (archInstallLog 'warning' \
                   "Adding user \"$userName\" failed." && false)) && \
