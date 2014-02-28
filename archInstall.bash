@@ -127,7 +127,7 @@ function archInstall() {
         "$_SCOPE" _HOSTNAME=''
 
         # NOTE: Possible constant values are "i686" or "x86_64".
-        "$_SCOPE" _CPU_ARCHITECTURE=$(uname -m) # Possible: x86_64, i686, arm, any
+        "$_SCOPE" _CPU_ARCHITECTURE="$(uname -m)" # Possible: x86_64, i686, arm, any
         "$_SCOPE" _OUTPUT_SYSTEM="$__NAME__"
 
         # NOTE: This properties aren't needed in the future with supporting
