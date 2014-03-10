@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+#-*- coding: utf-8 -*-
+
 # Copyright 2013, Milan David Oberkirch <oberkirm@informatik.uni-freiburg.de>
 ### This script will build a basic archlinux-system with unity as window manager
 ### and lightdm as display-manager.
@@ -133,3 +135,10 @@ if [[ "$0" == *${__NAME__}.bash ]]; then
   "$__NAME__" "$@" 
   exit
 fi
+
+# region vim modline
+
+# vim: set tabstop=4 shiftwidth=4 expandtab:
+# vim: foldmethod=marker foldmarker=region,endregion:
+
+# endregion

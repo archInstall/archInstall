@@ -1,9 +1,4 @@
-<!-- region vim modline
-
-vim: set tabstop=4 shiftwidth=4 expandtab:
-vim: foldmethod=marker foldmarker=region,endregion:
-
-endregion
+<!-- -*- coding: utf-8 -*-
 
 region header
 
@@ -81,3 +76,10 @@ Kernel-Kommandozeile einige Informationen mitgegeben werden:
     * Bei nfs:
     `nfsroot=[<server-ip>:]<root-dir>[,<nfs-options>]`
     Beispiel: `url="http://192.0.43.10/example.squashfs"`
+
+<!-- region vim modline
+
+vim: set tabstop=4 shiftwidth=4 expandtab:
+vim: foldmethod=marker foldmarker=region,endregion:
+
+endregion -->

@@ -1,9 +1,4 @@
-<!-- region vim modline
-
-vim: set tabstop=4 shiftwidth=4 expandtab:
-vim: foldmethod=marker foldmarker=region,endregion:
-
-endregion
+<!-- -*- coding: utf-8 -*-
 
 region header
 
@@ -42,3 +37,10 @@ Der folgende Befehl erzeugt ein Basis-ArchLinux-System in ein initramfs namens
 ```bash
 >>> ./makeRamOnlyLinux baseArchLinux.img
 ```
+
+<!-- region vim modline
+
+vim: set tabstop=4 shiftwidth=4 expandtab:
+vim: foldmethod=marker foldmarker=region,endregion:
+
+endregion -->

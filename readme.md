@@ -1,9 +1,4 @@
-<!-- region vim modline
-
-vim: set tabstop=4 shiftwidth=4 expandtab:
-vim: foldmethod=marker foldmarker=region,endregion:
-
-endregion
+<!-- -*- coding: utf-8 -*-
 
 region header
 
@@ -484,3 +479,10 @@ selber setzten will, eignet sich folgender Pattern:
     archInstall "$@" --output-system "$myTarget"
 
     # ...
+
+<!-- region vim modline
+
+vim: set tabstop=4 shiftwidth=4 expandtab:
+vim: foldmethod=marker foldmarker=region,endregion:
+
+endregion -->

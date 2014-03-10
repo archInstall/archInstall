@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# -*- coding: utf-8 -*-
+
 # Copyright 2013 Torben Sickert, Milan Oberkirch
 
 SELF_PATH=$(dirname $(readlink --canonicalize $0))/
@@ -117,3 +119,10 @@ if [[ "$0" == *${__NAME__}.bash ]]; then
   "$__NAME__" "$@"
   exit $?
 fi
+
+# region vim modline
+
+# vim: set tabstop=4 shiftwidth=4 expandtab:
+# vim: foldmethod=marker foldmarker=region,endregion:
+
+# endregion

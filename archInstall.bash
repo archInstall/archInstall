@@ -1,13 +1,6 @@
 #!/usr/bin/env bash
 # -*- coding: utf-8 -*-
 
-# region vim modline
-
-# vim: set tabstop=4 shiftwidth=4 expandtab:
-# vim: foldmethod=marker foldmarker=region,endregion:
-
-# endregion
-
 # region header
 
 # Copyright Torben Sickert 16.12.2012
@@ -1463,5 +1456,12 @@ if [[ "$0" == *"${__NAME__}.bash" || $(echo "$@" | grep --extended-regexp \
     '(^| )(-l|--load-environment)($| )') ]]; then
     "$__NAME__" "$@"
 fi
+
+# endregion
+
+# region vim modline
+
+# vim: set tabstop=4 shiftwidth=4 expandtab:
+# vim: foldmethod=marker foldmarker=region,endregion:
 
 # endregion

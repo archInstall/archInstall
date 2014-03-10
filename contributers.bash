@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# -*- coding: utf-8 -*-
 
 # Torben Sickert
 # @thaibault, http://thaibault.github.io/website/
@@ -20,3 +21,10 @@ done
 #     ...
 #     url = git@github.com:YOUR_NICKNAME/archInstall
 # ...
+
+# region vim modline
+
+# vim: set tabstop=4 shiftwidth=4 expandtab:
+# vim: foldmethod=marker foldmarker=region,endregion:
+
+# endregion

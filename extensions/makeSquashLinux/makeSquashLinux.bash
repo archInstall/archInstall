@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# -*- coding: utf-8 -*-
+
 # Script to build an ArchLinux into a squashfs and generate compatible kernel
 # and initramfs.
 
@@ -376,3 +378,10 @@ if [[ "$0" == *${__NAME__}.bash ]]; then
   "$__NAME__" "$@"
   exit $?
 fi
+
+# region vim modline
+
+# vim: set tabstop=4 shiftwidth=4 expandtab:
+# vim: foldmethod=marker foldmarker=region,endregion:
+
+# endregion

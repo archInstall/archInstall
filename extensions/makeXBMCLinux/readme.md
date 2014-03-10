@@ -1,9 +1,4 @@
-<!-- region vim modline
-
-vim: set tabstop=4 shiftwidth=4 expandtab:
-vim: foldmethod=marker foldmarker=region,endregion:
-
-endregion
+<!-- -*- coding: utf-8 -*-
 
 region header
 
@@ -69,3 +64,10 @@ XBMC auf der lokalen Festplatte (/dev/sdz) installieren:
 ```bash
 ./makeXBMCLinux/makeXBMCLinux.bash -o /dev/sdz
 ```
+
+<!-- region vim modline
+
+vim: set tabstop=4 shiftwidth=4 expandtab:
+vim: foldmethod=marker foldmarker=region,endregion:
+
+endregion -->

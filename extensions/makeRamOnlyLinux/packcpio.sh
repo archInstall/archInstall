@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# -*- coding: utf-8 -*-
+
 # Copyright 2012-2013 Torben Sickert, Milan Oberkirch
 
 __NAME__='packcpio'
@@ -20,3 +22,10 @@ function packcpio() {
 }
 
 [[ "$0" == *${__NAME__}.sh ]] && "$__NAME__" "$@"
+
+# region vim modline
+
+# vim: set tabstop=4 shiftwidth=4 expandtab:
+# vim: foldmethod=marker foldmarker=region,endregion:
+
+# endregion
