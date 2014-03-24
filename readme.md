@@ -45,11 +45,11 @@ Simply load the newest version from:
     -O archInstall.bash && chmod +x archInstall.bash
 ```
 
-archInstall ist das zentrale Module um eine Reihe von Aufgaben im Zuge der
+archInstall ist das zentrale Modul um eine Reihe von Aufgaben im Zuge der
 Vorbereitung, Installation, Konfiguration oder Manipulieren eines
 "Linux from Scratch" durchzuführen.
 
-Das Module kann im einfachsten Fall (z.B. von einer beliebigen Life Linux
+Das Modul kann im einfachsten Fall (z.B. von einer beliebigen Life Linux
 Umgebung) gestartet werden.
 
 ```bash
@@ -58,7 +58,7 @@ Umgebung) gestartet werden.
 
 In diesem Fall werden alle benötigten Informationen zur Einrichtung
 (nur Hostname) des Systems vor Beginn des Installations Prozesses interaktiv
-abgefragt. Zu Beachten ist: ohne zusätzliche Parameter gibt das Module keinen
+abgefragt. Zu Beachten ist: ohne zusätzliche Parameter gibt das Modul keinen
 Feedback über den aktuellen Zustand des Installations Vorgangs. Mit:
 
 ```bash
@@ -218,7 +218,7 @@ zu werfen.
 Decorator Pattern
 -----------------
 
-Um eigene Betriebssystem Module zu entwerfen bietet archInstall eine
+Um eigene Betriebssystem Modul zu entwerfen bietet archInstall eine
 Vielzahl von Schnittstellen um seine internen Mechanismen separate nach Außen
 zugänglich zu machen (siehe hierzu die Decorator Implementierung
 "installXBMCLinux", "makeRamOnlyLinux", "makeSquashLinux" oder
