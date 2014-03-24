@@ -49,8 +49,11 @@ archInstall ist das zentrale Modul um eine Reihe von Aufgaben im Zuge der
 Vorbereitung, Installation, Konfiguration oder Manipulieren eines
 "Linux from Scratch" durchzuführen.
 
-Das Modul kann im einfachsten Fall (z.B. von einer beliebigen Life Linux
-Umgebung) gestartet werden.
+Das Modul kann im einfachsten Fall (z.B. von einer beliebigen
+Life-Linux-Umgebung) gestartet werden. Zu beachten ist, dass die Installation
+von einem UEFI-System empfohlen wird, da dadurch entsprechende Boot-Einträge
+automatisch gesetzt werden können. Ein Bootloader wird nicht mit installiert
+und ist nicht notwendig, um das System zu booten.
 
 ```bash
 >>> ./archInstall.bash
