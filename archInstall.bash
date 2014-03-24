@@ -1132,7 +1132,6 @@ EOF
             archInstallLog 'Create partitions manually.' && \
             gdisk "$_OUTPUT_SYSTEM"
         fi
-        echo
         echo $?
         echo
         return $?
