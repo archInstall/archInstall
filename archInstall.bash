@@ -1119,6 +1119,9 @@ $_SYSTEM_PARTITION_LABEL
 w
 Y
 EOF
+                # NOTE: "gdisk" returns an error code even if it runs
+                # successfully.
+                true
             else
                 archInstallLog 'error' "Not enough space on \"$_OUTPUT_SYSTEM\" (\"$blockDeviceSpaceInByte\" byte). We need at least \"$(($_NEEDED_SYSTEM_SPACE_IN_BYTE + $_BOOT_SPACE_IN_BYTE))\" byte."
             fi
@@ -1132,8 +1135,6 @@ EOF
             archInstallLog 'Create partitions manually.' && \
             gdisk "$_OUTPUT_SYSTEM"
         fi
-        echo $?
-        echo
         return $?
     }
     function archInstallGenerateFstabConfigurationFile() {
