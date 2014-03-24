@@ -824,11 +824,11 @@ EOF
             # NOTE: We could only create a home directory with right rights if
             # we are root.
             (archInstallChangeRootToMountPoint useradd \
-                 $(if [[ "$UID" == '0' ]]; then 
-                       echo '--create-home'
+                 "$(if [[ "$UID" == '0' ]]; then
+                       echo '--create-home '
                    else
                        echo '--no-create-home'
-                   fi) \
+                   fi) --no-user-group --shell /bin/bash" \
                  "$userName" \
                  1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" || \
              (archInstallLog 'warning' \
