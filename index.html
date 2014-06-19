@@ -28,6 +28,7 @@ endregion -->
 <!-- region header -->
 
     <head>
+        <title>archInstall</title>
 
     <!-- region meta informations -->
 
@@ -57,8 +58,6 @@ endregion -->
         
 
     <!-- endregion -->
-
-        <title>archInstall</title>
 
 <style type="text/css">
 /*!
@@ -11015,6 +11014,7 @@ Version
         this._options = {
           domNodeSelectorPrefix: 'body',
           "default": 'enUS',
+          allowedLanguages: [],
           initial: null,
           domNodeClassPrefix: '',
           templateDelimiter: {
@@ -11097,6 +11097,10 @@ Version
         
             **returns {$.Lang}**  - Returns the current instance.
          */
+        if (language !== true && this._options.allowedLanguages.length && $.inArray(language, this._options.allowedLanguages) === -1) {
+          this.debug('"{1}" isn\'t one of the allowed languages.', language);
+          return this;
+        }
         this.acquireLock(this._options.toolsLockDescription, (function(_this) {
           return function() {
             var $lastLanguageDomNode, $lastTextNodeToTranslate, actionDescription, _ref;
@@ -11181,7 +11185,7 @@ Version
       Lang.prototype._collectTextNodesToReplace = function(language, ensure) {
 
         /*
-            Normalizes a given language string.
+            Collects all text nodes which should be replaced later.
         
             **language {String}**   - New language.
         
