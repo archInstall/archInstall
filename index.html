@@ -11315,6 +11315,10 @@ Version
           this.debug('Determine "{1}", because of default option.', result);
         }
         result = this._normalizeLanguage(result);
+        if (this._options.allowedLanguages.length && $.inArray(result, this._options.allowedLanguages) === -1) {
+          this.debug('"{1}" isn\'t one of the allowed languages. Set language' + ' to "{2}".', result, this._options.allowedLanguages[0]);
+          result = this._options.allowedLanguages[0];
+        }
         if (window.localStorage != null) {
           window.localStorage[this._options.sessionDescription] = result;
         }
