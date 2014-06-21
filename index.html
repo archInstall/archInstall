@@ -11559,7 +11559,7 @@ Version
         
             **returns {$.Lang}**  - Returns the current instance.
          */
-        $(("a[href^=\"#" + this._options.languageHashPrefix) + ("" + this.currentLanguage + "\"].") + this._options.currentLanguageIndicatorClassName).removeClass(this._options.currentLanguageIndicatorClassName);
+        $(("a[href=\"#" + this._options.languageHashPrefix) + ("" + this.currentLanguage + "\"].") + this._options.currentLanguageIndicatorClassName).removeClass(this._options.currentLanguageIndicatorClassName);
         $("a[href=\"#" + this._options.languageHashPrefix + language + "\"]").addClass(this._options.currentLanguageIndicatorClassName);
         return this;
       };
@@ -12468,7 +12468,7 @@ Version
     return $.Documentation({
       trackingCode: 'UA-40191664-1',
       language: {
-        allowedLanguages: ['deDE', 'enUS'],
+        allowedLanguages: ['enUS', 'deDE'],
         sessionDescription: 'documentationWebsite{1}'
       }
     });
@@ -12508,8 +12508,8 @@ Version
                     <a class="start-up-animation-number-8 zip-source-download" href="https://github.com/thaibault/archInstall/zipball/master">.zip</a>
                     <a class="start-up-animation-number-7 tar-gz-source-download" href="https://github.com/thaibault/archInstall/tarball/master">.tar.gz</a>
                     <i class="start-up-animation-number-6 icon-download-tarball"></i>
-                    <a href="#lang-deDE" class="visible-on-javascript-enabled start-up-animation-number-5">de</a>
-                    <a href="#lang-enUS" class="visible-on-javascript-enabled start-up-animation-number-4">en</a>
+                    <a href="#lang-enUS" class="visible-on-javascript-enabled start-up-animation-number-5">en</a>
+                    <a href="#lang-deDE" class="visible-on-javascript-enabled start-up-animation-number-4">de</a>
                 </section>
             </header>
         </div>
