@@ -19,6 +19,8 @@ develop-eggs
 .installed.cfg
 lib
 lib64
+.sass-cache
+.sass-cache
 
 # Unit test / coverage reports
 .coverage
