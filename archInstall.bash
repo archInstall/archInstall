@@ -3,7 +3,7 @@
 
 # region header
 
-# Copyright Torben Sickert 16.12.2012
+# Copyright Torben Sickert (t.sickert["~at~"]gmail.com) 16.12.2012
 
 # License
 # -------
