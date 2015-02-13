@@ -828,7 +828,7 @@ EOF
                        echo '--create-home '
                    else
                        echo '--no-create-home'
-                   fi) --no-user-group --shell /bin/bash" \
+                   fi) --no-user-group --shell /usr/bin/bash" \
                  "$userName" \
                  1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" || \
              (archInstallLog 'warning' \
