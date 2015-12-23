@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Torben Sickert
-# @thaibault, http://thaibault.github.io/website/
+# @thaibault, http://torben.website
 
 # Milan Oberkirch
 # @zvynar

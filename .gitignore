@@ -20,7 +20,9 @@ develop-eggs
 lib
 lib64
 .sass-cache
-.sass-cache
+
+# Ignore docker nested bash generated files.
+/.bash_history
 
 # Unit test / coverage reports
 .coverage
@@ -38,6 +40,7 @@ nosetests.xml
 # Vim temporary file
 *.swp
 .ropeproject
+.viminfo
 
 # PHPStorm and other IDE Files
 *.idea

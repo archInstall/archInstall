@@ -35,16 +35,13 @@
 # Dependencies
 # ------------
 
-# - bash (or any bash like shell)
-# - test       - Check file types and compare values (part of the shell).
-# - shift      - Shifts the command line arguments (part of the shell).
+# - bash (or any bash like shell with (test, shift, echo, cd))
 # - mount      - Filesystem mounter (part of util-linux).
 # - umount     - Filesystem unmounter (part of util-linux).
 # - mountpoint - See if a directory is a mountpoint (part of util-linux).
 # - blkid      - Locate or print block device attributes (part of util-linux).
 # - chroot     - Run command or interactive shell with special root directory
 #                (part of coreutils).
-# - echo       - Display a line of text (part of coreutils).
 # - ln         - Make links between files (part of coreutils).
 # - touch      - Change file timestamps or creates them (part of coreutils).
 # - sync       - Flushs file system buffers (part of coreutils).
@@ -97,9 +94,9 @@ __NAME__='archInstall'
 function archInstall() {
     # Provides the main module scope.
 
-# region properties
+    # region properties
 
-    # region command line arguments
+    ## region command line arguments
 
     local _SCOPE='local' && \
     if [[ $(echo "\"$@\"" | grep --extended-regexp \
@@ -152,11 +149,11 @@ function archInstall() {
         local neededServices=()
         "$_SCOPE" _NEEDED_SERVICES="${neededServices[*]}"
 
-    # endregion
+    ## endregion
 
-        local dependencies=(bash test shift mount umount mountpoint blkid \
-            chroot echo ln touch sync mktemp cat uniq uname rm sed wget xz \
-            tar grep)
+        local dependencies=(bash test shift echo cd \
+            mount umount mountpoint blkid chroot echo ln touch sync mktemp \
+            cat uniq uname rm sed wget xz tar grep)
         "$_SCOPE" _DEPENDENCIES="${dependencies[*]}"
         local blockIntegrationDependencies=(blockdev efibootmgr gdisk btrfs)
         "$_SCOPE" _BLOCK_INTEGRATION_DEPENDENCIES="${blockIntegrationDependencies[*]}"
@@ -196,11 +193,11 @@ function archInstall() {
         "$_SCOPE" _NEEDED_MOUNTPOINTS="${neededMountpoints[*]}"
     fi
 
-# endregion
+    # endregion
 
-# region functions
+    # region functions
 
-    # region command line interface
+    ## region command line interface
 
     function archInstallPrintUsageMessage() {
         # Prints a description about how to use this program.
@@ -544,9 +541,9 @@ EOF
         return 0
     }
 
-    # endregion
+    ## endregion
 
-    # region install arch linux steps.
+    ## region install arch linux steps.
 
     function archInstallWithPacstrap() {
         # Installs arch linux via pacstrap.
@@ -627,11 +624,11 @@ EOF
         return $?
     }
 
-    # endregion
+    ## endregion
 
-    # region tools
+    ## region tools
 
-        # region change root functions
+    ### region change root functions
 
     function archInstallPerformDependencyCheck() {
         # This function check if all given dependencies are present.
@@ -770,7 +767,7 @@ EOF
         return $?
     }
 
-        # endregion
+    ### endregion
 
     function archInstallConfigure() {
         # Provides generic linux configuration mechanism. If new systemd
@@ -1382,11 +1379,11 @@ EOF
         return $returnCode
     }
 
+    ## endregion
+
     # endregion
 
-# endregion
-
-# region controller
+    # region controller
 
     if [[ "$0" == *"${__NAME__}.bash" ]]; then
         archInstallPerformDependencyCheck "${_DEPENDENCIES[*]}" || \
@@ -1449,7 +1446,7 @@ EOF
     fi
     return 0
 
-# endregion
+    # endregion
 
 }
 
