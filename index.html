@@ -72,10 +72,10 @@ unattended individual installation process.</p>
 <!--deDE:
     Um die neuste Version zu erhalten sollte man das Bash-Script runterladen:
 -->
-<a href=https://raw.github.com/archInstall/archInstall/master/archInstall.bash>archInstall</a></p>
+<a href=https://raw.github.com/archInstall/archInstall/master/archInstall.sh>archInstall</a></p>
 <div class=codehilite><pre>&gt;&gt;&gt; wget <span class=se>\</span>
-    https://raw.github.com/archInstall/archInstall/master/archInstall.bash <span class=se>\</span>
-    -O archInstall.bash <span class=o>&amp;&amp;</span> chmod +x archInstall.bash
+    https://raw.github.com/archInstall/archInstall/master/archInstall.sh <span class=se>\</span>
+    -O archInstall.sh <span class=o>&amp;&amp;</span> chmod +x archInstall.sh
 </pre></div>
 
 
@@ -87,7 +87,7 @@ Life-Linux-Umgebung) gestartet werden. Zu beachten ist, dass die Installation
 von einem UEFI-System empfohlen wird, da dadurch entsprechende Boot-Einträge
 automatisch gesetzt werden können. Ein Bootloader wird nicht mit installiert
 und ist nicht notwendig, um das System zu booten.</p>
-<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.bash
+<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.sh
 </pre></div>
 
 
@@ -95,13 +95,13 @@ und ist nicht notwendig, um das System zu booten.</p>
 (nur Hostname) des Systems vor Beginn des Installations Prozesses interaktiv
 abgefragt. Zu Beachten ist: ohne zusätzliche Parameter gibt das Modul keinen
 Feedback über den aktuellen Zustand des Installations Vorgangs. Mit:</p>
-<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.bash --verbose
+<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.sh --verbose
 </pre></div>
 
 
 <p>bekommt man einen etwas geschwätzigeren Installationsvorgang.
 Mit:</p>
-<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.bash --verbose --debug
+<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.sh --verbose --debug
 </pre></div>
 
 
@@ -110,7 +110,7 @@ Mit:</p>
 einfach in das aktuelle Verzeichnis ein Ordner mit dem Programmnamen erstellt
 und darin das Betriebssystem installiert (./archInstall/). ill man lieber eine
 unbeaufsichtigte Installation:</p>
-<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.bash --host-name testSystem --auto-partitioning
+<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.sh --host-name testSystem --auto-partitioning
 </pre></div>
 
 
@@ -135,7 +135,7 @@ und sich nicht selber um die Partitionierung kümmern und den kompletten
 verfügbaren Platz für das Haupt System verwenden (es soll also keine Swap- oder
 Daten Partition erstellt werden).
 sieht das z.B. so aus:</p>
-<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.bash --output-system /dev/sdb --auto-partitioning
+<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.sh --output-system /dev/sdb --auto-partitioning
 </pre></div>
 
 
@@ -145,7 +145,7 @@ Partitionen gewünscht kann man diese während der Installation durch weglassen
 des entsprechenden Parameters selber konfigurieren. Die erste Partition wird
 dann als Boot-Partition und die Zweite als Systempartition betrachtet. Weitere
 Partitionen werden ignoriert. Manuelle Partitionierung:</p>
-<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.bash --output-system /dev/sdb
+<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.sh --output-system /dev/sdb
 </pre></div>
 
 
@@ -153,7 +153,7 @@ Partitionen werden ignoriert. Manuelle Partitionierung:</p>
 automatisch mit Labels in der Partitionstabelle und auf der Partition selbst
 versieht. Um dieses Verhalten zu individualisieren einfach folgende Optionen
 nutzen:</p>
-<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.bash --boot-partition-label uefiBoot <span class=se>\</span>
+<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.sh --boot-partition-label uefiBoot <span class=se>\</span>
     --system-partition-label system
 </pre></div>
 
@@ -164,7 +164,7 @@ nutzen:</p>
 <p>Um z.B. aus einem Produktivsystem heraus eine alternative Linux Distribution
 auf eine weitere Partition zu installieren kann einfach folgender Befehl
 verwendet werden:</p>
-<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.bash --output-system /dev/sdb2
+<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.sh --output-system /dev/sdb2
 </pre></div>
 
 
@@ -173,7 +173,7 @@ archInstall versucht bei der Installation auf ein Blockdevice stets einen
 entsprechenden Uefi-Boot-Eintrag für den Kernel mit einem Standard Initramfs
 und einem Ausweich-Initiramfs zu konfigurieren. Die folgenden Parameter
 definieren dessen Label:</p>
-<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.bash --output-system /dev/sdb2 --boot-entry-label archLinux <span class=se>\</span>
+<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.sh --output-system /dev/sdb2 --boot-entry-label archLinux <span class=se>\</span>
     --fallback-boot-entry-label archLinuxFallback
 </pre></div>
 
@@ -188,7 +188,7 @@ installieren. Siehe hierzu "archInstall with Decorator Pattern",
 "archInstallWrapperTemplate".</p>
 <p>Dieser Befehl installiert ein vollständiges System in den eigenen Home-Ordner
 "test" (siehe auch Installation ohne root Rechte).</p>
-<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.bash --output-system ~/test
+<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.sh --output-system ~/test
 </pre></div>
 
 
@@ -216,7 +216,7 @@ Folgende Tasks wurden automatisiert:</p>
   Architektur.</li>
 </ul>
 <p>Will man hierauf selber Einfluss nehmen, gibt es folgende Möglichkeiten:</p>
-<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.bash --host-name <span class=nb>test</span> --user-names <span class=nb>test</span> <span class=se>\</span>
+<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.sh --host-name <span class=nb>test</span> --user-names <span class=nb>test</span> <span class=se>\</span>
     --cpu-architecture x86_64 --local-time /Europe/London <span class=se>\</span>
     --keyboard-layout de-latin1 --country-with-mirrors Germany <span class=se>\</span>
     --prevent-using-pacstrap --additional-packages python vim <span class=se>\</span>
@@ -226,7 +226,7 @@ Folgende Tasks wurden automatisiert:</p>
 
 <p>Um die einzelnen Konfigurationsparameter zu verstehen empfiehlt sich ein Blick
 auf:</p>
-<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.bash --help
+<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.sh --help
 </pre></div>
 
 
@@ -263,7 +263,7 @@ aussehen:</p>
 
 <span class=c># Program description...</span>
 
-<span class=nb>source</span> <span class=s2>&quot;</span><span class=k>$(</span>dirname <span class=s2>&quot;</span><span class=k>$(</span>readlink --canonicalize <span class=s2>&quot;</span><span class=nv>$0</span><span class=s2>&quot;</span><span class=k>)</span><span class=s2>&quot;</span><span class=k>)</span><span class=s2>&quot;</span>archInstall.bash <span class=se>\</span>
+<span class=nb>source</span> <span class=s2>&quot;</span><span class=k>$(</span>dirname <span class=s2>&quot;</span><span class=k>$(</span>readlink --canonicalize <span class=s2>&quot;</span><span class=nv>$0</span><span class=s2>&quot;</span><span class=k>)</span><span class=s2>&quot;</span><span class=k>)</span><span class=s2>&quot;</span>archInstall.sh <span class=se>\</span>
     --load-environment
 
 <span class=c># Do your own stuff cli logic here..</span>
@@ -283,7 +283,7 @@ zwischen dem Wrapper-Scope und dem archInstall-Scope entstehen können. Die
 einzige globale Variable ist "archInstall" selbst.</p>
 <p>Will man nun von den internen Features von archInstall partizipieren geht
 das so:</p>
-<div class=codehilite><pre>&gt;&gt;&gt; <span class=nb>source </span>archInstall.bash --load-environment
+<div class=codehilite><pre>&gt;&gt;&gt; <span class=nb>source </span>archInstall.sh --load-environment
 </pre></div>
 
 
@@ -292,7 +292,7 @@ Methoden sind mit dem Prefix "archInstall" ausgestattet, um Namens Konflikte
 und versehentlich überschreiben von Methoden zu vermeiden. Will man sich also
 einen Überblick über alle verfügbaren Methoden machen, einfach in der shell
 folgendes eintippen:</p>
-<div class=codehilite><pre>&gt;&gt;&gt; <span class=nb>source </span>archInstall.bash --load-environment
+<div class=codehilite><pre>&gt;&gt;&gt; <span class=nb>source </span>archInstall.sh --load-environment
 
 &gt;&gt;&gt; archInstall&lt;TAB&gt;&lt;TAB&gt;
 ...
@@ -304,7 +304,7 @@ folgendes eintippen:</p>
 
 <h2 id=application-interface>Application Interface</h2>
 <p>Viele nützlich Umgebungsvariablen und Funktionen können mit</p>
-<div class=codehilite><pre>&gt;&gt;&gt; <span class=nb>source </span>archInstall.bash --load-environment
+<div class=codehilite><pre>&gt;&gt;&gt; <span class=nb>source </span>archInstall.sh --load-environment
 </pre></div>
 
 
@@ -316,29 +316,29 @@ API-Dokumentation anschauen.</p>
 <p>archInstall stellt ein Alphabet voller Optionen zur Verfügung. Während bisher
 zum einfachen Verständnis immer sog. Long-Options verwendet wurden, gibt es für
 jede Option auch einen Shortcut.</p>
-<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.bash --user-names mustermann --host-name lfs
+<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.sh --user-names mustermann --host-name lfs
 </pre></div>
 
 
 <p>ist äquivalent zu:</p>
-<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.bash -u mustermann -n lfs
+<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.sh -u mustermann -n lfs
 </pre></div>
 
 
 <p>Alle Optionen bis auf "--host-name" und "--auto-partitioning" haben
 Standardwerte. Diese beiden werden sofern nicht von vorne herein angegeben
 interaktiv abgefragt. Alle Standardwert können mit Hilfe von:</p>
-<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.bash -h
+<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.sh -h
 </pre></div>
 
 
 <p>oder</p>
-<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.bash --help
+<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.sh --help
 </pre></div>
 
 
 <p>oder</p>
-<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.bash --keyboard-layout de-latin1 -h
+<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.sh --keyboard-layout de-latin1 -h
 </pre></div>
 
 
@@ -346,7 +346,7 @@ interaktiv abgefragt. Alle Standardwert können mit Hilfe von:</p>
 ermittelten Informationen verändern können. So wird der Standardwert von
 "--key-map-configuration="KEYMAP=de-latin1\nFONT=Lat2-Terminus16\nFONT_MAP="
 nach Eingabe von</p>
-<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.bash --keyboard-layout us
+<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.sh --keyboard-layout us
 </pre></div>
 
 
@@ -355,23 +355,23 @@ nach Eingabe von</p>
 Architektur des aktuellen Systems, um Konfigurationsaufwand zu minimieren.</p>
 <p>Man kann Optionen die mehrere Werte annehmen auch mehrfach referenzieren.
 So hat:</p>
-<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.bash --additional-packages ssh --additional-packages vim -f python
+<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.sh --additional-packages ssh --additional-packages vim -f python
 </pre></div>
 
 
 <p>den gleichen Effekt wie:</p>
-<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.bash --additional-packages ssh vim python
+<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.sh --additional-packages ssh vim python
 </pre></div>
 
 
 <p>Dies ist im Decorator-Pattern nützlich. Bei einem Doppelt referenzierten Wert
 überschreiben spätere Werte zuvor Definierte. Folgendes:</p>
-<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.bash --host-name A --host-name B
+<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.sh --host-name A --host-name B
 </pre></div>
 
 
 <p>entspricht:</p>
-<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.bash --host-name B
+<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.sh --host-name B
 </pre></div>
 
 
@@ -386,7 +386,7 @@ So hat:</p>
 8
 9</pre></div><td class=code><div class=codehilite><pre><span class=c>#!/usr/bin/env bash</span>
 
-<span class=nb>source </span>archInstall.bash
+<span class=nb>source </span>archInstall.sh
 
 <span class=nv>myTarget</span><span class=o>=</span><span class=s1>&#39;/path/to/expected/result&#39;</span>
 
@@ -450,18 +450,18 @@ noch etwas nachbessern oder Überprüfen, bietet sich die selbsterklärende Opti
 <p>Möchte man die Pakete "base-devel", "sudo" und "python" haben, geht das mit
 dem Shortcut: "--install-common-additional-packages" oder "-z".</p>
 <p>Will man eine beliebige Liste von Paketen integrieren:</p>
-<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.bash --additional-packages ssh python2 vim
+<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.sh --additional-packages ssh python2 vim
 </pre></div>
 
 
 <p>Sollen Dienste schon beim ersten Start automatisch gestartet werden:</p>
-<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.bash --needed-services sshd dhcpcd
+<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.sh --needed-services sshd dhcpcd
 </pre></div>
 
 
 <p>Um die Installation zu beschleunigen kann auf ein zentral verwalteten
 Paket Cache verwiesen werden:</p>
-<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.bash --package-cache-path /var/cache/pacman/pkg/
+<div class=codehilite><pre>&gt;&gt;&gt; ./archInstall.sh --package-cache-path /var/cache/pacman/pkg/
 </pre></div>
 
 
@@ -554,7 +554,7 @@ This library written by Torben Sickert stand under a creative commons naming
 endregion -->
 
 <h3 id=makeramonlylinux>makeRamOnlyLinux</h3>
-<p>makeRamOnlyLinux.bash generiert ein ArchLinux-System (oder ein beliebiges auf
+<p>makeRamOnlyLinux.sh generiert ein ArchLinux-System (oder ein beliebiges auf
 ArchLinux basierendes System, welches mit einem Script generiert werden kann,
 welches Interface und API von archInstall bereitstellt) und packt es in
 eine bootbare initramfs und stellt einen passenden Kernel dazu bereit.</p>
@@ -562,7 +562,7 @@ eine bootbare initramfs und stellt einen passenden Kernel dazu bereit.</p>
 <p>Das Skript benötigt als Argument den Namen der zu erstellenden Initramfs-Datei.
 Der passende Kernel wird an gleicher Stelle nur dem Suffix 'Kernel' erstellt.
 Alle Optionen von archInstall werden unterstützt, es gibt keine
-zusätzlichen Optionen. Neben der obligatorischen archInstall.bash benötigt
+zusätzlichen Optionen. Neben der obligatorischen archInstall.sh benötigt
 dieses Skript packcpio.sh, welches im selben Ordner liegen muss.</p>
 <!--|deDE:Beispiel-->
 
@@ -608,13 +608,13 @@ generieren des Grundsystems weitere Anpassungen vornehmen möchten. Da der
 Download der squash-Datei ein paar Sekunden in Anspruch nimmt, wird beim
 booten per 'plymouth' ein splash-screen angezeigt.</p>
 <h4 id=interface_1>Interface</h4>
-<div class=codehilite><pre>Usage: ./makeSquashLinux.bash &lt;squashfsFilePath&gt; &lt;kernelFilePath&gt; &lt;initramfsFilePath&gt; [options]
+<div class=codehilite><pre>Usage: ./makeSquashLinux.sh &lt;squashfsFilePath&gt; &lt;kernelFilePath&gt; &lt;initramfsFilePath&gt; [options]
 
 makeSquashLinux installs an arch linux into a squashfs file.
 
 Option descriptions:
     -W --wrapper &lt;file&gt;  Use wrapper in &lt;file&gt; to generate the root-Filesystem
-    -X --xbmc Use &quot;../makeXBMCLinux/makeXBMCLinux.bash&quot; as wrapper.
+    -X --xbmc Use &quot;../makeXBMCLinux/makeXBMCLinux.sh&quot; as wrapper.
 </pre></div>
 
 
@@ -686,13 +686,13 @@ endregion -->
 Window-Manager/Arbeitsumgebung. Es werde auch andere Ubuntu-Typische Pakete,
 wie Libre-Office oder Thunderbird installiert.</p>
 <h4 id=interface_2>Interface</h4>
-<p>Das Interface ist mit dem von installArchLiunx.bash identisch, zusätzlich kann
+<p>Das Interface ist mit dem von installArchLiunx.sh identisch, zusätzlich kann
 mit der Option</p>
 <div class=codehilite><pre>-W --wrapper
 </pre></div>
 
 
-<p>ein anderes Skript mit zu archInstall.bash kompatiblem Interface zum
+<p>ein anderes Skript mit zu archInstall.sh kompatiblem Interface zum
 erstellen des Grundsystems verwendet werden.</p>
 <!-- region vim modline
 
@@ -737,8 +737,8 @@ z.B. von makeSquashLinux oder makeRamOnlyLinux eingebunden werden.</p>
 <p>-M --media-files <media-folder> Give a folder with media-files to copy into
                                   the system. This option doesn't work in
                                   combination with "--ram-only". (Hint:
-                                  makeRamOnlyLinux.bash --wrapper
-                                  makeXBMCLinux.bash --media-files)</media-folder></p>
+                                  makeRamOnlyLinux.sh --wrapper
+                                  makeXBMCLinux.sh --media-files)</media-folder></p>
 </li>
 <li>
 <p>-W --wrapper <filename> Use wrapper in <filename> to generate the
@@ -751,18 +751,18 @@ z.B. von makeSquashLinux oder makeRamOnlyLinux eingebunden werden.</p>
 <h4 id=use-cases>Use cases</h4>
 <p>Netzwerkboot-fähiges squashfs samt kernel und initramfs mit XBMC-Frontend und
 Media-Dateien bauen:</p>
-<div class=codehilite><pre>./makeSquashLinux.bash root.squash kernel initramfs --wrapper <span class=se>\</span>
-    ../makeXBMCLinux/makeXBMCLinux.bash --media-files ~/Musik/Justin_Bieber
+<div class=codehilite><pre>./makeSquashLinux.sh root.squash kernel initramfs --wrapper <span class=se>\</span>
+    ../makeXBMCLinux/makeXBMCLinux.sh --media-files ~/Musik/Justin_Bieber
 </pre></div>
 
 
 <p>XBMC auf der lokalen Partition (/dev/sdz1) installieren:</p>
-<div class=codehilite><pre>./makeXBMCLinux/makeXBMCLinux.bash -o /dev/sdz1
+<div class=codehilite><pre>./makeXBMCLinux/makeXBMCLinux.sh -o /dev/sdz1
 </pre></div>
 
 
 <p>XBMC auf der lokalen Festplatte (/dev/sdz) installieren:</p>
-<div class=codehilite><pre>./makeXBMCLinux/makeXBMCLinux.bash -o /dev/sdz
+<div class=codehilite><pre>./makeXBMCLinux/makeXBMCLinux.sh -o /dev/sdz
 </pre></div>
 
 
