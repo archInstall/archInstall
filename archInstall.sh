@@ -19,13 +19,13 @@
 
 # Start install progress command (Assuming internet is available):
 # >>> wget \
-# ... https://raw.github.com/archInstall/archInstall/master/archInstall.bash \
-# ...     -O archInstall.bash && chmod +x archInstall.bash && \
-# ... ./archInstall.bash --output-system /dev/sda1
+# ... https://raw.github.com/archInstall/archInstall/master/archInstall.sh \
+# ...     -O archInstall.sh && chmod +x archInstall.sh && \
+# ... ./archInstall.sh --output-system /dev/sda1
 # ...
 
 # Call a global function (Configures your current system):
-# >>> source archInstall.bash --load-environment && \
+# >>> source archInstall.sh --load-environment && \
 # ...     _MOUNTPOINT_PATH='/' _USER_NAMES='hans' \
 # ...     _LOCAL_TIME='Europe/Berlin' archInstallConfigure
 
@@ -495,7 +495,7 @@ EOF
                 "You have to run this script as \"root\" not as \"${USER}\". You can alternatively install \"fakeroot\", \"fakechroot\" and install into a directory."
             exit 2
         fi
-        if [[ "$0" == *"${__NAME__}.bash" ]]; then
+        if [[ "$0" == *"${__NAME__}.sh" ]]; then
             if [ ! "$_HOSTNAME" ]; then
                 while true; do
                     echo -n 'Please set hostname for new system: ' && \
@@ -552,9 +552,9 @@ EOF
             'Patch pacstrap to handle offline installations.' && \
         cat $(which pacstrap) | sed --regexp-extended \
             's/(pacman.+-(S|-sync))(y|--refresh)/\1/g' \
-            1>${_PACKAGE_CACHE_PATH}/patchedOfflinePacman.bash \
+            1>${_PACKAGE_CACHE_PATH}/patchedOfflinePacman.sh \
             2>"$_STANDARD_OUTPUT" && \
-        chmod +x "${_PACKAGE_CACHE_PATH}/patchedOfflinePacman.bash" \
+        chmod +x "${_PACKAGE_CACHE_PATH}/patchedOfflinePacman.sh" \
             1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT" && \
         archInstallLog 'Update package databases.' && \
         (pacman --arch "$_CPU_ARCHITECTURE" --sync --refresh \
@@ -566,10 +566,10 @@ EOF
             's/ /", "/g')\" to \"$_OUTPUT_SYSTEM\"."
         # NOTE: "${_PACKAGES[*]}" shouldn't be in quotes to get pacstrap
         # working.
-        "${_PACKAGE_CACHE_PATH}/patchedOfflinePacman.bash" -d \
+        "${_PACKAGE_CACHE_PATH}/patchedOfflinePacman.sh" -d \
             "$_MOUNTPOINT_PATH" ${_PACKAGES[*]} --force 1>"$_STANDARD_OUTPUT" \
             2>"$_ERROR_OUTPUT" && \
-        rm "${_PACKAGE_CACHE_PATH}/patchedOfflinePacman.bash" \
+        rm "${_PACKAGE_CACHE_PATH}/patchedOfflinePacman.sh" \
             1>"$_STANDARD_OUTPUT" 2>"$_ERROR_OUTPUT"
         local returnCode=$?
         (archInstallCache || archInstallLog 'warning' \
@@ -1385,7 +1385,7 @@ EOF
 
     # region controller
 
-    if [[ "$0" == *"${__NAME__}.bash" ]]; then
+    if [[ "$0" == *"${__NAME__}.sh" ]]; then
         archInstallPerformDependencyCheck "${_DEPENDENCIES[*]}" || \
             archInstallLog 'error' 'Satisfying main dependencies failed.'
         archInstallCommandLineInterface "$@" || return $?
@@ -1452,7 +1452,7 @@ EOF
 
 # region footer
 
-if [[ "$0" == *"${__NAME__}.bash" || $(echo "$@" | grep --extended-regexp \
+if [[ "$0" == *"${__NAME__}.sh" || $(echo "$@" | grep --extended-regexp \
     '(^| )(-l|--load-environment)($| )') ]]; then
     "$__NAME__" "$@"
 fi
