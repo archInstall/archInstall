@@ -29,13 +29,13 @@ booten per 'plymouth' ein splash-screen angezeigt.
 
 #### Interface
 
-    Usage: ./makeSquashLinux.bash <squashfsFilePath> <kernelFilePath> <initramfsFilePath> [options]
+    Usage: ./makeSquashLinux.sh <squashfsFilePath> <kernelFilePath> <initramfsFilePath> [options]
 
     makeSquashLinux installs an arch linux into a squashfs file.
 
     Option descriptions:
         -W --wrapper <file>  Use wrapper in <file> to generate the root-Filesystem
-        -X --xbmc Use "../makeXBMCLinux/makeXBMCLinux.bash" as wrapper.
+        -X --xbmc Use "../makeXBMCLinux/makeXBMCLinux.sh" as wrapper.
 
 Wrapper sind hier Skripte, welche den Standard-Setup von archInstall durch
 weitere Konfiguration oder Programme ergänzen (makeSquashLinux ist also selbst

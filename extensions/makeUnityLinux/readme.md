@@ -20,12 +20,12 @@ wie Libre-Office oder Thunderbird installiert.
 
 #### Interface
 
-Das Interface ist mit dem von installArchLiunx.bash identisch, zusätzlich kann
+Das Interface ist mit dem von installArchLiunx.sh identisch, zusätzlich kann
 mit der Option
 
     -W --wrapper
 
-ein anderes Skript mit zu archInstall.bash kompatiblem Interface zum
+ein anderes Skript mit zu archInstall.sh kompatiblem Interface zum
 erstellen des Grundsystems verwendet werden.
 
 <!-- region vim modline

@@ -35,8 +35,8 @@ z.B. von makeSquashLinux oder makeRamOnlyLinux eingebunden werden.
 - -M --media-files <media-folder> Give a folder with media-files to copy into
                                   the system. This option doesn't work in
                                   combination with "--ram-only". (Hint:
-                                  makeRamOnlyLinux.bash --wrapper
-                                  makeXBMCLinux.bash --media-files)
+                                  makeRamOnlyLinux.sh --wrapper
+                                  makeXBMCLinux.sh --media-files)
 
 - -W --wrapper <filename> Use wrapper in <filename> to generate the
                           root-filesystem. This option doesn't work in
@@ -49,20 +49,20 @@ Netzwerkboot-fähiges squashfs samt kernel und initramfs mit XBMC-Frontend und
 Media-Dateien bauen:
 
 ```bash
-./makeSquashLinux.bash root.squash kernel initramfs --wrapper \
-    ../makeXBMCLinux/makeXBMCLinux.bash --media-files ~/Musik/Justin_Bieber
+./makeSquashLinux.sh root.squash kernel initramfs --wrapper \
+    ../makeXBMCLinux/makeXBMCLinux.sh --media-files ~/Musik/Justin_Bieber
 ```
 
 XBMC auf der lokalen Partition (/dev/sdz1) installieren:
 
 ```bash
-./makeXBMCLinux/makeXBMCLinux.bash -o /dev/sdz1
+./makeXBMCLinux/makeXBMCLinux.sh -o /dev/sdz1
 ```
 
 XBMC auf der lokalen Festplatte (/dev/sdz) installieren:
 
 ```bash
-./makeXBMCLinux/makeXBMCLinux.bash -o /dev/sdz
+./makeXBMCLinux/makeXBMCLinux.sh -o /dev/sdz
 ```
 
 <!-- region vim modline
