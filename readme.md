@@ -37,7 +37,7 @@ Simply load the newest version from:
 <!--deDE:
     Um die neuste Version zu erhalten sollte man das Bash-Script runterladen:
 -->
-[archInstall](https://raw.github.com/archInstall/archInstall/master/archInstall.sh)
+[archInstall](https://raw.githubusercontent.com/archInstall/archInstall/master/archInstall.sh)
 
 ```bash
 >>> wget \
