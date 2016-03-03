@@ -41,7 +41,7 @@ Simply load the newest version from:
 
 ```bash
 >>> wget \
-    https://raw.github.com/archInstall/archInstall/master/archInstall.sh \
+    https://raw.githubusercontent.com/archInstall/archInstall/master/archInstall.sh \
     -O archInstall.sh && chmod +x archInstall.sh
 ```
 
