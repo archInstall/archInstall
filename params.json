@@ -7,5 +7,11 @@
     "note": "Don't delete this file! It's used internally to help with page regeneration.",
     "url": "http://archinstall.github.io/archInstall",
     "source_url": "https://github.com/archInstall/archInstall",
-    "languages": ["enUS", "deDE"]
+    "languages": ["enUS", "deDE"],
+    "meta_tags": [
+        {
+            "name": "google-site-verification",
+            "content": "_43uvhbSI6YxLaUm_PkMhYiN4-d0RRSo-ILtdFv9CG0"
+        }
+    ]
 }
