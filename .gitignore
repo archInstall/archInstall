@@ -65,7 +65,7 @@ nosetests.xml
 # Node Modules
 node_modules/
 .npm/
-v8flags.*
+.v8flags.*
 /.cache
 /.config
 .npm-debug.log
