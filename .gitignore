@@ -5,6 +5,9 @@
 
 ## Generic
 
+# Ignore profiling data.
+*.profile
+
 # Packages
 *.egg
 *.egg-info
@@ -55,9 +58,19 @@ nosetests.xml
 # Gedit autosave backups.
 *~
 
-# region vim modline
+# Temporary windows files
+*Thumbs.db
 
+# Node Modules
+node_modules/
+.npm/
+v8flags.*
+/.cache
+/.config
+.npm-debug.log
+*.compiled.*
+
+# region vim modline
 # vim: set tabstop=4 shiftwidth=4 expandtab:
 # vim: foldmethod=marker foldmarker=region,endregion:
-
 # endregion
